@@ -1,0 +1,11 @@
+# WordPress/Web Development
+wp-config-local.php
+wp-content/uploads/
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.vscode/
+*.zip
+*.tar.gz
