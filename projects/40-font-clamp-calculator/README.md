@@ -1,4 +1,4 @@
-# Font Clamp Calculator, WordPress Admin Snippet
+# Font Clamp Calculator - WordPress Admin Code Snippet
 
 **Professional responsive typography tool for WordPress developers**
 
@@ -157,17 +157,6 @@ Perfect mathematical ratios for professional typography:
 
 ## 🏗️ Technical Architecture
 
-### File Structure
-Currently under  active 
-```
-font-clamp-calculator/
-├── Font Clamp Calculator - Segment A.php     # Core foundation & data
-├── Font Clamp Calculator - Segment B.php     # Enhanced UI/UX layer  
-├── Font Clamp Calculator - Segment C.php     # Advanced features
-├── Font Clamp Calculator - Segment D.php     # Copy functionality
-├── Font Clamp Calculator - Segment Primary.php # Unified CSS system
-└── README.md
-```
 
 ### Key Features for Developers
 

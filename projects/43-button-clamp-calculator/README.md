@@ -1,4 +1,4 @@
-# 🎨 Button Design Calculator - Professional Button Systems for WordPress
+# 🎨 Button Design Calculator - WordPress Admin Code Snippet
 
 Create stunning, responsive button hierarchies that scale perfectly across all devices! The Button Design Calculator generates professional CSS using modern `clamp()` functions, ensuring your buttons maintain perfect proportions from mobile to desktop.
 
