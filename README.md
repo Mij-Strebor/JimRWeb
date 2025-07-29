@@ -1,51 +1,74 @@
-echo "# JimRWeb
+# CSS Clamp Tools - WordPress Admin Suite
 
-Web development projects and WordPress sites.
+**Professional responsive design tools for WordPress developers**
 
-## Projects
-- Located in the \`projects/\` folder
+[![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-blue.svg)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)](https://php.net/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## Technology Stack
-- WordPress
-- Elementor
-- Bricks Builde# JimRWeb
+> A comprehensive suite of WordPress admin tools built as code snippets that generate mathematically precise, responsive CSS using modern `clamp()` functions. Perfect for developers building professional WordPress themes and sites.
 
-Web development projects and WordPress sites.
 
-## Projects
-- Located in the \`projects/\` folder
 
-## Technology Stack
-- WordPress
-- Elementor
-- Bricks Builder# WordPress/Web Development
-wp-config-local.php
-wp-content/uploads/
-node_modules/
-.DS_Store
-Thumbs.db
-*.log
-.env
-.vscode/
-*.zip
-# JimRWeb
+### 📐 [Font Clamp Calculator](./font-clamp-calculator/)
+Generate responsive typography systems with mathematical precision. Create fluid font scaling that works beautifully from mobile to desktop using proven typographic ratios.
 
-Web development projects and WordPress sites.
+**Features:**
+- Typography scales (Minor Second, Major Third, Golden Ratio, etc.)
+- Three output modes: CSS Classes, Custom Properties, HTML Tags
+- Live preview and drag-and-drop reordering
+- Mathematical scaling with custom line heights
 
-## Projects
-- Located in the `projects/` folder
+### 📏 [Space Clamp Calculator](./space-clamp-calculator/)
+Create consistent, scalable spacing systems for margins, padding, and gaps. The perfect companion to Font Clamp Calculator for complete design system harmony.
 
-## Technology Stack
-- WordPress
-- Elementor
-- Bricks Builder# JimRWeb
+**Features:** 
+- Responsive spacing with CSS `clamp()` functions
+- Classes, Variables, and Utility class outputs
+- Mathematical scaling ratios
+- Dual unit support (px/rem)
 
-Web development projects and WordPress sites.
+### 🎨 [Button Design Calculator](./button-design-calculator/)
+Design professional button hierarchies that scale perfectly across all devices. Generate responsive button systems for CTAs, forms, and UI components.
 
-## Projects
-- Located in the `projects/` folder
+**Features:**
+- Professional button hierarchies (small, medium, large)
+- Framework-ready CSS for Elementor, Bricks, and custom themes
+- CSS Classes and Custom Properties output
+- Perfect touch targets across all devices
 
-## Technology Stack
-- WordPress
-- Elementor
-- Bricks Builder
+## 🚀 Why These Tools?
+
+As WordPress developers, we know the pain of managing responsive design across devices. These tools eliminate guesswork and deliver pixel-perfect scaling using modern CSS `clamp()` functions.
+
+**Perfect for:**
+- WordPress theme developers
+- Agency developers using page builders
+- Freelancers wanting professional typography systems
+- Anyone tired of media query breakpoint madness
+
+## ⚡ Quick Start
+
+1. **Install**: Add any tool as a WordPress code snippet
+2. **Configure**: Set your base values and scaling preferences  
+3. **Generate**: Get production-ready CSS with one click
+4. **Implement**: Copy CSS to your theme or page builder
+
+## 🧪 Browser Support
+
+CSS `clamp()` is supported in all modern browsers:
+- Chrome 79+ | Firefox 75+ | Safari 13.1+ | Edge 79+
+
+## 🤝 Contributing
+
+Contributions welcome! Each tool has its own development setup and guidelines in their respective directories.
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+**Made with ❤️ for the WordPress developer community**
+
+*Transform your responsive design workflow with mathematically precise CSS scaling.*
