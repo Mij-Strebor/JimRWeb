@@ -2915,14 +2915,11 @@ class ButtonDesignCalculator
                     classCSS += '}\n\n';
 
                     // Use button-specific colors if available, fallback to global colors
-                    const buttonColors = size.colors || globalColors;
-
-                    // Use normalized colors for CSS generation
-                    const normalizedColors = normalizeColorData(buttonColors);
+                    const buttonColors = normalizeColorData(size.colors || globalColors);
 
                     // Add state variations using button's individual colors
-                    Object.keys(normalizedColors).forEach(state => {
-                        const stateColors = normalizedColors[state];
+                    Object.keys(buttonColors).forEach(state => {
+                        const stateColors = buttonColors[state];
                         const stateClass = state === 'normal' ? `.${size.className}` : `.${size.className}:${state}`;
 
                         let stateCSS = `${stateClass} {\n`;
@@ -2948,8 +2945,10 @@ class ButtonDesignCalculator
                         css += stateCSS;
                     });
 
-                    return css.trim();
+                    css += classCSS;
                 });
+
+                return css.trim();
             }
 
             function updatePreview() {
@@ -3013,9 +3012,9 @@ class ButtonDesignCalculator
                             `;
             }).join('')
             } <
-            /div> <
-            /div>
-            `;
+            /div> < /
+            div >
+                `;
         }).join('')}
     </div>
 `;
