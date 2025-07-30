@@ -1,4 +1,5 @@
 # Font Clamp Calculator - WordPress Admin Code Snippet
+<img src="..\..\resources\00-assets\design-assets\icons\svg\JimRWeb-logo-black.svg" alt="JimRWeb logo" style="height: 15px; width:100px;"/>
 
 **Professional responsive typography tool for WordPress developers**
 

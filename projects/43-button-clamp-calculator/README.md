@@ -1,4 +1,7 @@
 # 🎨 Button Design Calculator - WordPress Admin Code Snippet
+<img src="..\..\resources\00-assets\design-assets\icons\svg\JimRWeb-logo-black.svg" alt="JimRWeb logo" style="height: 15px; width:100px;"/>
+
+**Professional responsive design tools for WordPress developers**
 
 Create stunning, responsive button hierarchies that scale perfectly across all devices! The Button Design Calculator generates professional CSS using modern `clamp()` functions, ensuring your buttons maintain perfect proportions from mobile to desktop.
 

@@ -2,7 +2,7 @@
 
 /**
  * Button Design Calculator - Inline Editing Version (Cleaned)
- * Version: 1.0
+ * Version: 1
  * Generates responsive button designs using CSS clamp() functions
  */
 
@@ -120,39 +120,55 @@ class ButtonDesignCalculator
         }, $config);
     }
 
+    // Create default colors for button states
+    // This includes Normal, Hover, Active, and Disabled states   
     private function create_default_colors()
     {
         return [
             'normal' => [
-                'background1' => '#FFD700',
-                'background2' => '#FFA500',
-                'useGradient' => false,
-                'text' => '#9C0202',
-                'border' => '#DE0B0B',
+                'background' => 'var(--clr-accent)',
+                'text' => 'var(--clr-btn-txt)',
+                'border' => 'var(--clr-btn-bdr)',
                 'useBorder' => true
             ],
             'hover' => [
-                'background1' => '#E5B929',
-                'background2' => '#FF8C00',
-                'useGradient' => false,
-                'text' => '#9C0202',
-                'border' => '#DE0B0B',
+                'background' => 'var(--clr-btn-hover)',
+                'text' => 'var(--clr-btn-txt)',
+                'border' => 'var(--clr-btn-bdr)',
                 'useBorder' => true
             ],
             'active' => [
-                'background1' => '#DAA520',
-                'background2' => '#FF7F00',
-                'useGradient' => false,
-                'text' => '#9C0202',
-                'border' => '#DE0B0B',
+                'background' => [
+                    'type' => 'solid',
+                    'solid' => '#DAA520',
+                    'gradient' => [
+                        'type' => 'linear',
+                        'angle' => 135,
+                        'stops' => [
+                            ['color' => '#DAA520', 'position' => 0],
+                            ['color' => '#FF7F00', 'position' => 100]
+                        ]
+                    ]
+                ],
+                'text' => 'var(--clr-btn-txt)',
+                'border' => 'var(--clr-btn-bdr)',
                 'useBorder' => true
             ],
             'disabled' => [
-                'background1' => '#CCCCCC',
-                'background2' => '#999999',
-                'useGradient' => false,
-                'text' => '#666666',
-                'border' => '#999999',
+                'background' => [
+                    'type' => 'solid',
+                    'solid' => 'var(--jimr-gray-300)',
+                    'gradient' => [
+                        'type' => 'linear',
+                        'angle' => 135,
+                        'stops' => [
+                            ['color' => 'var(--jimr-gray-300)', 'position' => 0],
+                            ['color' => 'var(--jimr-gray-400)', 'position' => 100]
+                        ]
+                    ]
+                ],
+                'text' => 'var(--jimr-gray-600)',
+                'border' => 'var(--jimr-gray-400)',
                 'useBorder' => true
             ]
         ];
@@ -1566,12 +1582,6 @@ class ButtonDesignCalculator
                 });
 
                 // Button card checkbox listeners
-                const gradientCheckboxes = document.querySelectorAll('.use-gradient-checkbox');
-                gradientCheckboxes.forEach(checkbox => {
-                    checkbox.removeEventListener('change', handleCardGradientChange);
-                    checkbox.addEventListener('change', handleCardGradientChange);
-                });
-
                 const borderCheckboxes = document.querySelectorAll('.use-border-checkbox');
                 borderCheckboxes.forEach(checkbox => {
                     checkbox.removeEventListener('change', handleCardBorderChange);
@@ -1859,35 +1869,27 @@ class ButtonDesignCalculator
                     borderWidth: 2,
                     colors: {
                         normal: {
-                            background1: '#FFD700',
-                            background2: '#FFA500',
-                            useGradient: false,
-                            text: '#9C0202',
-                            border: '#DE0B0B',
+                            background: 'var(--clr-accent)',
+                            text: 'var(--clr-btn-txt)',
+                            border: 'var(--clr-btn-bdr)',
                             useBorder: true
                         },
                         hover: {
-                            background1: '#E5B929',
-                            background2: '#FF8C00',
-                            useGradient: false,
-                            text: '#9C0202',
-                            border: '#DE0B0B',
+                            background: 'var(--clr-btn-hover)',
+                            text: 'var(--clr-btn-txt)',
+                            border: 'var(--clr-btn-bdr)',
                             useBorder: true
                         },
                         active: {
-                            background1: '#DAA520',
-                            background2: '#FF7F00',
-                            useGradient: false,
-                            text: '#9C0202',
-                            border: '#DE0B0B',
+                            background: 'var(--clr-secondary)',
+                            text: 'var(--clr-btn-txt)',
+                            border: 'var(--clr-btn-bdr)',
                             useBorder: true
                         },
                         disabled: {
-                            background1: '#CCCCCC',
-                            background2: '#999999',
-                            useGradient: false,
-                            text: '#666666',
-                            border: '#999999',
+                            background: 'var(--jimr-gray-300)',
+                            text: 'var(--jimr-gray-600)',
+                            border: 'var(--jimr-gray-500)',
                             useBorder: true
                         }
                     }
@@ -1920,8 +1922,8 @@ class ButtonDesignCalculator
                 const value = input.value;
                 const sizeId = parseInt(input.getAttribute('data-size-id'));
 
-                // Extract color type from class name (e.g., 'background1-input' -> 'background1')
-                const colorType = input.classList.toString().match(/(background1|background2|text|border)-input/)?.[1];
+                // Extract color type from class name (e.g., 'background-input' -> 'background')
+                const colorType = input.classList.toString().match(/(background|text|border)-input/)?.[1];
 
                 if (!sizeId || !colorType) {
                     console.error('No size ID or color type found for color input', {
@@ -1949,13 +1951,12 @@ class ButtonDesignCalculator
                     button.colors[buttonState] = {};
                 }
 
-                // Update the specific color property
+                // Update the specific color property using simplified structure
                 switch (colorType) {
-                    case 'background1':
+                    case 'background':
+                        // Update both old structure (for compatibility) and add new structure
                         button.colors[buttonState].background1 = value;
-                        break;
-                    case 'background2':
-                        button.colors[buttonState].background2 = value;
+                        button.colors[buttonState].background = value;
                         break;
                     case 'text':
                         button.colors[buttonState].text = value;
@@ -1964,7 +1965,6 @@ class ButtonDesignCalculator
                         button.colors[buttonState].border = value;
                         break;
                 }
-
                 updateCSSOutputs();
                 updatePreview();
                 updateButtonCardPreview(sizeId);
@@ -1987,7 +1987,7 @@ class ButtonDesignCalculator
 
                 // Get current state and colors
                 const currentState = getButtonCurrentState(sizeId) || 'normal';
-                const buttonColors = button.colors || buttonDesignAjax.data.colors;
+                const buttonColors = normalizeColorData(button.colors || buttonDesignAjax.data.colors);
                 const stateColors = buttonColors[currentState] || buttonColors.normal;
 
                 // Update dimensions only when explicitly requested (property changes)
@@ -2004,11 +2004,7 @@ class ButtonDesignCalculator
                 }
 
                 // Always update colors
-                if (stateColors.useGradient) {
-                    previewButton.style.background = `linear-gradient(135deg, ${stateColors.background1}, ${stateColors.background2})`;
-                } else {
-                    previewButton.style.background = stateColors.background1;
-                }
+                previewButton.style.background = stateColors.background;
 
                 previewButton.style.color = stateColors.text;
 
@@ -2089,15 +2085,11 @@ class ButtonDesignCalculator
                     }
                 });
 
-                // Apply color styles
+                // Apply color styles  
                 if (stateColors) {
-                    if (stateColors.useGradient) {
-                        style.background = `linear-gradient(135deg, ${stateColors.background1}, ${stateColors.background2})`;
-                    } else {
-                        style.background = stateColors.background1;
-                    }
-
+                    style.background = stateColors.background;
                     style.color = stateColors.text;
+
                     // Get the actual border width from the button data
                     const currentSizes = buttonDesignAjax.data.classSizes;
                     const buttonItem = currentSizes.find(item => item.id === button.id);
@@ -2159,31 +2151,8 @@ class ButtonDesignCalculator
 
                 // Update color inputs to show this state's colors
                 updateCardColorInputs(sizeId, newState);
-            }
 
-            // Handle gradient checkbox changes for specific buttons
-            function handleCardGradientChange(event) {
-                const checkbox = event.target;
-                const sizeId = parseInt(checkbox.getAttribute('data-size-id'));
-                const isChecked = checkbox.checked;
-
-                const currentSizes = buttonDesignAjax.data.classSizes;
-                const button = currentSizes.find(item => item.id === sizeId);
-                if (!button || !button.colors) return;
-
-                const currentState = getButtonCurrentState(sizeId) || 'normal';
-                if (!button.colors[currentState]) button.colors[currentState] = {};
-
-                button.colors[currentState].useGradient = isChecked;
-
-                // Enable/disable background2 input
-                const background2Input = document.querySelector(`[data-size-id="${sizeId}"].background2-input`);
-                if (background2Input) {
-                    background2Input.disabled = !isChecked;
-                }
-
-                updateCSSOutputs();
-                updatePreview();
+                // Update the card preview to show this state's colors
                 updateButtonCardPreview(sizeId);
             }
 
@@ -2222,29 +2191,28 @@ class ButtonDesignCalculator
                 // Get state colors, fallback to normal if state doesn't exist
                 const stateColors = button.colors[state] || button.colors.normal;
 
+                // Normalize the colors first
+                const normalizedColors = normalizeColorData({
+                    [state]: stateColors
+                });
+                const normalizedStateColors = normalizedColors[state];
+
                 // Update color inputs
-                const background1Input = document.querySelector(`[data-size-id="${sizeId}"].background1-input`);
-                const background2Input = document.querySelector(`[data-size-id="${sizeId}"].background2-input`);
+                const backgroundInput = document.querySelector(`[data-size-id="${sizeId}"].background-input`);
                 const textInput = document.querySelector(`[data-size-id="${sizeId}"].text-input`);
                 const borderInput = document.querySelector(`[data-size-id="${sizeId}"].border-input`);
 
-                if (background1Input) background1Input.value = stateColors.background1 || '#FFD700';
-                if (background2Input) {
-                    background2Input.value = stateColors.background2 || '#FFA500';
-                    background2Input.disabled = !stateColors.useGradient;
-                }
-                if (textInput) textInput.value = stateColors.text || '#9C0202';
+                if (backgroundInput) backgroundInput.value = normalizedStateColors.background || '#FFD700';
+                if (textInput) textInput.value = normalizedStateColors.text || '#9C0202';
                 if (borderInput) {
-                    borderInput.value = stateColors.border || '#DE0B0B';
-                    borderInput.disabled = !stateColors.useBorder;
+                    borderInput.value = normalizedStateColors.border || '#DE0B0B';
+                    borderInput.disabled = !normalizedStateColors.useBorder;
                 }
 
                 // Update checkboxes
-                const gradientCheckbox = document.querySelector(`[data-size-id="${sizeId}"].use-gradient-checkbox`);
                 const borderCheckbox = document.querySelector(`[data-size-id="${sizeId}"].use-border-checkbox`);
 
-                if (gradientCheckbox) gradientCheckbox.checked = stateColors.useGradient || false;
-                if (borderCheckbox) borderCheckbox.checked = stateColors.useBorder !== false;
+                if (borderCheckbox) borderCheckbox.checked = normalizedStateColors.useBorder !== false;
 
                 // Update preview immediately
                 updateButtonCardPreview(sizeId);
@@ -2527,7 +2495,7 @@ class ButtonDesignCalculator
                 css += classCSS;
 
                 // Use button-specific colors if available, fallback to global colors
-                const buttonColors = button.colors || globalColors;
+                const buttonColors = normalizeColorData(button.colors || globalColors);
 
                 // Add state variations
                 Object.keys(buttonColors).forEach(state => {
@@ -2536,12 +2504,8 @@ class ButtonDesignCalculator
 
                     let stateCSS = `${stateClass} {\n`;
 
-                    // Background
-                    if (stateColors.useGradient) {
-                        stateCSS += `  background: linear-gradient(135deg, ${stateColors.background1}, ${stateColors.background2});\n`;
-                    } else {
-                        stateCSS += `  background: ${stateColors.background1};\n`;
-                    }
+                    // Background (simplified - no gradients)
+                    stateCSS += `  background: ${stateColors.background};\n`;
 
                     // Text color
                     stateCSS += `  color: ${stateColors.text};\n`;
@@ -2559,6 +2523,47 @@ class ButtonDesignCalculator
                 });
 
                 return css.trim();
+            }
+
+            // ========================================================================
+            // COLOR DATA NORMALIZATION  
+            // ========================================================================
+
+            function normalizeColorData(colors) {
+                if (!colors) return {};
+
+                const normalized = {};
+
+                Object.keys(colors).forEach(state => {
+                    const stateColors = colors[state];
+                    let backgroundColor;
+
+                    // Handle newer background object structure (priority)
+                    if (stateColors.background && typeof stateColors.background === 'object') {
+                        backgroundColor = stateColors.background.solid || stateColors.background.gradient?.stops?.[0]?.color || '#FFD700';
+                    }
+                    // Handle old background1/background2 structure
+                    else if (stateColors.background1) {
+                        backgroundColor = stateColors.background1;
+                    }
+                    // Handle simple background string
+                    else if (stateColors.background) {
+                        backgroundColor = stateColors.background;
+                    }
+                    // Fallback
+                    else {
+                        backgroundColor = '#FFD700';
+                    }
+
+                    normalized[state] = {
+                        background: backgroundColor,
+                        text: stateColors.text || '#9C0202',
+                        border: stateColors.border || '#DE0B0B',
+                        useBorder: stateColors.useBorder !== false
+                    };
+                });
+
+                return normalized;
             }
 
             // ========================================================================
@@ -2809,6 +2814,7 @@ class ButtonDesignCalculator
                 return `clamp(${minUnit}, ${preferredValue}, ${maxUnit})`;
             }
 
+            // Calculate button property based on size ID and settings
             function calculateButtonProperty(sizeId, property, settings) {
                 const currentSizes = buttonDesignAjax.data.classSizes;
                 const buttonItem = currentSizes.find(item => item.id === sizeId);
@@ -2843,6 +2849,7 @@ class ButtonDesignCalculator
                 };
             }
 
+            // Update CSS outputs
             function updateCSSOutputs() {
                 const settings = buttonDesignAjax.data.settings;
                 const colors = buttonDesignAjax.data.colors;
@@ -2858,6 +2865,7 @@ class ButtonDesignCalculator
                 updateSelectedButtonCSS();
             }
 
+            // Generate CSS for all button classes
             function generateClassesCSS(sizes, settings, globalColors) {
                 const minVp = settings.minViewport;
                 const maxVp = settings.maxViewport;
@@ -2909,19 +2917,18 @@ class ButtonDesignCalculator
                     // Use button-specific colors if available, fallback to global colors
                     const buttonColors = size.colors || globalColors;
 
+                    // Use normalized colors for CSS generation
+                    const normalizedColors = normalizeColorData(buttonColors);
+
                     // Add state variations using button's individual colors
-                    Object.keys(buttonColors).forEach(state => {
-                        const stateColors = buttonColors[state];
+                    Object.keys(normalizedColors).forEach(state => {
+                        const stateColors = normalizedColors[state];
                         const stateClass = state === 'normal' ? `.${size.className}` : `.${size.className}:${state}`;
 
                         let stateCSS = `${stateClass} {\n`;
 
-                        // Background
-                        if (stateColors.useGradient) {
-                            stateCSS += `  background: linear-gradient(135deg, ${stateColors.background1}, ${stateColors.background2});\n`;
-                        } else {
-                            stateCSS += `  background: ${stateColors.background1};\n`;
-                        }
+                        // Background (simplified - no gradients)
+                        stateCSS += `  background: ${stateColors.background};\n`;
 
                         // Text color
                         stateCSS += `  color: ${stateColors.text};\n`;
@@ -2941,10 +2948,8 @@ class ButtonDesignCalculator
                         css += stateCSS;
                     });
 
-                    css += classCSS;
+                    return css.trim();
                 });
-
-                return css.trim();
             }
 
             function updatePreview() {
@@ -2955,7 +2960,7 @@ class ButtonDesignCalculator
             function updateAllCardPreviews() {
                 const currentSizes = buttonDesignAjax.data.classSizes;
                 currentSizes.forEach(size => {
-                    updateButtonCardPreview(size.id);
+                    updateButtonCardPreview(size.id, true); // true = update dimensions too
                 });
             }
 
@@ -2978,13 +2983,13 @@ class ButtonDesignCalculator
                 const titleText = sizeType === 'min' ? 'Small Screen Buttons' : 'Large Screen Buttons';
 
                 return `
-        <div style="font-family: Arial, sans-serif;">
-            <h4 style="margin: 0 0 16px 0; color: var(--clr-txt); font-size: 14px; font-weight: 600;">${titleText}</h4>
-            ${sizes.map(size => {
-                const name = size.className;
-                const buttonColors = size.colors || globalColors;
-                
- return `
+    <div style="font-family: Arial, sans-serif;">
+        <h4 style="margin: 0 0 16px 0; color: var(--clr-txt); font-size: 14px; font-weight: 600;">${titleText}</h4>
+        ${sizes.map(size => {
+            const name = size.className;
+            const buttonColors = normalizeColorData(size.colors || globalColors);
+            
+            return `
                 <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #1976d2; display: block; position: relative;">
                     <div style="font-size: 11px; color: #666; margin-bottom: 8px; font-weight: 600;">${name}</div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -3011,9 +3016,9 @@ class ButtonDesignCalculator
             /div> <
             /div>
             `;
-            }).join('')}
-        </div>
-    `;
+        }).join('')}
+    </div>
+`;
             }
 
             // ========================================================================
@@ -3093,35 +3098,27 @@ class ButtonDesignCalculator
                     if (!size.colors) {
                         size.colors = {
                             normal: {
-                                background1: '#FFD700',
-                                background2: '#FFA500',
-                                useGradient: false,
-                                text: '#9C0202',
-                                border: '#DE0B0B',
+                                background: 'var(--clr-accent)',
+                                text: 'var(--clr-btn-txt)',
+                                border: 'var(--clr-btn-bdr)',
                                 useBorder: true
                             },
                             hover: {
-                                background1: '#E5B929',
-                                background2: '#FF8C00',
-                                useGradient: false,
-                                text: '#9C0202',
-                                border: '#DE0B0B',
+                                background: 'var(--clr-btn-hover)',
+                                text: 'var(--clr-btn-txt)',
+                                border: 'var(--clr-btn-bdr)',
                                 useBorder: true
                             },
                             active: {
-                                background1: '#DAA520',
-                                background2: '#FF7F00',
-                                useGradient: false,
-                                text: '#9C0202',
-                                border: '#DE0B0B',
+                                background: 'var(--clr-secondary)',
+                                text: 'var(--clr-btn-txt)',
+                                border: 'var(--clr-btn-bdr)',
                                 useBorder: true
                             },
                             disabled: {
-                                background1: '#cbd5e1',
-                                background2: '#64748b',
-                                useGradient: false,
-                                text: '#64748b',
-                                border: '#64748b',
+                                background: 'var(--jimr-gray-300)',
+                                text: 'var(--jimr-gray-600)',
+                                border: 'var(--jimr-gray-500)',
                                 useBorder: true
                             }
                         };
@@ -3129,6 +3126,7 @@ class ButtonDesignCalculator
                 });
 
                 return `
+                
     <!-- Add New Button Form -->
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -3274,31 +3272,25 @@ class ButtonDesignCalculator
                                             <div style="margin-top: 20px;">
                                                 <div class="card-panel-title">Colors</div>
                                                 
-      <div class="card-checkbox-row">
-                                                    <input type="checkbox" class="use-gradient-checkbox" data-size-id="${size.id}" ${size.colors?.normal?.useGradient ? 'checked' : ''}>
-                                                    <span>Use Gradient</span>
-                                                    <input type="checkbox" class="use-border-checkbox" data-size-id="${size.id}" ${size.colors?.normal?.useBorder !== false ? 'checked' : ''} style="margin-left: 12px;">
-                                                    <span>Show Border</span>
-                                                </div>
-                                                
-                                                <div class="card-color-grid">
-                                                    <div class="card-color-section">
-                                                        <span class="card-color-label">Background 1</span>
-                                                        <input type="color" class="card-color-input background1-input" data-size-id="${size.id}" value="${size.colors?.normal?.background1 || '#FFD700'}">
-                                                    </div>
-                                                    <div class="card-color-section">
-                                                        <span class="card-color-label">Background 2</span>
-                                                        <input type="color" class="card-color-input background2-input" data-size-id="${size.id}" value="${size.colors?.normal?.background2 || '#FFA500'}" ${!size.colors?.normal?.useGradient ? 'disabled' : ''}>
-                                                    </div>
-                                                    <div class="card-color-section">
-                                                        <span class="card-color-label">Text Color</span>
-                                                        <input type="color" class="card-color-input text-input" data-size-id="${size.id}" value="${size.colors?.normal?.text || '#9C0202'}">
-                                                    </div>
-                                                    <div class="card-color-section">
-                                                        <span class="card-color-label">Border Color</span>
-                                                        <input type="color" class="card-color-input border-input" data-size-id="${size.id}" value="${size.colors?.normal?.border || '#DE0B0B'}" ${size.colors?.normal?.useBorder === false ? 'disabled' : ''}>
-                                                    </div>
-                                                </div>
+<div class="card-checkbox-row">
+    <input type="checkbox" class="use-border-checkbox" data-size-id="${size.id}" ${size.colors?.normal?.useBorder !== false ? 'checked' : ''}>
+    <span>Show Border</span>
+</div>
+
+<div style="display: flex; gap: 12px; align-items: end;">
+    <div class="card-color-section" style="flex: 1;">
+        <span class="card-color-label">Background</span>
+        <input type="color" class="card-color-input background-input" data-size-id="${size.id}" value="#FFD700">
+    </div>
+    <div class="card-color-section" style="flex: 1;">
+        <span class="card-color-label">Text</span>
+        <input type="color" class="card-color-input text-input" data-size-id="${size.id}" value="${size.colors?.normal?.text || '#9C0202'}">
+    </div>
+    <div class="card-color-section" style="flex: 1;">
+        <span class="card-color-label">Border</span>
+        <input type="color" class="card-color-input border-input" data-size-id="${size.id}" value="${size.colors?.normal?.border || '#DE0B0B'}" ${size.colors?.normal?.useBorder === false ? 'disabled' : ''}>
+    </div>
+</div>
                                             </div>
                                         </div>
                                     </div>
@@ -3449,30 +3441,24 @@ class ButtonDesignCalculator
                 const panelContainer = document.getElementById('sizes-table-container');
                 if (panelContainer) {
                     if (buttonDesignAjax && buttonDesignAjax.data && buttonDesignAjax.data.classSizes) {
+                        // Replace panel content
                         panelContainer.innerHTML = generatePanelContent();
 
-                        // Remove any remaining loading content
-                        setTimeout(() => {
-                            const loadingSpinners = document.querySelectorAll('.fcc-loading-spinner');
-                            loadingSpinners.forEach(spinner => spinner.remove());
+                        // Force update preview containers immediately
+                        const minContainer = document.getElementById('preview-min-container');
+                        const maxContainer = document.getElementById('preview-max-container');
 
-                            const loadingTexts = document.querySelectorAll('*');
-                            loadingTexts.forEach(el => {
-                                if (el.textContent === 'Loading button classes...') {
-                                    el.remove();
-                                }
-                            });
-
-                            // Remove the entire loading wrapper div
-                            const sizesTableWrapper = document.getElementById('sizes-table-wrapper');
-                            if (sizesTableWrapper) {
-                                sizesTableWrapper.remove();
-                            }
-                        }, 50);
+                        if (minContainer) {
+                            minContainer.innerHTML = '<div style="text-align: center; padding: 20px;">Loading previews...</div>';
+                        }
+                        if (maxContainer) {
+                            maxContainer.innerHTML = '<div style="text-align: center; padding: 20px;">Loading previews...</div>';
+                        }
 
                         attachEventListeners();
                         updateCSSOutputs();
-                        updatePreview();
+                        updatePreview(); // This should replace the "Loading previews..." content
+                        updateAllCardPreviews();
 
                         // Auto-select first button if available
                         const currentSizes = buttonDesignAjax.data.classSizes;
