@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Font Clamp Calculator  * Version: 3.7.0
+ * Fluid Font Forge  * Version: 3.7.0
  */
 
 // Prevent direct access
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Font Clamp Calculator - Complete Unified Class
+ * Fluid Font Forge - Complete Unified Class
  */
 class FontClampCalculator
 {
@@ -170,6 +170,16 @@ class FontClampCalculator
                 ['id' => 7, 'name' => '--fs-xs', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
                 ['id' => 8, 'name' => '--fs-xxs', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT]
             ],
+            'tailwind' => [
+                ['id' => 1, 'name' => '4xl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
+                ['id' => 2, 'name' => '3xl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
+                ['id' => 3, 'name' => '2xl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
+                ['id' => 4, 'name' => 'xl', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
+                ['id' => 5, 'name' => 'base', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
+                ['id' => 6, 'name' => 'lg', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
+                ['id' => 7, 'name' => 'sm', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
+                ['id' => 8, 'name' => 'xs', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT]
+            ],
             'tags' => [
                 ['id' => 1, 'name' => 'h1', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
                 ['id' => 2, 'name' => 'h2', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
@@ -206,6 +216,7 @@ class FontClampCalculator
         $property_map = [
             'class' => 'className',
             'vars' => 'variableName',
+            'tailwind' => 'tailwindName',
             'tags' => 'tagName'
         ];
 
@@ -222,7 +233,7 @@ class FontClampCalculator
     public function add_admin_menu()
     {
         add_menu_page(
-            'Font Clamp Calculator',
+            'Fluid Font Forge',
             'Font Clamp',
             'manage_options',
             self::PLUGIN_SLUG,
@@ -352,6 +363,15 @@ class FontClampCalculator
         return $cached_sizes;
     }
 
+    public function get_font_clamp_tailwind_sizes()
+    {
+        static $cached_sizes = null;
+        if ($cached_sizes === null) {
+            $cached_sizes = get_option('font_clamp_tailwind_sizes', $this->default_tailwind_sizes);
+        }
+        return $cached_sizes;
+    }
+
     // ========================================================================
     // MAIN ADMIN PAGE RENDERER
     // ========================================================================
@@ -363,9 +383,10 @@ class FontClampCalculator
     {
         $data = [
             'settings' => $this->get_font_clamp_settings(),
-            'class_sizes' => $this->get_font_clamp_class_sizes(),
-            'variable_sizes' => $this->get_font_clamp_variable_sizes(),
-            'tag_sizes' => $this->get_font_clamp_tag_sizes()
+            'classSizes' => $this->get_font_clamp_class_sizes(),
+            'variableSizes' => $this->get_font_clamp_variable_sizes(),
+            'tagSizes' => $this->get_font_clamp_tag_sizes(),
+            'tailwindSizes' => $this->get_font_clamp_tailwind_sizes()
         ];
 
         echo $this->get_complete_interface($data);
@@ -384,12 +405,12 @@ class FontClampCalculator
         ob_start();
 ?>
         <div class="wrap" style="background: var(--clr-page-bg); padding: 20px; min-height: 100vh;">
-            <h1 class="text-2xl font-bold mb-4">Font Clamp Calculator (<?php echo self::VERSION; ?>)</h1>
+            <h1 class="text-2xl font-bold mb-4">Fluid Font Forge (<?php echo self::VERSION; ?>)</h1>
 
             <!-- About Section -->
             <div class="fcc-info-toggle-section">
                 <button class="fcc-info-toggle expanded" data-toggle-target="about-content">
-                    <span style="color: #FAF9F6 !important;">ℹ️ About Font Clamp Calculator</span>
+                    <span style="color: #FAF9F6 !important;">ℹ️ About Fluid Font Forge</span>
                     <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
                 </button>
                 <div class="fcc-info-content expanded" id="about-content">
@@ -398,7 +419,7 @@ class FontClampCalculator
                             I've been a font nerd for a while. I enjoy seeing designers presenting an attraction in a striking way that doesn't attract attention itself. It's exactly like a director, or cinematographer moves you into the emotional depth of a movie without you knowing it. When CSS clamp() came along, there was an explosion of responsive font management. That gave the font the ability to stop drawing attention to itself and present the message effectively. I recently visited a YouTube presentation by a favorite WordPress guru. There was a sophisticated calculator for font clamping demo development. This was better than many of the websites out there. But it wasn't enough! Here's my attempt. Enjoy.</p>
                         <div style="background: rgba(60, 32, 23, 0.1); padding: 12px 16px; border-radius: 6px; border-left: 4px solid var(--clr-accent); margin-top: 20px;">
                             <p style="margin: 0; font-size: 13px; opacity: 0.95; line-height: 1.5; color: var(--clr-txt);">
-                                Font Clamp Calculator by Jim R. (<a href="https://jimrweb.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">JimRWeb</a>), developed with tremendous help from Claude AI (<a href="https://anthropic.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">Anthropic</a>), based on an original snippet by Imran Siddiq (<a href="https://websquadron.co.uk" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">WebSquadron</a>), in his Font Clamp Calculator (2.2).</p>
+                                Fluid Font Forge by Jim R. (<a href="https://jimrweb.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">JimRWeb</a>), developed with tremendous help from Claude AI (<a href="https://anthropic.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">Anthropic</a>), based on an original snippet by Imran Siddiq (<a href="https://websquadron.co.uk" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">WebSquadron</a>), in his Font Clamp Calculator (2.2).</p>
                         </div>
                     </div>
                 </div>
@@ -408,7 +429,7 @@ class FontClampCalculator
             <div id="fcc-loading-screen" class="fcc-loading-screen">
                 <div class="fcc-loading-content">
                     <div class="fcc-loading-spinner"></div>
-                    <h2>Font Clamp Calculator<br><br>Loading...</h2>
+                    <h2>Fluid Font Forge<br><br>Loading...</h2>
                     <p>Initializing enhanced interface and advanced features...</p>
                     <div class="fcc-loading-progress">
                         <div class="fcc-progress-bar"></div>
@@ -423,7 +444,7 @@ class FontClampCalculator
                     <!-- How to Use Panel -->
                     <div class="fcc-info-toggle-section">
                         <button class="fcc-info-toggle expanded" data-toggle-target="info-content">
-                            <span style="color: #FAF9F6 !important;">ℹ️ How to Use Font Clamp Calculator</span>
+                            <span style="color: #FAF9F6 !important;">ℹ️ How to Use Fluid Font Forge</span>
                             <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
                         </button>
                         <div class="fcc-info-content expanded" id="info-content">
@@ -488,6 +509,7 @@ class FontClampCalculator
                             <div class="fcc-tabs" style="width: 100%; max-width: 600px;">
                                 <button id="class-tab" class="tab-button <?php echo $settings['activeTab'] === 'class' ? 'active' : ''; ?>" style="flex: 1; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600;" data-tab="class" data-tooltip="Generate CSS classes like .large, .medium, .small for use in HTML">Class</button>
                                 <button id="vars-tab" class="tab-button <?php echo $settings['activeTab'] === 'vars' ? 'active' : ''; ?>" style="flex: 1; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600;" data-tab="vars" data-tooltip="Generate CSS custom properties like --fs-lg for use with var() in CSS">Variables</button>
+                                <button id="tailwind-tab" class="tab-button <?php echo $settings['activeTab'] === 'tailwind' ? 'active' : ''; ?>" style="flex: 1; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600;" data-tab="tailwind" data-tooltip="Generate Tailwind config fontSize object for direct integration with tailwind.config.js">Tailwind Config</button>
                                 <button id="tag-tab" class="tab-button <?php echo $settings['activeTab'] === 'tag' ? 'active' : ''; ?>" style="flex: 1; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600;" data-tab="tag" data-tooltip="Generate CSS that directly styles HTML tags like h1, h2, p automatically">Tags</button>
                             </div>
                         </div>
@@ -625,10 +647,23 @@ class FontClampCalculator
                                             data-tooltip="Reference size used for calculating other sizes - this will be your body text size">
                                             <?php
                                             // Populate based on current tab
-                                            $current_sizes = $settings['activeTab'] === 'class' ? $class_sizes : ($settings['activeTab'] === 'vars' ? $variable_sizes : $tag_sizes);
-                                            $property_name = $settings['activeTab'] === 'class' ? 'className' : ($settings['activeTab'] === 'vars' ? 'variableName' : 'tagName');
-                                            $selected_id = $settings['activeTab'] === 'class' ? $settings['selectedClassSizeId'] : ($settings['activeTab'] === 'vars' ? $settings['selectedVariableSizeId'] : $settings['selectedTagSizeId']);
-
+                                            if ($settings['activeTab'] === 'class') {
+                                                $current_sizes = $class_sizes;
+                                                $property_name = 'className';
+                                                $selected_id = $settings['selectedClassSizeId'];
+                                            } elseif ($settings['activeTab'] === 'vars') {
+                                                $current_sizes = $variable_sizes;
+                                                $property_name = 'variableName';
+                                                $selected_id = $settings['selectedVariableSizeId'];
+                                            } elseif ($settings['activeTab'] === 'tailwind') {
+                                                $current_sizes = $this->get_font_clamp_tailwind_sizes();
+                                                $property_name = 'tailwindName';
+                                                $selected_id = 5; // default to 'base'
+                                            } else {
+                                                $current_sizes = $tag_sizes;
+                                                $property_name = 'tagName';
+                                                $selected_id = $settings['selectedTagSizeId'];
+                                            }
                                             foreach ($current_sizes as $size) {
                                                 $selected = $size['id'] == $selected_id ? 'selected' : '';
                                                 echo "<option value='{$size['id']}' {$selected}>{$size[$property_name]}</option>";
@@ -1845,6 +1880,9 @@ class FontClampCalculator
                                 case 'vars':
                                     sizes = window.fontClampAjax?.data?.variableSizes || [];
                                     break;
+                                case 'tailwind':
+                                    sizes = window.fontClampAjax?.data?.tailwindSizes || [];
+                                    break;
                                 case 'tag':
                                     sizes = window.fontClampAjax?.data?.tagSizes || [];
                                     break;
@@ -1867,6 +1905,12 @@ class FontClampCalculator
                                             window.fontClampAjax.data.variableSizes = sizes;
                                         }
                                         break;
+                                    case 'tailwind':
+                                        sizes = fontClampAdvanced.getDefaultTailwindSizes();
+                                        if (window.fontClampAjax?.data) {
+                                            window.fontClampAjax.data.tailwindSizes = sizes;
+                                        }
+                                        break;
                                     case 'tag':
                                         sizes = fontClampAdvanced.getDefaultTagSizes();
                                         if (window.fontClampAjax?.data) {
@@ -1884,7 +1928,7 @@ class FontClampCalculator
                     // Enhanced Core Interface Controller
                     class FontClampEnhancedCoreInterface {
                         constructor() {
-                            console.log('🚀 Font Clamp Calculator');
+                            console.log('🚀 Fluid Font Forge');
 
                             this.initializeData();
                             this.cacheElements();
@@ -2031,6 +2075,7 @@ class FontClampCalculator
                             this.classSizes = data.classSizes || [];
                             this.variableSizes = data.variableSizes || [];
                             this.tagSizes = data.tagSizes || [];
+                            this.tailwindSizes = data.tailwindSizes || [];
 
                             this.activeTab = this.settings.activeTab || 'class';
                             this.unitType = this.settings.unitType || 'px';
@@ -2063,6 +2108,15 @@ class FontClampCalculator
                         bindBasicEvents() {
                             this.elements.classTab?.addEventListener('click', () => this.switchTab('class'));
                             this.elements.varsTab?.addEventListener('click', () => this.switchTab('vars'));
+
+                            // Force bind tailwind tab with direct query
+                            const tailwindTab = document.getElementById('tailwind-tab');
+                            if (tailwindTab) {
+                                tailwindTab.addEventListener('click', () => this.switchTab('tailwind'));
+                            } else {
+                                console.log('❌ Tailwind tab not found!');
+                            }
+
                             this.elements.tagTab?.addEventListener('click', () => this.switchTab('tag'));
 
                             this.elements.pxTab?.addEventListener('click', () => this.switchUnitType('px'));
@@ -2113,6 +2167,10 @@ class FontClampCalculator
                                 this.elements.tableTitle.textContent = 'CSS Variables';
                                 this.elements.selectedCodeTitle.textContent = 'Selected Variable CSS';
                                 this.elements.generatedCodeTitle.textContent = 'Generated CSS (All Variables)';
+                            } else if (tabName === 'tailwind') {
+                                this.elements.tableTitle.textContent = 'Tailwind Font Sizes';
+                                this.elements.selectedCodeTitle.textContent = 'Selected Size Config';
+                                this.elements.generatedCodeTitle.textContent = 'Tailwind Config (fontSize Object)';
                             } else if (tabName === 'tag') {
                                 this.elements.tableTitle.textContent = 'HTML Tag Styles';
                                 this.elements.selectedCodeTitle.textContent = 'Selected Tag CSS';
@@ -2150,6 +2208,11 @@ class FontClampCalculator
                                 );
                                 propertyName = 'variableName';
                                 defaultValue = '--fs-md';
+                            } else if (tabName === 'tailwind') {
+                                currentSizes = FontClampUtils.getCurrentSizes('tailwind', window.fontClampAdvanced);
+                                propertyName = 'tailwindName';
+                                defaultValue = 'base';
+                                console.log('🔍 Fixed tailwind sizes:', currentSizes);
                             } else if (tabName === 'tag') {
                                 currentSizes = this.tagSizes.filter(size =>
                                     !size.tagName || !size.tagName.startsWith('custom-')
@@ -2802,6 +2865,14 @@ class FontClampCalculator
                                             selectionFound = true;
                                         }
                                         break;
+                                    case 'tailwind':
+                                        option.value = size.id;
+                                        option.textContent = size.tailwindName;
+                                        if ((currentSelection && size.id == currentSelection) || (!currentSelection && size.tailwindName === 'base')) {
+                                            option.selected = true;
+                                            selectionFound = true;
+                                        }
+                                        break;
                                     case 'tag':
                                         option.value = size.id;
                                         option.textContent = size.tagName;
@@ -3342,7 +3413,6 @@ class FontClampCalculator
 
                                 const selectedId = this.getSelectedSizeId();
                                 const selectedSize = sizes.find(s => s.id === selectedId);
-
                                 if (selectedSize && selectedSize.min && selectedSize.max) {
                                     const clampValue = generateClampCSS(selectedSize.min, selectedSize.max);
                                     const displayName = this.getSizeDisplayName(selectedSize, activeTab);
@@ -3352,6 +3422,8 @@ class FontClampCalculator
                                         selectedCSS = `.${displayName} {\n  font-size: ${clampValue};\n  line-height: ${selectedSize.lineHeight};\n}`;
                                     } else if (activeTab === 'vars') {
                                         selectedCSS = `:root {\n  ${displayName}: ${clampValue};\n}`;
+                                    } else if (activeTab === 'tailwind') {
+                                        selectedCSS = `'${displayName}': '${clampValue}'`;
                                     } else {
                                         selectedCSS = `${displayName} {\n  font-size: ${clampValue};\n  line-height: ${selectedSize.lineHeight};\n}`;
                                     }
@@ -3379,6 +3451,16 @@ class FontClampCalculator
                                         }
                                     });
                                     allCSS += '}';
+                                } else if (activeTab === 'tailwind') {
+                                    allCSS = 'module.exports = {\n  theme: {\n    extend: {\n      fontSize: {\n';
+                                    sizes.forEach((size, index) => {
+                                        if (size.min && size.max) {
+                                            const clampValue = generateClampCSS(size.min, size.max);
+                                            const comma = index < sizes.length - 1 ? ',' : '';
+                                            allCSS += `        '${size.tailwindName}': '${clampValue}'${comma}\n`;
+                                        }
+                                    });
+                                    allCSS += '      }\n    }\n  }\n}';
                                 } else {
                                     sizes.forEach(size => {
                                         if (size.min && size.max) {
@@ -3991,11 +4073,34 @@ class FontClampCalculator
                                         break;
                                 }
 
-                                this.updateBaseValueOptions();
                                 this.calculateSizes();
                                 this.renderSizes();
                                 this.updatePreview();
                                 this.markDataChanged();
+
+                                // Update only the current tab's data in core interface
+                                setTimeout(() => {
+                                    if (window.fontClampCore) {
+                                        const activeTab = window.fontClampCore.activeTab;
+                                        // Update only the specific tab's data
+                                        switch (activeTab) {
+                                            case 'class':
+                                                window.fontClampCore.classSizes = window.fontClampAjax.data.classSizes;
+                                                break;
+                                            case 'vars':
+                                                window.fontClampCore.variableSizes = window.fontClampAjax.data.variableSizes;
+                                                break;
+                                            case 'tailwind':
+                                                window.fontClampCore.tailwindSizes = window.fontClampAjax.data.tailwindSizes;
+                                                break;
+                                            case 'tag':
+                                                window.fontClampCore.tagSizes = window.fontClampAjax.data.tagSizes;
+                                                break;
+                                        }
+                                        // Then update dropdown with fresh data for current tab only
+                                        window.fontClampCore.updateBaseValueDropdown(activeTab);
+                                    }
+                                }, 200);
 
                                 // Show success notification
                                 this.showResetNotification(tabName);
@@ -4265,7 +4370,9 @@ class FontClampCalculator
 
                         getCurrentSizes() {
                             const activeTab = window.fontClampCore?.activeTab || 'class';
-                            return FontClampUtils.getCurrentSizes(activeTab, this);
+                            const sizes = FontClampUtils.getCurrentSizes(activeTab, this);
+                            console.log(`🔍 getCurrentSizes for ${activeTab}:`, sizes);
+                            return sizes;
                         }
 
                         getSizeDisplayName(size, activeTab) {
@@ -4274,6 +4381,8 @@ class FontClampCalculator
                                     return size.className || '';
                                 case 'vars':
                                     return size.variableName || '';
+                                case 'tailwind':
+                                    return size.tailwindName || '';
                                 case 'tag':
                                     return size.tagName || '';
                                 default:
@@ -4435,6 +4544,50 @@ class FontClampCalculator
                                 }
                             ];
                         }
+
+                        getDefaultTailwindSizes() {
+                            return [{
+                                    id: 1,
+                                    tailwindName: '4xl',
+                                    lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT
+                                },
+                                {
+                                    id: 2,
+                                    tailwindName: '3xl',
+                                    lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT
+                                },
+                                {
+                                    id: 3,
+                                    tailwindName: '2xl',
+                                    lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT
+                                },
+                                {
+                                    id: 4,
+                                    tailwindName: 'xl',
+                                    lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT
+                                },
+                                {
+                                    id: 5,
+                                    tailwindName: 'base',
+                                    lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT
+                                },
+                                {
+                                    id: 6,
+                                    tailwindName: 'lg',
+                                    lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT
+                                },
+                                {
+                                    id: 7,
+                                    tailwindName: 'sm',
+                                    lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT
+                                },
+                                {
+                                    id: 8,
+                                    tailwindName: 'xs',
+                                    lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT
+                                }
+                            ];
+                        }
                     }
 
                     // Initialize Advanced Features
@@ -4522,7 +4675,7 @@ class FontClampCalculator
     // INITIALIZATION - CRITICAL FOR SNIPPETS MANAGER
     // ========================================================================
 
-    // Initialize the unified Font Clamp Calculator
+    // Initialize the unified Fluid Font Forge
     if (is_admin()) {
         global $fontClampCalculator;
         $fontClampCalculator = new FontClampCalculator();
