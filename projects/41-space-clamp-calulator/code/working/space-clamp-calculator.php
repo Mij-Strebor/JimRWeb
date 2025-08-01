@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Space Clamp Calculator
+ * Fluid Space Forge
  * Version: 1.0
  * Generates responsive space using CSS clamp() functions
  */
@@ -12,9 +12,9 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Space Clamp Calculator - Complete Unified Class
+ * Fluid Space Forge - Complete Unified Class
  */
-class SpaceClampCalculator
+class fluidSpaceForge
 {
     // ========================================================================
     // CORE CONSTANTS SYSTEM
@@ -22,8 +22,8 @@ class SpaceClampCalculator
 
     // Configuration Constants
     const VERSION = '1.0';
-    const PLUGIN_SLUG = 'space-clamp-calculator';
-    const NONCE_ACTION = 'space_clamp_nonce';
+    const PLUGIN_SLUG = 'fluid-space-forge';
+    const NONCE_ACTION = 'fluid-space_nonce';
 
     // Validation Ranges
     // Why 1-100px: Prevents unusably small (<1px) or absurdly large (>100px) base space
@@ -148,12 +148,12 @@ class SpaceClampCalculator
                 ['id' => 6, 'name' => 'space-xxl']
             ],
             'vars' => [
-                ['id' => 1, 'name' => '--space-xs'],
-                ['id' => 2, 'name' => '--space-sm'],
-                ['id' => 3, 'name' => '--space-md'],
-                ['id' => 4, 'name' => '--space-lg'],
-                ['id' => 5, 'name' => '--space-xl'],
-                ['id' => 6, 'name' => '--space-xxl']
+                ['id' => 1, 'name' => '--sp-xs'],
+                ['id' => 2, 'name' => '--sp-sm'],
+                ['id' => 3, 'name' => '--sp-md'],
+                ['id' => 4, 'name' => '--sp-lg'],
+                ['id' => 5, 'name' => '--sp-xl'],
+                ['id' => 6, 'name' => '--sp-xxl']
             ],
             'utils' => [
                 ['id' => 1, 'name' => 'xs', 'properties' => ['margin', 'padding']],
@@ -166,7 +166,7 @@ class SpaceClampCalculator
         ];
 
         if (!isset($configs[$type])) {
-            error_log("Space Clamp: Invalid size type: {$type}");
+            error_log("Fluid Space: Invalid size type: {$type}");
             return [];
         }
 
@@ -212,8 +212,8 @@ class SpaceClampCalculator
     public function add_admin_menu()
     {
         add_menu_page(
-            'Space Clamp Calculator',
-            'Space Clamp',
+            'Fluid Space Forge',
+            'Fluid Space',
             'manage_options',
             self::PLUGIN_SLUG,
             [$this, 'render_admin_page'],
@@ -367,12 +367,12 @@ class SpaceClampCalculator
         ob_start();
 ?>
         <div class="wrap" style="background: var(--clr-page-bg); padding: 20px; min-height: 100vh;">
-            <h1 class="text-2xl font-bold mb-4">Space Clamp Calculator (1.0)</h1>
+            <h1 class="text-2xl font-bold mb-4">Fluid Space Forge (1.0)</h1>
 
             <!-- About Section -->
             <div class="fcc-info-toggle-section">
                 <button class="fcc-info-toggle expanded" data-toggle-target="about-content">
-                    <span style="color: #FAF9F6 !important;">📐 About Space Clamp Calculator</span>
+                    <span style="color: #FAF9F6 !important;">📐 About Fluid Space Forge</span>
                     <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
                 </button>
                 <div class="fcc-info-content expanded" id="about-content">
@@ -382,7 +382,7 @@ class SpaceClampCalculator
                         </p>
                         <div style="background: rgba(60, 32, 23, 0.1); padding: 12px 16px; border-radius: 6px; border-left: 4px solid var(--clr-accent); margin-top: 20px;">
                             <p style="margin: 0; font-size: 13px; opacity: 0.95; line-height: 1.5; color: var(--clr-txt);">
-                                Space Clamp Calculator by Jim R. (<a href="https://jimrweb.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">JimRWeb</a>), part of the CSS Tools series developed with Claude AI (<a href="https://anthropic.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">Anthropic</a>).
+                                Fluid Space Forge by Jim R. (<a href="https://jimrweb.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">JimRWeb</a>), part of the CSS Tools series developed with Claude AI (<a href="https://anthropic.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">Anthropic</a>).
                             </p>
                         </div>
                     </div>
@@ -397,7 +397,7 @@ class SpaceClampCalculator
                     <!-- How to Use Panel -->
                     <div class="fcc-info-toggle-section">
                         <button class="fcc-info-toggle expanded" data-toggle-target="info-content">
-                            <span style="color: #FAF9F6 !important;">ℹ️ How to Use Space Clamp Calculator</span>
+                            <span style="color: #FAF9F6 !important;">ℹ️ How to Use Fluid Space Forge</span>
                             <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
                         </button>
                         <div class="fcc-info-content expanded" id="info-content">
@@ -454,7 +454,7 @@ class SpaceClampCalculator
                         <div style="display: flex; justify-content: center;">
                             <div class="fcc-tabs" style="width: 100%; max-width: 600px;">
                                 <button id="class-tab" class="tab-button <?php echo $settings['activeTab'] === 'class' ? 'active' : ''; ?>" style="flex: 1; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600;" data-tab="class" data-tooltip="Generate space classes like .space-lg, .space-md for use in HTML">Classes</button>
-                                <button id="vars-tab" class="tab-button <?php echo $settings['activeTab'] === 'vars' ? 'active' : ''; ?>" style="flex: 1; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600;" data-tab="vars" data-tooltip="Generate CSS custom properties like --space-lg for use with var() in CSS">Variables</button>
+                                <button id="vars-tab" class="tab-button <?php echo $settings['activeTab'] === 'vars' ? 'active' : ''; ?>" style="flex: 1; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600;" data-tab="vars" data-tooltip="Generate CSS custom properties like --sp-lg for use with var() in CSS">Variables</button>
                                 <button id="utils-tab" class="tab-button <?php echo $settings['activeTab'] === 'utils' ? 'active' : ''; ?>" style="flex: 1; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: 600;" data-tab="utils" data-tooltip="Generate utility classes like .mt-lg, .p-md for margins and padding">Utilities</button>
                             </div>
                         </div>
@@ -1855,7 +1855,7 @@ class SpaceClampCalculator
                 <label class="fcc-label" for="edit-variable-name">Variable Name</label>
                 <input type="text" id="edit-variable-name" class="fcc-input" 
                        value="${currentData?.variableName || ''}" 
-                       placeholder="e.g., --space-lg">
+                       placeholder="e.g., --sp-lg">
             </div>
         `;
                 } else if (tabType === 'utils') {
@@ -2358,7 +2358,7 @@ class SpaceClampCalculator
                 }
 
                 // Check for placeholder text
-                const placeholders = ['e.g., space-lg', 'e.g., --space-lg', 'e.g., lg'];
+                const placeholders = ['e.g., space-lg', 'e.g., --sp-lg', 'e.g., lg'];
                 if (placeholders.includes(name.trim())) {
                     return 'Please enter a real name, not the placeholder text.';
                 }
@@ -2443,7 +2443,7 @@ class SpaceClampCalculator
                 <label class="fcc-label" for="add-variable-name">Variable Name</label>
                 <input type="text" id="add-variable-name" class="fcc-input" 
                        value="${defaultName}" 
-                       placeholder="e.g., --space-lg">
+                       placeholder="e.g., --sp-lg">
             </div>
         `;
                 } else if (tabType === 'utils') {
@@ -2555,27 +2555,27 @@ class SpaceClampCalculator
                 } else if (tabType === 'vars') {
                     spaceClampAjax.data.variableSizes = [{
                             id: 1,
-                            variableName: '--space-xs'
+                            variableName: '--sp-xs'
                         },
                         {
                             id: 2,
-                            variableName: '--space-sm'
+                            variableName: '--sp-sm'
                         },
                         {
                             id: 3,
-                            variableName: '--space-md'
+                            variableName: '--sp-md'
                         },
                         {
                             id: 4,
-                            variableName: '--space-lg'
+                            variableName: '--sp-lg'
                         },
                         {
                             id: 5,
-                            variableName: '--space-xl'
+                            variableName: '--sp-xl'
                         },
                         {
                             id: 6,
-                            variableName: '--space-xxl'
+                            variableName: '--sp-xxl'
                         }
                     ];
                 } else if (tabType === 'utils') {
@@ -3450,20 +3450,32 @@ class SpaceClampCalculator
                     });
                 });
 
-                // Generate initial content
+                // Generate initial content using saved active tab
+                const initialTab = spaceClampAjax.data.settings.activeTab || 'class';
                 const panelContainer = document.getElementById('sizes-table-container');
                 if (panelContainer) {
-                    panelContainer.innerHTML = generatePanelContent('class');
+                    panelContainer.innerHTML = generatePanelContent(initialTab);
 
                     const generatedCode = document.getElementById('generated-code');
                     if (generatedCode) {
                         const settings = spaceClampAjax.data.settings;
-                        const currentSizes = spaceClampAjax.data.classSizes;
-                        const css = generateClassesCSS(currentSizes, settings, getSelectedBaseId());
+                        let currentSizes, css;
+
+                        if (initialTab === 'class') {
+                            currentSizes = spaceClampAjax.data.classSizes;
+                            css = generateClassesCSS(currentSizes, settings, getSelectedBaseId());
+                        } else if (initialTab === 'vars') {
+                            currentSizes = spaceClampAjax.data.variableSizes;
+                            css = generateVariablesCSS(currentSizes, settings, getSelectedBaseId());
+                        } else if (initialTab === 'utils') {
+                            currentSizes = spaceClampAjax.data.utilitySizes;
+                            css = generateUtilitiesCSS(currentSizes, settings, getSelectedBaseId());
+                        }
+
                         generatedCode.textContent = css;
                     }
 
-                    generatespacePreview('class', spaceClampAjax.data.classSizes, getSelectedBaseId());
+                    generatespacePreview(initialTab, currentSizes, getSelectedBaseId());
 
                     // Add event handlers for space input changes
                     const spaceInputs = ['min-base-space', 'max-base-space', 'min-viewport', 'max-viewport', 'min-scale', 'max-scale'];
@@ -3649,7 +3661,7 @@ class SpaceClampCalculator
                                         <td><div class="drag-handle">⋮⋮</div></td>
                                         <td>
                                             <input type="text" value="${size.variableName}" class="size-name-input" 
-                                                   placeholder="e.g., --space-lg">
+                                                   placeholder="e.g., --sp-lg">
                                         </td>
                                         <td>
                                             <span class="calculated-value">${(() => {
@@ -3833,8 +3845,8 @@ return calc.maxUnit;
 // INITIALIZATION
 // ========================================================================
 
-// Initialize the Space Clamp Calculator
+// Initialize the Fluid Space Forge
 if (is_admin()) {
-    global $spaceClampCalculator;
-    $spaceClampCalculator = new SpaceClampCalculator();
+    global $fluidSpaceForge;
+    $fluidSpaceForge = new fluidSpaceForge();
 }
