@@ -1,7 +1,7 @@
 # CSS Clamp Tools - WordPress Admin Suite
 <img src="resources\00-assets\design-assets\icons\svg\JimRWeb-logo-black.svg" alt="JimRWeb logo" style="height: 15px; width:100px;"/>
 
-**Professional responsive design tools for WordPress developers**
+**Professional responsive design tools for WordPress developers**v
 
 [![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-blue.svg)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)](https://php.net/)
@@ -11,7 +11,7 @@
 
 
 
-### 📐 [Font Clamp Calculator](./font-clamp-calculator/)
+### 📐 [Fluid Font Forge](./font-clamp-calculator/)
 Generate responsive typography systems with mathematical precision. Create fluid font scaling that works beautifully from mobile to desktop using proven typographic ratios.
 
 **Features:**
@@ -20,8 +20,8 @@ Generate responsive typography systems with mathematical precision. Create fluid
 - Live preview and drag-and-drop reordering
 - Mathematical scaling with custom line heights
 
-### 📏 [Space Clamp Calculator](./space-clamp-calculator/)
-Create consistent, scalable spacing systems for margins, padding, and gaps. The perfect companion to Font Clamp Calculator for complete design system harmony.
+### 📏 [Fluid Space Forge](./space-clamp-calculator/)
+Create consistent, scalable spacing systems for margins, padding, and gaps. The perfect companion to Fluid Font Forge and the Fluid Button Forge for complete design system harmony.
 
 **Features:** 
 - Responsive spacing with CSS `clamp()` functions
@@ -29,7 +29,7 @@ Create consistent, scalable spacing systems for margins, padding, and gaps. The 
 - Mathematical scaling ratios
 - Dual unit support (px/rem)
 
-### 🎨 [Button Design Calculator](./button-design-calculator/)
+### 🎨 [Fluid Button Forge](./button-design-calculator/)
 Design professional button hierarchies that scale perfectly across all devices. Generate responsive button systems for CTAs, forms, and UI components.
 
 **Features:**

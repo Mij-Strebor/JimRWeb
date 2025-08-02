@@ -1,11 +1,11 @@
-# 🎨 Button Design Calculator - WordPress Admin Code Snippet
+# 🎨 Fluid Button Forge - WordPress Admin Code Snippet
 <img src="..\..\resources\00-assets\design-assets\icons\svg\JimRWeb-logo-black.svg" alt="JimRWeb logo" style="height: 15px; width:100px;"/>
 
 **Professional responsive design tools for WordPress developers**
 
-Create stunning, responsive button hierarchies that scale perfectly across all devices! The Button Design Calculator generates professional CSS using modern `clamp()` functions, ensuring your buttons maintain perfect proportions from mobile to desktop.
+Create stunning, responsive button hierarchies that scale perfectly across all devices! The Fluid Button Forge generates professional CSS using modern `clamp()` functions, ensuring your buttons maintain perfect proportions from mobile to desktop.
 
-## ✨ Why Use Button Design Calculator?
+## ✨ Why Use Fluid Button Forge?
 
 **No more guesswork.** Design once, work everywhere. Create consistent button systems that automatically adapt to any screen size while maintaining your brand's visual hierarchy.
 
@@ -19,7 +19,7 @@ Create stunning, responsive button hierarchies that scale perfectly across all d
 
 ## 🔧 How It Works
 
-The Button Design Calculator generates two types of CSS output:
+The Fluid Button Forge generates two types of CSS output:
 
 ### 1. **CSS Classes** - Direct Implementation
 ```css
@@ -64,7 +64,7 @@ Create button hierarchies that guide user attention:
 
 ### **Method 1: Direct CSS Classes (Recommended)**
 
-**Step 1:** Copy the generated CSS from Button Design Calculator
+**Step 1:** Copy the generated CSS from Fluid Button Forge
 **Step 2:** Add to your WordPress theme's `style.css` or child theme
 **Step 3:** Apply classes directly to your buttons
 
@@ -197,7 +197,7 @@ element {
 
 **Traditional Approach**: Set fixed pixel sizes, fight with media queries, hope it looks good.
 
-**Button Design Calculator Approach**: Define your design system once, generate responsive CSS that scales beautifully across all devices using modern CSS techniques.
+**Fluid Button Forge Approach**: Define your design system once, generate responsive CSS that scales beautifully across all devices using modern CSS techniques.
 
 **Result**: Professional button systems that work everywhere, save development time, and create better user experiences.
 
@@ -212,4 +212,4 @@ element {
 
 ---
 
-*Ready to create professional button systems? Download Button Design Calculator and transform your WordPress site's user interface today!*
+*Ready to create professional button systems? Download Fluid Button Forge and transform your WordPress site's user interface today!*

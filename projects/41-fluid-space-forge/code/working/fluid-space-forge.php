@@ -367,23 +367,25 @@ class fluidSpaceForge
         ob_start();
 ?>
         <div class="wrap" style="background: var(--clr-page-bg); padding: 20px; min-height: 100vh;">
-            <h1 class="text-2xl font-bold mb-4">Fluid Space Forge (1.0)</h1>
+            <div class="fcc-header-section">
+                <h1 class="text-2xl font-bold mb-4">Fluid Space Forge (1.0)</h1><br>
 
-            <!-- About Section -->
-            <div class="fcc-info-toggle-section">
-                <button class="fcc-info-toggle expanded" data-toggle-target="about-content">
-                    <span style="color: #FAF9F6 !important;">📐 About Fluid Space Forge</span>
-                    <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
-                </button>
-                <div class="fcc-info-content expanded" id="about-content">
-                    <div style="color: var(--clr-txt); font-size: 14px; line-height: 1.6;">
-                        <p style="margin: 0 0 16px 0; color: var(--clr-txt);">
-                            Perfect companion to the Font Clamp Calculator! While typography scales smoothly across devices, your space should too. This tool generates responsive margins, padding, and gaps using CSS clamp() functions. Create consistent space systems that adapt beautifully from mobile to desktop.
-                        </p>
-                        <div style="background: rgba(60, 32, 23, 0.1); padding: 12px 16px; border-radius: 6px; border-left: 4px solid var(--clr-accent); margin-top: 20px;">
-                            <p style="margin: 0; font-size: 13px; opacity: 0.95; line-height: 1.5; color: var(--clr-txt);">
-                                Fluid Space Forge by Jim R. (<a href="https://jimrweb.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">JimRWeb</a>), part of the CSS Tools series developed with Claude AI (<a href="https://anthropic.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">Anthropic</a>).
+                <!-- About Section -->
+                <div class="fcc-info-toggle-section">
+                    <button class="fcc-info-toggle expanded" data-toggle-target="about-content">
+                        <span style="color: #FAF9F6 !important;">📐 About Fluid Space Forge</span>
+                        <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
+                    </button>
+                    <div class="fcc-info-content expanded" id="about-content">
+                        <div style="color: var(--clr-txt); font-size: 14px; line-height: 1.6;">
+                            <p style="margin: 0 0 16px 0; color: var(--clr-txt);">
+                                Perfect companion to the Font Clamp Calculator! While typography scales smoothly across devices, your space should too. This tool generates responsive margins, padding, and gaps using CSS clamp() functions. Create consistent space systems that adapt beautifully from mobile to desktop.
                             </p>
+                            <div style="background: rgba(60, 32, 23, 0.1); padding: 12px 16px; border-radius: 6px; border-left: 4px solid var(--clr-accent); margin-top: 20px;">
+                                <p style="margin: 0; font-size: 13px; opacity: 0.95; line-height: 1.5; color: var(--clr-txt);">
+                                    Fluid Space Forge by Jim R. (<a href="https://jimrweb.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">JimRWeb</a>), part of the CSS Tools series developed with Claude AI (<a href="https://anthropic.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">Anthropic</a>).
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -484,10 +486,12 @@ class fluidSpaceForge
                                     </div>
                                 </div>
 
+                                <p class="divider">What is the base space size at the viewport limits and the viewport range?</p>
+
                                 <!-- Row 1: Min Base and Min Width -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
                                     <div class="grid-item">
-                                        <label class="component-label" for="min-base-space">Min Viewport Space (px)</label>
+                                        <label class="component-label" for="min-base-space">Min Viewport Space Size (px)</label>
                                         <input type="number" id="min-base-space" value="<?php echo esc_attr($settings['minBasespace'] ?? self::DEFAULT_MIN_BASE_space); ?>"
                                             class="component-input" style="width: 100%;"
                                             min="<?php echo self::MIN_BASE_space_RANGE[0]; ?>"
@@ -508,26 +512,10 @@ class fluidSpaceForge
                                     </div>
                                 </div>
 
-                                <!-- Row 2: Min Scale -->
-                                <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px;">
-                                    <div class="grid-item">
-                                        <label class="component-label" for="min-scale">Min Viewport Space Scaling</label>
-                                        <select id="min-scale" class="component-select" style="width: 100%;"
-                                            aria-label="Minimum scale ratio for space on smaller screens - controls size differences between space levels"
-                                            data-tooltip="space scale ratio for smaller screens - how much size difference between space levels">
-                                            <option value="1.067" <?php selected($settings['minScale'], '1.067'); ?>>1.067 Minor Second</option>
-                                            <option value="1.125" <?php selected($settings['minScale'], '1.125'); ?>>1.125 Major Second</option>
-                                            <option value="1.200" <?php selected($settings['minScale'], '1.200'); ?>>1.200 Minor Third</option>
-                                            <option value="1.250" <?php selected($settings['minScale'], '1.250'); ?>>1.250 Major Third</option>
-                                            <option value="1.333" <?php selected($settings['minScale'], '1.333'); ?>>1.333 Perfect Fourth</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Row 3: Max Base and Max Width -->
+                                <!-- Row 2: Max Base and Max Width -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
                                     <div class="grid-item">
-                                        <label class="component-label" for="max-base-space">Max Viewport Space (px)</label>
+                                        <label class="component-label" for="max-base-space">Max Viewport Space Size (px)</label>
                                         <input type="number" id="max-base-space" value="<?php echo esc_attr($settings['maxBasespace'] ?? self::DEFAULT_MAX_BASE_space); ?>"
                                             class="component-input" style="width: 100%;"
                                             min="<?php echo self::MIN_BASE_space_RANGE[0]; ?>"
@@ -545,6 +533,24 @@ class fluidSpaceForge
                                             step="1"
                                             aria-label="Maximum viewport width in pixels - screen width where maximum space applies"
                                             data-tooltip="Screen width where maximum space applies">
+                                    </div>
+                                </div>
+
+                                <p class="divider">How should your spacing scale? Set the ratio at both viewport limits.</p>
+
+                                <!-- Row 3: Min Scale -->
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px;">
+                                    <div class="grid-item">
+                                        <label class="component-label" for="min-scale">Min Viewport Space Scaling</label>
+                                        <select id="min-scale" class="component-select" style="width: 100%;"
+                                            aria-label="Minimum scale ratio for space on smaller screens - controls size differences between space levels"
+                                            data-tooltip="space scale ratio for smaller screens - how much size difference between space levels">
+                                            <option value="1.067" <?php selected($settings['minScale'], '1.067'); ?>>1.067 Minor Second</option>
+                                            <option value="1.125" <?php selected($settings['minScale'], '1.125'); ?>>1.125 Major Second</option>
+                                            <option value="1.200" <?php selected($settings['minScale'], '1.200'); ?>>1.200 Minor Third</option>
+                                            <option value="1.250" <?php selected($settings['minScale'], '1.250'); ?>>1.250 Major Third</option>
+                                            <option value="1.333" <?php selected($settings['minScale'], '1.333'); ?>>1.333 Perfect Fourth</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -1031,9 +1037,15 @@ class fluidSpaceForge
                 box-shadow: var(--clr-shadow-lg) !important;
             }
 
+            /* Header Section and Main Container */
+            .fcc-header-section,
+            .space-clamp-container {
+                width: 1280px;
+                margin: 0 auto;
+            }
+
             /* Main Container */
             .space-clamp-container {
-                margin: 0 auto;
                 background: var(--clr-card-bg);
                 border-radius: var(--jimr-border-radius-lg);
                 box-shadow: var(--clr-shadow-xl);
@@ -1042,6 +1054,7 @@ class fluidSpaceForge
                 opacity: 0;
                 visibility: hidden;
                 transition: opacity 0.3s ease, visibility 0.3s ease;
+                display: block !important;
             }
 
             .space-clamp-container.ready {
@@ -1299,6 +1312,12 @@ class fluidSpaceForge
                 margin: 0 0 var(--jimr-space-5) 0;
                 border-bottom: 2px solid var(--clr-secondary);
                 padding-bottom: var(--jimr-space-2);
+            }
+
+            /* Dividers */
+            .divider {
+                border-top: 1px solid var(--clr-secondary);
+                margin-top: var(--jimr-space-4);
             }
 
             /* Font Units */
@@ -1639,10 +1658,6 @@ class fluidSpaceForge
                 visibility: visible !important;
                 opacity: 1 !important;
             }
-
-            .space-clamp-container {
-                display: block !important;
-            }
         </style>
     <?php
     }
@@ -1656,8 +1671,6 @@ class fluidSpaceForge
     {
     ?>
         <script id="space-clamp-basic-script">
-            console.log('✅ JavaScript is loading');
-
             // Function to attach event listeners (can be called multiple times)
             function attachEventListeners() {
                 // Settings input listeners
@@ -1676,6 +1689,8 @@ class fluidSpaceForge
                 if (baseSelect) {
                     baseSelect.removeEventListener('change', handleBaseChange);
                     baseSelect.addEventListener('change', handleBaseChange);
+                } else {
+                    console.log('❌ Base select NOT found');
                 }
 
                 // Unit button listeners (PX/REM)
@@ -2074,18 +2089,23 @@ class fluidSpaceForge
 
             // space calculation function
             function calculatespaceSize(sizeId, settings, selectedBaseId = 3) {
-                // Step 1: Get the entry from the Base combo box
-                const baseComboValue = document.getElementById('base-value')?.value;
-                if (!baseComboValue) {
-                    console.log("❌ No base value selected.");
-                    return {
-                        min: 8,
-                        max: 12,
-                        minUnit: '8px',
-                        maxUnit: '12px'
-                    }; // fallback
+                // Step 1: Use the provided selectedBaseId parameter, or fall back to DOM
+                let baseId = selectedBaseId;
+
+                // Only read from DOM if selectedBaseId is invalid
+                if (!baseId || isNaN(baseId)) {
+                    const baseComboValue = document.getElementById('base-value')?.value;
+                    if (!baseComboValue) {
+                        console.log("❌ No base value selected.");
+                        return {
+                            min: 8,
+                            max: 12,
+                            minUnit: '8px',
+                            maxUnit: '12px'
+                        }; // fallback
+                    }
+                    baseId = parseInt(baseComboValue);
                 }
-                const baseId = parseInt(baseComboValue);
 
                 // Step 2: Get current data array and find base position
                 const currentTab = document.querySelector('.tab-button.active')?.getAttribute('data-tab') || 'class';
@@ -3456,22 +3476,22 @@ class fluidSpaceForge
                 if (panelContainer) {
                     panelContainer.innerHTML = generatePanelContent(initialTab);
 
+                    const settings = spaceClampAjax.data.settings;
+                    let currentSizes, css;
+
+                    if (initialTab === 'class') {
+                        currentSizes = spaceClampAjax.data.classSizes;
+                        css = generateClassesCSS(currentSizes, settings, getSelectedBaseId());
+                    } else if (initialTab === 'vars') {
+                        currentSizes = spaceClampAjax.data.variableSizes;
+                        css = generateVariablesCSS(currentSizes, settings, getSelectedBaseId());
+                    } else if (initialTab === 'utils') {
+                        currentSizes = spaceClampAjax.data.utilitySizes;
+                        css = generateUtilitiesCSS(currentSizes, settings, getSelectedBaseId());
+                    }
+
                     const generatedCode = document.getElementById('generated-code');
                     if (generatedCode) {
-                        const settings = spaceClampAjax.data.settings;
-                        let currentSizes, css;
-
-                        if (initialTab === 'class') {
-                            currentSizes = spaceClampAjax.data.classSizes;
-                            css = generateClassesCSS(currentSizes, settings, getSelectedBaseId());
-                        } else if (initialTab === 'vars') {
-                            currentSizes = spaceClampAjax.data.variableSizes;
-                            css = generateVariablesCSS(currentSizes, settings, getSelectedBaseId());
-                        } else if (initialTab === 'utils') {
-                            currentSizes = spaceClampAjax.data.utilitySizes;
-                            css = generateUtilitiesCSS(currentSizes, settings, getSelectedBaseId());
-                        }
-
                         generatedCode.textContent = css;
                     }
 

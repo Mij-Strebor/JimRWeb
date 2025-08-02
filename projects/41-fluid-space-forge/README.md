@@ -1,4 +1,4 @@
-# Space Clamp Calculator - WordPress Admin Code Snippet
+# Fluid Space Forge - WordPress Admin Code Snippet
 <img src="..\..\resources\00-assets\design-assets\icons\svg\JimRWeb-logo-black.svg" alt="JimRWeb logo" style="height: 15px; width:100px;"/>
 
 **Professional responsive design tools for WordPress developers**
@@ -26,7 +26,7 @@ A WordPress plugin that generates responsive spacing systems using CSS `clamp()`
 
 ## 📱 Perfect Companion
 
-Space Clamp Calculator is the perfect companion to the **Font Clamp Calculator**! While typography scales smoothly across devices, your spacing should too. Together, they create cohesive, responsive design systems.
+Fluid Space Forge is the perfect companion to the **Fluid Font Forge**! While typography scales smoothly across devices, your spacing should too. Together, they create cohesive, responsive design systems.
 
 ## 🛠 Installation
 
@@ -34,7 +34,7 @@ Space Clamp Calculator is the perfect companion to the **Font Clamp Calculator**
 
 ### Manual Installation
 
-1. Upload font-clamp-calculator.php file to your code snippets manager.`
+1. Upload space-clamp-calculator.php file to your code snippets manager.`
 2. Set the snippet to run as Admin on WordPress.
 3. Acitivate the snippet.
 4. Access via **Space Clamp** in the admin menu
@@ -159,20 +159,10 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 3. Make changes and test thoroughly
 4. Submit pull request with detailed description
 
-## 📝 Changelog
-
-### Version 1.0
-- Initial release
-- Three output formats (Classes, Variables, Utilities)
-- Drag & drop reordering
-- Live preview system
-- Autosave functionality
-- Mathematical scaling ratios
-- Dual unit support (px/rem)
 
 ## 🙏 Credits
 
-**Space Clamp Calculator** is part of the CSS Tools series by:
+**Fluid Space Forge** is part of the CSS Tools series by:
 - **Jim R.** - [JimRWeb.com](https://jimrweb.com)
 - **Claude AI** - [Anthropic](https://anthropic.com) (Development Assistant)
 

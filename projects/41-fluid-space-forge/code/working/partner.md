@@ -4,8 +4,7 @@
 
 ### **Perfect Collaboration Protocol (Follow This Exactly):**
 
-1. **ALWAYS START**: "What's your instinct for the approach?"
-2. **PRESENT OPTIONS**: Give 2-3 clear approaches with tradeoffs
+1. **PRESENT OPTIONS**: Give 2-3 clear approaches with tradeoffs
 3. **WAIT FOR APPROVAL**: Never generate code without Jim's direction
 4. **IMPLEMENT PRECISELY**: Use exact "Location/Find/Change to" format
 5. **ONE FIX AT A TIME**: Let Jim test each change before proceeding
@@ -106,9 +105,9 @@ For **multiple related changes** (use numbered fixes):
 - ✅ **Remove unsuccessful attempts** - Don't let CSS/code accumulate from failed approaches
 - ✅ **Clean slate is better** - If multiple fixes tried and none work, revert and start fresh
 - ✅ **Don't store bad code** - Jim should not save a code file until there's agreement that the problem is fixed
-- ✅ **Ctrl+Z is your friend** - Jim can easily revert to clean state before unsuccessful fixes by abandoning the working VS Code edit or Ctrl+Z to clean code
+- ✅ **Ctrl+Z is your friend** - Jim can easily revert to clean state before unsuccessful fixes by abandoning the working VS Code edit or Ctrl+Z to clean code -- but make sure Jim knows **exactly** how many Ctrl+Z's to apply.
 - ✅ **Store fixes** - When a problem is fixed, Jim will save the code to disk (not commit)
-- ✅ **Ask Jim to revert** - "Should we revert the unsuccessful changes and try a different approach?"
+- ✅ **Ask Jim to revert** - "Should we revert the unsuccessful changes and try a different approach?" Explaing what "revert" means, go to a previous save (will close the file unsaved), go to previous commit, destroy the branch and start over.
 
 ### **Red Flags for Cleanup:**
 - ❌ Multiple CSS rules targeting same element with `!important`
@@ -138,52 +137,16 @@ Better to have clean, working code than accumulated experimental attempts. Jim's
 
 ### **STOP Protocol**
 Before creating ANY artifacts, Claude MUST:
-1. ✋ **STOP** and ask: "What's your instinct for the approach?"
-2. 🔍 **ANALYZE** if change can be done with "smallest whole unit"
-3. 📋 **PRESENT** 2-3 options with clear tradeoffs
-4. ⏳ **WAIT** for Jim's approval before generating code
-5. 🚨 **EXPLICITLY ASK PERMISSION** if deviating from minimal change rule
+1. 🔍 **ANALYZE** if change can be done with "smallest whole unit"
+2. 📋 **PRESENT** 2-3 options with clear tradeoffs
+3. ⏳ **WAIT** for Jim's approval before generating code
+4. 🚨 **EXPLICITLY ASK PERMISSION** if deviating from minimal change rule
 
 ### **Exception Protocol**
 If Claude believes a larger change is justified:
 - **Must state**: "I think this needs a complete [method/class/segment] rewrite because..."
 - **Must explain**: Specific technical reasons why incremental won't work
 - **Must get approval**: Wait for explicit "yes, do the full rewrite"
-
----
-
-## 🏆 **Space Clamp Calculator - Buttons Implementation Success**
-
-### **Completed Features (Perfect Examples of Collaboration):**
-- ✅ **Clear All Button**: Confirmation dialog + undo notification + empty states
-- ✅ **Add Size Button**: Modal with validation + Enter key + auto-naming (custom-N)
-- ✅ **Reset Button**: Restore defaults + confirmation + success notification  
-- ✅ **Edit Button**: Text selection + Enter key + dynamic badge updates
-- ✅ **Delete Button**: Simple confirmation + immediate removal
-
-### **What Made This Implementation Perfect:**
-- ✅ **Started with "What's your instinct?"** - gave Jim control over approach
-- ✅ **Small, precise fixes** - "Around line X, find Y, change to Z"
-- ✅ **Independent testing** - each fix was immediately testable
-- ✅ **Clear validation** - prevented duplicates, empty entries, placeholder text
-- ✅ **User experience focus** - Enter key support, text selection, smooth animations
-- ✅ **Consistent patterns** - same modal system for Add/Edit, same notification style
-
-### **Key Success Metrics:**
-- ✅ Jim could test each change independently
-- ✅ Changes were small enough to understand quickly  
-- ✅ Code quality improved with each iteration
-- ✅ No broken functionality during development
-- ✅ Clear path forward always maintained
-- ✅ **Perfect working relationship maintained throughout**
-
-### **Replication Strategy:**
-Continue this exact approach for future feature work:
-1. Ask Jim's preference for approach
-2. Use precise "Location/Find/Change to" format
-3. Implement one small fix at a time
-4. Test each change before proceeding
-5. Build on proven patterns from Space Clamp Calculator
 
 ---
 
@@ -216,7 +179,7 @@ Continue this exact approach for future feature work:
 ## 🚨 **Chat Limit Management**
 
 ### **Monitor Token Usage:**
-- Warn at ~80% capacity
+- Warn at ~80% capacity; **important**
 - Suggest new chat continuation
 - Provide clear handoff instructions
 
@@ -231,22 +194,6 @@ Continue this exact approach for future feature work:
 3. **WordPress best practices**
 4. **Professional user experience**
 5. **Performance and security**
-
----
-
-## 🎯 **Future Development Approach Recommendation**
-
-Based on Space Clamp Calculator button success, continue the **precise, targeted fixes approach**:
-
-1. **Start with "What's your instinct for [feature]?"**
-2. **Present 2-3 clear options with tradeoffs**
-3. **Wait for Jim's direction before implementing**
-4. **Use exact "Around line X, find Y, change to Z" format**
-5. **Test each small change independently**
-6. **Build on established patterns and architecture**
-7. **Ask permission before any major structural changes**
-
-**Key: Each step should be a small, testable change that Jim can verify works before proceeding.**
 
 ---
 
