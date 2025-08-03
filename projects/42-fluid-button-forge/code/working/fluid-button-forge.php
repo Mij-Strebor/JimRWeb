@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Button Design Calculator - Inline Editing Version (Cleaned)
+ * Fluid Button Forge - Inline Editing Version (Cleaned)
  * Version: 1
  * Generates responsive button designs using CSS clamp() functions
  */
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Button Design Calculator - Complete Unified Class
+ * Fluid Button Forge - Complete Unified Class
  */
 class ButtonDesignCalculator
 {
@@ -22,8 +22,8 @@ class ButtonDesignCalculator
 
     // Configuration Constants
     const VERSION = '1.0';
-    const PLUGIN_SLUG = 'button-design-calculator';
-    const NONCE_ACTION = 'button_design_nonce';
+    const PLUGIN_SLUG = 'fluid-button-forge';
+    const NONCE_ACTION = 'fluid_button_nonce';
 
     // Validation Ranges
     const MIN_BUTTON_SIZE_RANGE = [1, 200];
@@ -178,18 +178,48 @@ class ButtonDesignCalculator
     // ADMIN INTERFACE
     // ========================================================================
 
+    /**
+     * Add admin menu page
+     */
     public function add_admin_menu()
     {
-        add_menu_page(
-            'Button Design Calculator',
-            'Button Design',
-            'manage_options',
-            self::PLUGIN_SLUG,
-            [$this, 'render_admin_page'],
-            'dashicons-editor-expand',
-            14
+        // Check if J Forge parent menu exists, create if needed
+        global $menu;
+        $j_forge_exists = false;
+
+        if (is_array($menu)) {
+            foreach ($menu as $menu_item) {
+                if (isset($menu_item[0]) && $menu_item[0] === 'J Forge') {
+                    $j_forge_exists = true;
+                    break;
+                }
+            }
+        }
+
+        // Create J Forge parent menu if it doesn't exist
+        if (!$j_forge_exists) {
+            add_menu_page(
+                'J Forge',                    // Page title
+                'J Forge',                    // Menu title
+                'manage_options',             // Capability
+                'j-forge',                    // Menu slug
+                '__return_null',              // No callback (parent only)
+                'dashicons-admin-tools',      // Icon
+                12                            // Position
+            );
+        }
+
+        // Add Fluid Font Forge as submenu under J Forge
+        add_submenu_page(
+            'j-forge',                       // Parent slug
+            'Fluid Button Forge',              // Page title
+            'Fluid Button',                    // Menu title
+            'manage_options',                // Capability
+            self::PLUGIN_SLUG,               // Menu slug
+            [$this, 'render_admin_page']     // Callback
         );
     }
+
 
     public function enqueue_assets()
     {
@@ -304,25 +334,27 @@ class ButtonDesignCalculator
         ob_start();
 ?>
         <div class="wrap" style="background: var(--clr-page-bg); padding: 20px; min-height: 100vh;">
-            <h1 class="text-2xl font-bold mb-4">Button Design Calculator (1.0)</h1>
+            <div class="header-section">
+                <h1 class="text-2xl font-bold mb-4">Fluid Button Forge (1.0)</h1><br>
 
-            <!-- About Section -->
-            <div class="about-panel-container">
-                <div>
-                    <button class="fcc-info-toggle expanded" data-toggle-target="about-content">
-                        <span style="color: #FAF9F6 !important;">🎨 About Button Design Calculator</span>
-                        <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
-                    </button>
-                </div>
-                <div class="collapsible-text expanded" id="about-content">
-                    <div style="color: var(--clr-txt); font-size: 14px; line-height: 1.6;">
-                        <p style="margin: 0 0 16px 0; color: var(--clr-txt);">
-                            Create professional button systems for your website! Design responsive Call-to-Action buttons, primary navigation buttons, secondary actions, and form submit buttons that scale perfectly across all devices. This tool generates CSS clamp() functions for consistent button hierarchies that maintain their proportions from mobile to desktop, ensuring your CTAs and interactive elements look perfect everywhere.
-                        </p>
-                        <div style="background: rgba(60, 32, 23, 0.1); padding: 12px 16px; border-radius: 6px; border-left: 4px solid var(--clr-accent); margin-top: 20px;">
-                            <p style="margin: 0; font-size: 13px; opacity: 0.95; line-height: 1.5; color: var(--clr-txt);">
-                                Button Design Calculator by Jim R. (<a href="https://jimrweb.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">JimRWeb</a>), part of the CSS Tools series developed with Claude AI (<a href="https://anthropic.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">Anthropic</a>).
+                <!-- About Section -->
+                <div class="about-panel-container">
+                    <div>
+                        <button class="fcc-info-toggle expanded" data-toggle-target="about-content">
+                            <span style="color: #FAF9F6 !important;">🎨 About Fluid Button Forge</span>
+                            <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
+                        </button>
+                    </div>
+                    <div class="collapsible-text expanded" id="about-content">
+                        <div style="color: var(--clr-txt); font-size: 14px; line-height: 1.6;">
+                            <p style="margin: 0 0 16px 0; color: var(--clr-txt);">
+                                Create professional button systems for your website! Design responsive Call-to-Action buttons, primary navigation buttons, secondary actions, and form submit buttons that scale perfectly across all devices. This tool generates CSS clamp() functions for consistent button hierarchies that maintain their proportions from mobile to desktop, ensuring your CTAs and interactive elements look perfect everywhere.
                             </p>
+                            <div style="background: rgba(60, 32, 23, 0.1); padding: 12px 16px; border-radius: 6px; border-left: 4px solid var(--clr-accent); margin-top: 20px;">
+                                <p style="margin: 0; font-size: 13px; opacity: 0.95; line-height: 1.5; color: var(--clr-txt);">
+                                    Fluid Button Forge by Jim R. (<a href="https://jimrweb.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">JimRWeb</a>), part of the CSS Tools series developed with Claude AI (<a href="https://anthropic.com" target="_blank" style="color: #CD5C5C; text-decoration: underline; font-weight: 600;">Anthropic</a>).
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -334,7 +366,7 @@ class ButtonDesignCalculator
                 <div class="full-width-styling">
                     <div class="major-panel-header">
                         <button class="fcc-info-toggle expanded" data-toggle-target="info-content">
-                            <span style="color: #FAF9F6 !important;">ℹ️ How to Use Button Design Calculator</span>
+                            <span style="color: #FAF9F6 !important;">ℹ️ How to Use Fluid Button Forge</span>
                             <span class="fcc-toggle-icon" style="color: #FAF9F6 !important;">▼</span>
                         </button>
                     </div>
@@ -1067,6 +1099,13 @@ class ButtonDesignCalculator
                 margin-bottom: var(--jimr-space-3);
             }
 
+            /* Header Section and Main Container */
+            .header-section,
+            .main-panel-container {
+                width: 1280px;
+                margin: 0 auto;
+            }
+
             .about-panel-container,
             .main-panel-container,
             .full-width-styling {
@@ -1075,12 +1114,6 @@ class ButtonDesignCalculator
                 border: 2px solid var(--clr-primary);
                 border-radius: var(--jimr-border-radius-lg);
                 box-shadow: var(--clr-shadow-xl);
-            }
-
-            /* Main Container */
-            .main-panel-container {
-                margin: var(--jimr-space-6) 0;
-                padding: var(--jimr-space-6)
             }
 
             .about-panel-container {
@@ -3279,7 +3312,7 @@ class ButtonDesignCalculator
 <div style="display: flex; gap: 12px; align-items: end;">
     <div class="card-color-section" style="flex: 1;">
         <span class="card-color-label">Background</span>
-        <input type="color" class="card-color-input background-input" data-size-id="${size.id}" value="#FFD700">
+        <input type="color" class="card-color-input background-input" data-size-id="${size.id}" value="${normalizeColorData(size.colors || buttonDesignAjax.data.colors).normal.background}">
     </div>
     <div class="card-color-section" style="flex: 1;">
         <span class="card-color-label">Text</span>

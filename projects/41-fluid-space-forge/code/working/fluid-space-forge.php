@@ -211,14 +211,40 @@ class fluidSpaceForge
      */
     public function add_admin_menu()
     {
-        add_menu_page(
-            'Fluid Space Forge',
-            'Fluid Space',
-            'manage_options',
-            self::PLUGIN_SLUG,
-            [$this, 'render_admin_page'],
-            'dashicons-editor-expand',
-            13
+        // Check if J Forge parent menu exists, create if needed
+        global $menu;
+        $j_forge_exists = false;
+
+        if (is_array($menu)) {
+            foreach ($menu as $menu_item) {
+                if (isset($menu_item[0]) && $menu_item[0] === 'J Forge') {
+                    $j_forge_exists = true;
+                    break;
+                }
+            }
+        }
+
+        // Create J Forge parent menu if it doesn't exist
+        if (!$j_forge_exists) {
+            add_menu_page(
+                'J Forge',                    // Page title
+                'J Forge',                    // Menu title
+                'manage_options',             // Capability
+                'j-forge',                    // Menu slug
+                '__return_null',              // No callback (parent only)
+                'dashicons-admin-tools',      // Icon
+                12                            // Position
+            );
+        }
+
+        // Add Fluid Font Forge as submenu under J Forge
+        add_submenu_page(
+            'j-forge',                       // Parent slug
+            'Fluid Space Forge',              // Page title
+            'Fluid Space',                    // Menu title
+            'manage_options',                // Capability
+            self::PLUGIN_SLUG,               // Menu slug
+            [$this, 'render_admin_page']     // Callback
         );
     }
 
