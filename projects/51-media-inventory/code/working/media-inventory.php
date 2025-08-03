@@ -68,7 +68,7 @@ add_action('admin_menu', 'media_inventory_add_admin_menu');
 /**
  * Add admin menu page
  */
-function add_admin_menu()
+function media_inventory_add_admin_menu()
 {
     // Check if J Forge parent menu exists, create if needed
     global $menu;
