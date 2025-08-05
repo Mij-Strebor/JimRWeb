@@ -86,6 +86,7 @@ Professional color management, analysis, and WCAG accessibility compliance tool.
 - **Smart Color Suggestions**: Intelligent recommendations while preserving brand identity
 - **Usage Tracking**: Site-wide color usage detection and analytics
 - **CSS Generation**: Four output modes (Variables, Classes, SCSS, Fallbacks)
+- **Elementor CSS Capture**: Provides Delementor's unique CSS Variables naming of your Custom Colors
 - **Educational Content**: Built-in WCAG guidelines and accessibility explanations
 
 #### ♿ Accessibility Compliance Features

@@ -60,7 +60,6 @@ function media_inventory_get_font_family($title, $filename)
 // Add admin menu
 add_action('admin_menu', 'media_inventory_add_admin_menu');
 
-
 // ========================================================================
 // ADMIN INTERFACE
 // ========================================================================
