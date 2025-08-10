@@ -1680,10 +1680,14 @@ function elementor_color_inventory_admin_page()
                                 // Calculate contrast ratio
                                 const ratio = calculateContrastRatio(bgColor, fgColor);
                                 console.log('Calculated ratio:', ratio);
-
                                 // Update preview
                                 $('#contrast-preview').css({
                                     'background-color': bgColor,
+                                    'color': fgColor
+                                });
+
+                                // Also apply foreground color to text elements inside preview
+                                $('#contrast-preview h3, #contrast-preview p').css({
                                     'color': fgColor
                                 });
 
@@ -1821,6 +1825,7 @@ function elementor_color_inventory_admin_page()
                                 const aaColor = $('#aa-color-hex').text();
                                 $('#fg-color-picker').val(aaColor);
                                 $('#fg-color-button').text(aaColor);
+                                $('#fg-color-dropdown').val(''); // Reset dropdown to "Choose from Global Colors..."
                                 updateContrastAnalysis();
                                 showCopyNotification('Applied AA compliant color: ' + aaColor);
                             }
@@ -1830,6 +1835,7 @@ function elementor_color_inventory_admin_page()
                                 const aaaColor = $('#aaa-color-hex').text();
                                 $('#fg-color-picker').val(aaaColor);
                                 $('#fg-color-button').text(aaaColor);
+                                $('#fg-color-dropdown').val(''); // Reset dropdown to "Choose from Global Colors..."
                                 updateContrastAnalysis();
                                 showCopyNotification('Applied AAA compliant color: ' + aaaColor);
                             }
