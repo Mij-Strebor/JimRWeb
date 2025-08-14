@@ -35,7 +35,7 @@ Create consistent, scalable spacing systems for margins, padding, and gaps. The 
 - Mathematical scaling ratios
 - Dual unit support (px/rem)
 
-### 🎨 [Fluid Button Forge][(./button-design-calculator/)](https://github.com/Mij-Strebor/JimRWeb/tree/main/projects/42-fluid-button-forge)
+### 🎨 [Fluid Button Forge](https://github.com/Mij-Strebor/JimRWeb/tree/main/projects/42-fluid-button-forge)
 Design professional button hierarchies that scale perfectly across all devices. Generate responsive button systems for CTAs, forms, and UI components.
 
 **Features:**
