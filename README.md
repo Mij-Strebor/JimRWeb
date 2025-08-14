@@ -16,7 +16,7 @@
 
 Transform your responsive design workflow with mathematically precise CSS scaling using modern `clamp()` functions.
 
-### 📐 [Fluid Font Forge]([[./40-flluid-font-forge/](https://github.com/Mij-Strebor/JimRWeb/blob/main/projects/40-flluid-font-forge/README.md)
+### 📐 [Fluid Font Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/projects/40-flluid-font-forge/)
 Generate responsive typography systems with mathematical precision. Create fluid font scaling that works beautifully from mobile to desktop using proven typographic ratios.
 
 **Features:**
