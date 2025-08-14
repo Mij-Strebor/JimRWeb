@@ -60,7 +60,7 @@ Professional one-click cache clearing for WordPress administrators. A comprehens
 - AJAX-powered with no page refreshes required
 - Comprehensive error handling and logging
 
-### 📊 [Media Inventory Forge][(./media-inventory-forge/)](https://github.com/Mij-Strebor/JimRWeb/tree/main/projects/51-color-forge)
+### 📊 [Media Inventory Forge](https://github.com/Mij-Strebor/JimRWeb/tree/main/projects/52-media-inventory/)
 Professional media library scanner and analyzer. Scan, analyze, and optimize your WordPress media library with detailed insights and storage breakdowns.
 
 **Features:**
