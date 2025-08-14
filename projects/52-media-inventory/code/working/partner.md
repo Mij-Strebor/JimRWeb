@@ -11,10 +11,10 @@
 6. **ASK PERMISSION**: For any change larger than a single function
 
 ### **Jim's Preferred Communication Style:**
-- ✅ **"Around line X in [function name]"** - gives precise context
-- ✅ **"Find: [exact code]"** - eliminates guesswork  
+- ✅ **"In [function name]"** - gives precise context
+- ✅ **"Find: [exact code]"** - eliminates guesswork **Importent** 
 - ✅ **"Change to: [complete code]"** - provides working solution
-- ✅ **Multiple small fixes** - easier to debug and test
+- ✅ **Multiple small fixes** - easier to debug and test **Important**
 - ✅ **Test instructions** - "Click X button to verify Y works"
 - ✅ **Brief technical why** - helps Jim understand the solution
 
@@ -26,20 +26,13 @@
 - ❌ Code snippets without clear insertion points
 
 ### **Proven Technical Collaboration Style:**
-- ✅ **PERFECT**: "Around line X in [function], find [exact code], change to [exact code]"
+- ✅ **PERFECT**: "Iin [function], find [exact code], change to [exact code]"
 - ✅ **EXCELLENT**: Small, targeted fixes with precise locations
 - ✅ **TESTED METHOD**: One change per message when possible
 - ✅ **PROVEN**: Complete code blocks for new functions (in artifacts when >20 lines)
 - ✅ **SUCCESSFUL**: "Fix 1/Fix 2/Fix 3" format for related changes
 - ✅ **REQUIRED**: Each step must be independently testable
 - ✅ **ESSENTIAL**: Maintain existing architecture and patterns
-
-### **Code Location Precision (Critical for Success):**
-- ✅ **"Around line 750 in the attachEventListeners() function"**
-- ✅ **"In the generateClassesPanel function, after the empty state check"**  
-- ✅ **"Before the handleClearAll function"**
-- ✅ **Give function names and contextual landmarks**
-- ✅ **Provide enough surrounding code to locate precisely**
 
 ### **PROVEN SUCCESSFUL Fix Message Format (Use This Exactly):**
 
@@ -102,7 +95,7 @@ For **multiple related changes** (use numbered fixes):
 ## 🧹 **Code Cleanup Protocol**
 
 ### **When Fixes Don't Work:**
-- ✅ **Remove unsuccessful attempts** - Don't let CSS/code accumulate from failed approaches
+- ✅ **Remove unsuccessful attempts** - Don't let CSS/code accumulate from failed approaches **Important**
 - ✅ **Clean slate is better** - If multiple fixes tried and none work, revert and start fresh
 - ✅ **Don't store bad code** - Jim should not save a code file until there's agreement that the problem is fixed
 - ✅ **Ctrl+Z is your friend** - Jim can easily revert to clean state before unsuccessful fixes by abandoning the working VS Code edit or Ctrl+Z to clean code -- but make sure Jim knows **exactly** how many Ctrl+Z's to apply.

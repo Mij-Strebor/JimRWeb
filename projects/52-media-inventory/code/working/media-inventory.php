@@ -1189,185 +1189,136 @@ function media_inventory_admin_page()
                         html += '</tbody></table>';
 
                     } else if (catName === 'Images') {
-                        // Group images by file type for summary
-                        const imageTypes = {};
+                        // Group images by WordPress size categories
+                        const wpSizeCategories = {};
+
                         category.items.forEach(item => {
-                            const fileType = item.extension.toUpperCase() || 'Unknown';
-                            if (!imageTypes[fileType]) {
-                                imageTypes[fileType] = {
-                                    items: [],
-                                    totalSize: 0,
-                                    totalFiles: 0
-                                };
-                            }
-                            imageTypes[fileType].items.push(item);
-                            imageTypes[fileType].totalSize += item.total_size;
-                            imageTypes[fileType].totalFiles += item.file_count;
-                        });
+                            item.files.forEach(file => {
+                                const filename = file.filename || '';
+                                let sizeCategory = 'Original Files';
+                                let sizeSuffix = 'original';
 
-                        // Summary table by image type
-                        html += '<table class="inventory-table">';
-                        html += '<thead><tr><th>Image Type</th><th>Count</th><th>Files</th><th>Total Size</th><th>Sample Images</th></tr></thead>';
-                        html += '<tbody>';
+                                // Extract size suffix from filename (e.g., "-150", "-300x200", "-768")
+                                const sizeMatch = filename.match(/-(\d+)(?:x\d+)?(?:\.[^.]+)?$/);
+                                if (sizeMatch) {
+                                    const width = parseInt(sizeMatch[1]);
+                                    sizeSuffix = '-' + width;
 
-                        Object.keys(imageTypes).sort().forEach(typeName => {
-                            const imageType = imageTypes[typeName];
-
-                            // Create sample thumbnails (max 3)
-                            const sampleImages = imageType.items.slice(0, 3).map(item => {
-                                if (item.thumbnail_url) {
-                                    return '<img src="' + escapeHtml(item.thumbnail_url) + '" ' +
-                                        'alt="' + escapeHtml(item.title) + '" ' +
-                                        'title="' + escapeHtml(item.title) + '" ' +
-                                        'class="sample-thumbnail" ' +
-                                        'onerror="this.style.display=\'none\';" />';
+                                    // Categorize by WordPress standard sizes
+                                    if (width <= 150) {
+                                        sizeCategory = 'Thumbnails (≤150px)';
+                                    } else if (width <= 300) {
+                                        sizeCategory = 'Small (151-300px)';
+                                    } else if (width <= 768) {
+                                        sizeCategory = 'Medium (301-768px)';
+                                    } else if (width <= 1024) {
+                                        sizeCategory = 'Large (769-1024px)';
+                                    } else if (width <= 1536) {
+                                        sizeCategory = 'Extra Large (1025-1536px)';
+                                    } else {
+                                        sizeCategory = 'Super Large (>1536px)';
+                                    }
                                 }
-                                return '';
-                            }).filter(img => img !== '').join('');
 
-                            const moreCount = imageType.items.length > 3 ? ' +' + (imageType.items.length - 3) + ' more' : '';
+                                if (!wpSizeCategories[sizeCategory]) {
+                                    wpSizeCategories[sizeCategory] = {
+                                        items: [],
+                                        totalSize: 0,
+                                        totalFiles: 0,
+                                        sizeSuffixes: new Set()
+                                    };
+                                }
 
-                            html += '<tr>';
-                            html += '<td><strong>' + typeName + '</strong></td>';
-                            html += '<td>' + imageType.items.length + '</td>';
-                            html += '<td>' + imageType.totalFiles + '</td>';
-                            html += '<td>' + formatBytes(imageType.totalSize) + '</td>';
-                            html += '<td class="sample-images">' + sampleImages + moreCount + '</td>';
-                            html += '</tr>';
+                                wpSizeCategories[sizeCategory].items.push({
+                                    ...item,
+                                    currentFile: file
+                                });
+                                wpSizeCategories[sizeCategory].totalSize += file.size;
+                                wpSizeCategories[sizeCategory].totalFiles++;
+                                wpSizeCategories[sizeCategory].sizeSuffixes.add(sizeSuffix);
+                            });
                         });
 
-                        html += '</tbody></table>';
+                        // WordPress Image Sizes Summary title
+                        html += '<h2 style="color: var(--clr-primary); margin: 20px 0 12px 0; text-align: center;">WordPress Image Sizes Summary</h2>';
 
-                        // Group images by dimensions for size summary
-                        const imageSizes = {};
-                        category.items.forEach(item => {
-                            const dimensions = item.dimensions || 'Unknown size';
-                            if (!imageSizes[dimensions]) {
-                                imageSizes[dimensions] = {
-                                    items: [],
-                                    totalSize: 0,
-                                    totalFiles: 0
-                                };
-                            }
-                            imageSizes[dimensions].items.push(item);
-                            imageSizes[dimensions].totalSize += item.total_size;
-                            imageSizes[dimensions].totalFiles += item.file_count;
-                        });
-
-                        // Image Dimensions Summary title
-                        html += '<h2 style="color: var(--clr-primary); margin: 20px 0 12px 0; text-align: center;">Image Dimensions Summary</h2>';
-
-                        // Summary by image dimensions (three separate white columns)
+                        // Summary by WordPress size categories (three separate white columns)
                         html += '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">';
 
-                        const sortedDimensions = Object.keys(imageSizes).sort((a, b) => {
-                            // Sort by dimensions - put "Unknown size" last, otherwise sort by pixel count
-                            if (a === 'Unknown size') return 1;
-                            if (b === 'Unknown size') return -1;
+                        const wpCategoryOrder = [
+                            'Original Files',
+                            'Thumbnails (≤150px)',
+                            'Small (151-300px)',
+                            'Medium (301-768px)',
+                            'Large (769-1024px)',
+                            'Extra Large (1025-1536px)',
+                            'Super Large (>1536px)'
+                        ];
 
-                            // Extract pixel dimensions for sorting (larger dimensions first)
-                            const getPixels = (dim) => {
-                                const match = dim.match(/(\d+)\s*×\s*(\d+)/);
-                                return match ? parseInt(match[1]) * parseInt(match[2]) : 0;
-                            };
+                        const sortedWpCategories = wpCategoryOrder.filter(cat => wpSizeCategories[cat]);
 
-                            return getPixels(b) - getPixels(a);
+                        // Split into three columns more evenly
+                        const leftColumn = [];
+                        const middleColumn = [];
+                        const rightColumn = [];
+
+                        sortedWpCategories.forEach((cat, index) => {
+                            if (index % 3 === 0) {
+                                leftColumn.push(cat);
+                            } else if (index % 3 === 1) {
+                                middleColumn.push(cat);
+                            } else {
+                                rightColumn.push(cat);
+                            }
                         });
-
-                        // Split into three columns
-                        const thirdPoint = Math.ceil(sortedDimensions.length / 3);
-                        const leftColumn = sortedDimensions.slice(0, thirdPoint);
-                        const middleColumn = sortedDimensions.slice(thirdPoint, thirdPoint * 2);
-                        const rightColumn = sortedDimensions.slice(thirdPoint * 2);
-
                         // Left column
                         html += '<div style="background: white; border-radius: var(--jimr-border-radius); padding: 12px; box-shadow: var(--clr-shadow); border: 1px solid var(--jimr-gray-200);">';
-                        leftColumn.forEach(dimensionName => {
-                            const imageSize = imageSizes[dimensionName];
+                        leftColumn.forEach(categoryName => {
+                            const wpCategory = wpSizeCategories[categoryName];
+                            const leftSizeSuffixList = Array.from(wpCategory.sizeSuffixes).join(', ');
 
-                            // Create sample thumbnails (max 2 for space)
-                            const sampleImages = imageSize.items.slice(0, 2).map(item => {
-                                if (item.thumbnail_url) {
-                                    return '<img src="' + escapeHtml(item.thumbnail_url) + '" ' +
-                                        'alt="' + escapeHtml(item.title) + '" ' +
-                                        'title="' + escapeHtml(item.title) + '" ' +
-                                        'class="sample-thumbnail" style="width: 24px; height: 24px;" ' +
-                                        'onerror="this.style.display=\'none\';" />';
-                                }
-                                return '';
-                            }).filter(img => img !== '').join('');
-
-                            const moreCount = imageSize.items.length > 2 ? ' +' + (imageSize.items.length - 2) : '';
-
-                            html += '<div style="padding: 8px 0; border-bottom: 1px solid var(--jimr-gray-200); display: flex; justify-content: space-between; align-items: center;">';
-                            html += '<div><strong style="color: var(--clr-secondary);">' + escapeHtml(dimensionName) + '</strong><br>';
-                            html += '<small style="color: var(--clr-txt);">' + imageSize.items.length + ' images, ' + formatBytes(imageSize.totalSize) + '</small></div>';
-                            html += '<div class="sample-images" style="display: flex; gap: 2px; align-items: center;">' + sampleImages + moreCount + '</div>';
+                            html += '<div style="padding: 8px 0; border-bottom: 1px solid var(--jimr-gray-200);">';
+                            html += '<div><strong style="color: var(--clr-secondary);">' + escapeHtml(categoryName) + '</strong><br>';
+                            html += '<small style="color: var(--clr-txt);">Suffixes: ' + leftSizeSuffixList + '</small><br>';
+                            html += '<small style="color: var(--clr-txt);">' + wpCategory.totalFiles + ' files, ' + formatBytes(wpCategory.totalSize) + '</small></div>';
                             html += '</div>';
                         });
                         html += '</div>';
 
                         // Middle column
                         html += '<div style="background: white; border-radius: var(--jimr-border-radius); padding: 12px; box-shadow: var(--clr-shadow); border: 1px solid var(--jimr-gray-200);">';
-                        middleColumn.forEach(dimensionName => {
-                            const imageSize = imageSizes[dimensionName];
+                        middleColumn.forEach(categoryName => {
+                            const wpCategory = wpSizeCategories[categoryName];
+                            const middleSizeSuffixList = Array.from(wpCategory.sizeSuffixes).join(', ');
 
-                            // Create sample thumbnails (max 2 for space)
-                            const sampleImages = imageSize.items.slice(0, 2).map(item => {
-                                if (item.thumbnail_url) {
-                                    return '<img src="' + escapeHtml(item.thumbnail_url) + '" ' +
-                                        'alt="' + escapeHtml(item.title) + '" ' +
-                                        'title="' + escapeHtml(item.title) + '" ' +
-                                        'class="sample-thumbnail" style="width: 24px; height: 24px;" ' +
-                                        'onerror="this.style.display=\'none\';" />';
-                                }
-                                return '';
-                            }).filter(img => img !== '').join('');
-
-                            const moreCount = imageSize.items.length > 2 ? ' +' + (imageSize.items.length - 2) : '';
-
-                            html += '<div style="padding: 8px 0; border-bottom: 1px solid var(--jimr-gray-200); display: flex; justify-content: space-between; align-items: center;">';
-                            html += '<div><strong style="color: var(--clr-secondary);">' + escapeHtml(dimensionName) + '</strong><br>';
-                            html += '<small style="color: var(--clr-txt);">' + imageSize.items.length + ' images, ' + formatBytes(imageSize.totalSize) + '</small></div>';
-                            html += '<div class="sample-images" style="display: flex; gap: 2px; align-items: center;">' + sampleImages + moreCount + '</div>';
+                            html += '<div style="padding: 8px 0; border-bottom: 1px solid var(--jimr-gray-200);">';
+                            html += '<div><strong style="color: var(--clr-secondary);">' + escapeHtml(categoryName) + '</strong><br>';
+                            html += '<small style="color: var(--clr-txt);">Suffixes: ' + middleSizeSuffixList + '</small><br>';
+                            html += '<small style="color: var(--clr-txt);">' + wpCategory.totalFiles + ' files, ' + formatBytes(wpCategory.totalSize) + '</small></div>';
                             html += '</div>';
                         });
                         html += '</div>';
 
                         // Right column
                         html += '<div style="background: white; border-radius: var(--jimr-border-radius); padding: 12px; box-shadow: var(--clr-shadow); border: 1px solid var(--jimr-gray-200);">';
-                        rightColumn.forEach(dimensionName => {
-                            const imageSize = imageSizes[dimensionName];
+                        rightColumn.forEach(categoryName => {
+                            const wpCategory = wpSizeCategories[categoryName];
+                            const rightSizeSuffixList = Array.from(wpCategory.sizeSuffixes).join(', ');
 
-                            // Create sample thumbnails (max 2 for space)
-                            const sampleImages = imageSize.items.slice(0, 2).map(item => {
-                                if (item.thumbnail_url) {
-                                    return '<img src="' + escapeHtml(item.thumbnail_url) + '" ' +
-                                        'alt="' + escapeHtml(item.title) + '" ' +
-                                        'title="' + escapeHtml(item.title) + '" ' +
-                                        'class="sample-thumbnail" style="width: 24px; height: 24px;" ' +
-                                        'onerror="this.style.display=\'none\';" />';
-                                }
-                                return '';
-                            }).filter(img => img !== '').join('');
-
-                            const moreCount = imageSize.items.length > 2 ? ' +' + (imageSize.items.length - 2) : '';
-
-                            html += '<div style="padding: 8px 0; border-bottom: 1px solid var(--jimr-gray-200); display: flex; justify-content: space-between; align-items: center;">';
-                            html += '<div><strong style="color: var(--clr-secondary);">' + escapeHtml(dimensionName) + '</strong><br>';
-                            html += '<small style="color: var(--clr-txt);">' + imageSize.items.length + ' images, ' + formatBytes(imageSize.totalSize) + '</small></div>';
-                            html += '<div class="sample-images" style="display: flex; gap: 2px; align-items: center;">' + sampleImages + moreCount + '</div>';
+                            html += '<div style="padding: 8px 0; border-bottom: 1px solid var(--jimr-gray-200);">';
+                            html += '<div><strong style="color: var(--clr-secondary);">' + escapeHtml(categoryName) + '</strong><br>';
+                            html += '<small style="color: var(--clr-txt);">Suffixes: ' + rightSizeSuffixList + '</small><br>';
+                            html += '<small style="color: var(--clr-txt);">' + wpCategory.totalFiles + ' files, ' + formatBytes(wpCategory.totalSize) + '</small></div>';
                             html += '</div>';
                         });
                         html += '</div>';
-
                         html += '</div>';
 
                         // Image cards title
                         html += '<h2 style="color: var(--clr-primary); margin: 20px 0 12px 0; text-align: center;">Image Cards</h2>';
 
-                        // Individual image cards (detailed view)
-                        html += '<div class="images-list">';
+                        // Individual image cards (detailed view) - Two column layout
+                        html += '<div class="images-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">';
 
                         category.items.forEach(item => {
                             html += '<div class="image-item">';
