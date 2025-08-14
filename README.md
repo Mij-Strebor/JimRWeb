@@ -26,7 +26,7 @@ Generate responsive typography systems with mathematical precision. Create fluid
 - Mathematical scaling with custom line heights
 - Drag-and-drop reordering with autosave
 
-### 📏 [Fluid Space Forge](./space-clamp-calculator/)
+### 📏 [Fluid Space Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/projects/41-flluid-space-forge/)
 Create consistent, scalable spacing systems for margins, padding, and gaps. The perfect companion to Fluid Font Forge and Fluid Button Forge for complete design system harmony.
 
 **Features:** 
