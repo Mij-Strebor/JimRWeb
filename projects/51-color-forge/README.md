@@ -90,6 +90,7 @@ $color-secondary: #5C3324; // Secondary Brand
 
 ### **⚡ Developer-Friendly Interface**
 - **One-Click CSS Export**: Generate ready-to-use CSS in multiple formats
+- **Elementor Custom Color CSS Variables:** Capture Elementors color variable naming
 - **Copy to Clipboard**: Individual color values and complete CSS blocks
 - **CSV Data Export**: Comprehensive reports for documentation and client deliverables
 - **Responsive Design**: Works perfectly on desktop and mobile devices
