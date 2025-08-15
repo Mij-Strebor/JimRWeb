@@ -34,7 +34,8 @@ Managing color consistency and accessibility compliance across large Elementor w
 ### **🎨 Complete Color Analysis**
 - **System & Custom Colors**: Automatic detection of all Elementor Global Colors
 - **Multi-Format Conversion**: HEX, RGB, HSL with precise mathematical calculations
-- **Visual Color Swatches**: Interactive preview with contrast-optimized text overlays
+- **Visual Color Swatches**: Interactive preview with contrast-optimized text overlays- 
+- **Elementor Custom Color CSS Variables:** Capture Elementors color variable naming
 
 ### **♿ WCAG Contrast Analysis & Accessibility Compliance**
 - **Real-Time Contrast Checker**: Live WCAG AA/AAA compliance analysis
@@ -90,7 +91,7 @@ $color-secondary: #5C3324; // Secondary Brand
 
 ### **⚡ Developer-Friendly Interface**
 - **One-Click CSS Export**: Generate ready-to-use CSS in multiple formats
-- **Elementor Custom Color CSS Variables:** Capture Elementors color variable naming
+
 - **Copy to Clipboard**: Individual color values and complete CSS blocks
 - **CSV Data Export**: Comprehensive reports for documentation and client deliverables
 - **Responsive Design**: Works perfectly on desktop and mobile devices
