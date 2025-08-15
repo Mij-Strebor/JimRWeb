@@ -12,6 +12,8 @@
 > ![alt text](screencapture-staging51-jimrweb-wp-admin-admin-php-2025-06-22-19_51_07.png)
 > Fluid Font Forge is a WordPress Admin snippet that will work with you generating the font clamping functions for your typography.
 
+![alt text](font.png)
+
 ## ✨ Why Fluid Font Forge?
 
 As a WordPress developer, you know the pain of managing typography across devices. Fluid Font Forge eliminates guesswork and delivers pixel-perfect responsive typography that scales beautifully from mobile to desktop.

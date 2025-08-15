@@ -12,6 +12,8 @@
 
 > **Comprehensive Elementor Global Color Analysis, Management & WCAG Accessibility Compliance**
 > Complete inventory system for Elementor Global Colors with detailed analysis, usage tracking, professional CSS generation, and integrated WCAG contrast analysis for accessibility compliance.
+> 
+![Color Inventory](./resources/reference-materials/colors.png)
 
 ## ✨ Why Elementor Color Inventory Forge?
 

@@ -1101,7 +1101,8 @@ class ButtonDesignCalculator
 
             /* Header Section and Main Container */
             .header-section,
-            .main-panel-container {
+            .main-panel-container,
+            .full-width-styling {
                 width: 1280px;
                 margin: 0 auto;
             }
@@ -2224,8 +2225,8 @@ class ButtonDesignCalculator
                 // Get state colors, fallback to normal if state doesn't exist
                 const stateColors = button.colors[state] || button.colors.normal;
 
-                // Normalize the colors first
-                const normalizedColors = normalizeColorData({
+                // Normalize the colors first for inputs (resolves CSS variables)
+                const normalizedColors = normalizeColorDataForInputs({
                     [state]: stateColors
                 });
                 const normalizedStateColors = normalizedColors[state];
@@ -2600,9 +2601,66 @@ class ButtonDesignCalculator
             }
 
             // ========================================================================
-            // HELPER FUNCTIONS
+            // COLOR RESOLUTION FUNCTIONS
             // ========================================================================
 
+            function resolveCSSVariableToHex(cssValue) {
+                // Map of CSS variables to their hex values
+                const cssVariableMap = {
+                    'var(--clr-accent)': '#FFD700',
+                    'var(--clr-btn-txt)': '#9C0202',
+                    'var(--clr-btn-bdr)': '#DE0B0B',
+                    'var(--clr-btn-hover)': '#E5B929',
+                    'var(--clr-secondary)': '#5C3324',
+                    'var(--jimr-gray-300)': '#cbd5e1',
+                    'var(--jimr-gray-600)': '#475569',
+                    'var(--jimr-gray-500)': '#64748b'
+                };
+
+                // Return mapped value if it's a CSS variable, otherwise return the original value
+                return cssVariableMap[cssValue] || cssValue;
+            }
+
+            function normalizeColorDataForInputs(colors) {
+                if (!colors) return {};
+
+                const normalized = {};
+
+                Object.keys(colors).forEach(state => {
+                    const stateColors = colors[state];
+                    let backgroundColor;
+
+                    // Handle newer background object structure (priority)
+                    if (stateColors.background && typeof stateColors.background === 'object') {
+                        backgroundColor = stateColors.background.solid || stateColors.background.gradient?.stops?.[0]?.color || '#FFD700';
+                    }
+                    // Handle old background1/background2 structure
+                    else if (stateColors.background1) {
+                        backgroundColor = stateColors.background1;
+                    }
+                    // Handle simple background string
+                    else if (stateColors.background) {
+                        backgroundColor = stateColors.background;
+                    }
+                    // Fallback
+                    else {
+                        backgroundColor = '#FFD700';
+                    }
+
+                    normalized[state] = {
+                        background: resolveCSSVariableToHex(backgroundColor),
+                        text: resolveCSSVariableToHex(stateColors.text || '#9C0202'),
+                        border: resolveCSSVariableToHex(stateColors.border || '#DE0B0B'),
+                        useBorder: stateColors.useBorder !== false
+                    };
+                });
+
+                return normalized;
+            }
+
+            // ========================================================================
+            // HELPER FUNCTIONS
+            // ========================================================================
             function restoreDefaults() {
                 buttonDesignAjax.data.classSizes = [{
                         id: 1,
@@ -3038,16 +3096,16 @@ class ButtonDesignCalculator
                                 })
                                 .join('; ');
 
-                            return `
+return `
                                 <button class="preview-button" style="${styleString}">
                                     ${state}
                                 </button>
                             `;
             }).join('')
             } <
-            /div> < /
-            div >
-                `;
+            /div> <
+            /div>
+            `;
         }).join('')}
     </div>
 `;
@@ -3312,15 +3370,15 @@ class ButtonDesignCalculator
 <div style="display: flex; gap: 12px; align-items: end;">
     <div class="card-color-section" style="flex: 1;">
         <span class="card-color-label">Background</span>
-        <input type="color" class="card-color-input background-input" data-size-id="${size.id}" value="${normalizeColorData(size.colors || buttonDesignAjax.data.colors).normal.background}">
+        <input type="color" class="card-color-input background-input" data-size-id="${size.id}" value="${normalizeColorDataForInputs(size.colors || buttonDesignAjax.data.colors).normal.background}">
     </div>
     <div class="card-color-section" style="flex: 1;">
         <span class="card-color-label">Text</span>
-        <input type="color" class="card-color-input text-input" data-size-id="${size.id}" value="${size.colors?.normal?.text || '#9C0202'}">
+        <input type="color" class="card-color-input text-input" data-size-id="${size.id}" value="${normalizeColorDataForInputs(size.colors || buttonDesignAjax.data.colors).normal.text}">
     </div>
     <div class="card-color-section" style="flex: 1;">
         <span class="card-color-label">Border</span>
-        <input type="color" class="card-color-input border-input" data-size-id="${size.id}" value="${size.colors?.normal?.border || '#DE0B0B'}" ${size.colors?.normal?.useBorder === false ? 'disabled' : ''}>
+       <input type="color" class="card-color-input border-input" data-size-id="${size.id}" value="${normalizeColorDataForInputs(size.colors || buttonDesignAjax.data.colors).normal.border}" ${normalizeColorDataForInputs(size.colors || buttonDesignAjax.data.colors).normal.useBorder === false ? 'disabled' : ''}>
     </div>
 </div>
                                             </div>

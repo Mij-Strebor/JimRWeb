@@ -11,6 +11,8 @@
 > **Comprehensive Media Library Analysis Tool**
 > Scan, analyze, and optimize your WordPress media library with detailed insights, storage breakdowns, and professional reporting capabilities.
 
+![Media Inventory](./resources/reference-materials/media.png) 
+
 ## ✨ Why Media Inventory Forge?
 
 Every WordPress site accumulates media files over time, but understanding what you have, where storage is being consumed, and which files need optimization becomes nearly impossible without proper tools. Media Inventory Forge provides comprehensive analysis of your entire media library with beautiful visualizations and actionable insights.

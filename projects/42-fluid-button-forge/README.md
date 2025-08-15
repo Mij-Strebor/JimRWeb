@@ -5,6 +5,8 @@
 
 Create stunning, responsive button hierarchies that scale perfectly across all devices! The Fluid Button Forge generates professional CSS using modern `clamp()` functions, ensuring your buttons maintain perfect proportions from mobile to desktop.
 
+![Fluid Buttons](buttons.png)
+
 ## ✨ Why Use Fluid Button Forge?
 
 **No more guesswork.** Design once, work everywhere. Create consistent button systems that automatically adapt to any screen size while maintaining your brand's visual hierarchy.

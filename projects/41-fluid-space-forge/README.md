@@ -10,7 +10,9 @@ A WordPress plugin that generates responsive spacing systems using CSS `clamp()`
 ![PHP](https://img.shields.io/badge/php-7.4+-purple.svg)
 ![License](https://img.shields.io/badge/license-GPL--2.0+-red.svg)
 
-## 🚀 Features
+![alt text](space.png)
+
+## 🚀 Why Fluid Space Forge?
 
 - **Responsive Spacing**: Generate CSS `clamp()` functions for fluid spacing across all device sizes
 - **Three Output Formats**: 
