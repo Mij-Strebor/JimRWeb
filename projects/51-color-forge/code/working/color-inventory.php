@@ -82,16 +82,26 @@ function elementor_color_find_usage($color_id)
     $usage_count = 0;
     $used_on = [];
 
-    // Search for global color references in post meta
-    $search_pattern = "globals/colors?id={$color_id}";
+    // Search for global color references in post meta - enhanced patterns
+    $search_patterns = [
+        "globals/colors?id={$color_id}",
+        "globals/colors/{$color_id}",
+        $color_id
+    ];
 
-    $results = $wpdb->get_results($wpdb->prepare("
-        SELECT p.ID, p.post_title, p.post_type, pm.meta_key 
-        FROM {$wpdb->postmeta} pm 
-        JOIN {$wpdb->posts} p ON pm.post_id = p.ID 
-        WHERE pm.meta_value LIKE %s 
-        AND p.post_status = 'publish'
-    ", '%' . $search_pattern . '%'));
+    $results = [];
+    foreach ($search_patterns as $search_pattern) {
+        $pattern_results = $wpdb->get_results($wpdb->prepare("
+            SELECT p.ID, p.post_title, p.post_type, pm.meta_key 
+            FROM {$wpdb->postmeta} pm 
+            JOIN {$wpdb->posts} p ON pm.post_id = p.ID 
+            WHERE pm.meta_value LIKE %s 
+            AND p.post_status IN ('publish', 'private')
+            AND pm.meta_key IN ('_elementor_data', '_elementor_page_settings')
+        ", '%' . $search_pattern . '%'));
+
+        $results = array_merge($results, $pattern_results);
+    }
 
     foreach ($results as $result) {
         $usage_count++;
