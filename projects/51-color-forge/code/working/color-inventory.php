@@ -920,6 +920,32 @@ function elementor_color_inventory_admin_page()
                             filter: brightness(1.1);
                         }
 
+                        /* Grid layout that accommodates the 60/30/10 wheel */
+                        .color-grid-with-wheel {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr);
+                            gap: 20px;
+                            margin-top: 20px;
+                        }
+
+                        .design-wheel-container {
+                            background: white;
+                            border-radius: var(--jimr-border-radius-lg);
+                            border: 2px solid var(--clr-secondary);
+                            box-shadow: var(--clr-shadow);
+                            padding: 20px;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            transition: var(--jimr-transition);
+                        }
+
+                        .design-wheel-container:hover {
+                            transform: translateY(-3px);
+                            box-shadow: var(--clr-shadow-lg);
+                        }
+
                         .color-info {
                             padding: 16px;
                         }
@@ -1460,11 +1486,23 @@ function elementor_color_inventory_admin_page()
                                 if (systemColors.length > 0) {
                                     html += '<div style="margin-bottom: 32px;">';
                                     html += '<div style="background: var(--clr-secondary); color: #FAF9F6; padding: 16px 20px; margin: 0 0 20px 0; font-size: var(--jimr-font-lg); font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); border-radius: var(--jimr-border-radius-lg) var(--jimr-border-radius-lg) 0 0;">System Colors (' + systemColors.length + ')</div>';
-                                    html += '<div class="color-grid">';
-                                    systemColors.forEach(color => {
-                                        html += generateColorCard(color);
-                                    });
-                                    html += '</div></div>';
+                                    // Check if we should add the 60/30/10 wheel
+                                    const shouldAddWheel = shouldShow603010Wheel(systemColors);
+
+                                    if (shouldAddWheel.show) {
+                                        html += '<div class="color-grid-with-wheel">';
+                                        systemColors.forEach(color => {
+                                            html += generateColorCard(color);
+                                        });
+                                        html += generate603010Wheel(shouldAddWheel.colors);
+                                        html += '</div></div>';
+                                    } else {
+                                        html += '<div class="color-grid">';
+                                        systemColors.forEach(color => {
+                                            html += generateColorCard(color);
+                                        });
+                                        html += '</div></div>';
+                                    }
                                 }
 
                                 // Custom Colors Section
@@ -1608,6 +1646,99 @@ function elementor_color_inventory_admin_page()
                                 div.textContent = text;
                                 return div.innerHTML;
                             }
+
+                            // Check if we should show the 60/30/10 wheel
+                            function shouldShow603010Wheel(systemColors) {
+                                if (systemColors.length !== 4) return {
+                                    show: false
+                                };
+
+                                // Look for Primary, Secondary, Accent colors by ID
+                                const primary = systemColors.find(color =>
+                                    color.id.toLowerCase().includes('primary') || color.title.toLowerCase().includes('primary')
+                                );
+                                const secondary = systemColors.find(color =>
+                                    color.id.toLowerCase().includes('secondary') || color.title.toLowerCase().includes('secondary')
+                                );
+                                const accent = systemColors.find(color =>
+                                    color.id.toLowerCase().includes('accent') || color.title.toLowerCase().includes('accent')
+                                );
+
+                                if (primary && secondary && accent) {
+                                    return {
+                                        show: true,
+                                        colors: {
+                                            primary,
+                                            secondary,
+                                            accent
+                                        }
+                                    };
+                                }
+
+                                return {
+                                    show: false
+                                };
+                            }
+
+                            // Generate the 60/30/10 design wheel with proper pie chart
+                            function generate603010Wheel(colors) {
+                                const {
+                                    primary,
+                                    secondary,
+                                    accent
+                                } = colors;
+
+                                // Helper function to get coordinates for pie slices
+                                function getCoordinates(centerX, centerY, radius, angleInDegrees) {
+                                    const angleInRadians = (angleInDegrees - 90) * (Math.PI / 180);
+                                    return {
+                                        x: centerX + (radius * Math.cos(angleInRadians)),
+                                        y: centerY + (radius * Math.sin(angleInRadians))
+                                    };
+                                }
+
+                                const centerX = 90,
+                                    centerY = 90,
+                                    radius = 65;
+
+                                // Calculate slice endpoints
+                                const slice1End = getCoordinates(centerX, centerY, radius, 216); // 60%
+                                const slice2End = getCoordinates(centerX, centerY, radius, 324); // 30% 
+                                const slice3End = getCoordinates(centerX, centerY, radius, 360); // 10%
+
+                                return `
+        <div class="design-wheel-container">
+            <h3 style="color: var(--clr-primary); margin: 0 0 16px 0; font-size: var(--jimr-font-lg); text-align: center;">60/30/10 Design Rule</h3>
+            
+            <svg width="180" height="180" viewBox="0 0 180 180" style="margin-bottom: 12px;">
+                <!-- Primary slice (60%) -->
+                <path d="M ${centerX} ${centerY} L ${centerX} ${centerY - radius} A ${radius} ${radius} 0 1 1 ${slice1End.x} ${slice1End.y} Z" 
+                      fill="${primary.hex}" 
+                      stroke="white" 
+                      stroke-width="2"/>
+                
+                <!-- Secondary slice (30%) -->
+                <path d="M ${centerX} ${centerY} L ${slice1End.x} ${slice1End.y} A ${radius} ${radius} 0 0 1 ${slice2End.x} ${slice2End.y} Z" 
+                      fill="${secondary.hex}" 
+                      stroke="white" 
+                      stroke-width="2"/>
+                
+                <!-- Accent slice (10%) -->
+                <path d="M ${centerX} ${centerY} L ${slice2End.x} ${slice2End.y} A ${radius} ${radius} 0 0 1 ${centerX} ${centerY - radius} Z" 
+                      fill="${accent.hex}" 
+                      stroke="white" 
+                      stroke-width="2"/>      
+            </svg>
+            
+            <div style="text-align: center; font-size: var(--jimr-font-xs); color: var(--clr-txt); line-height: 1.4;">
+                <div style="margin-bottom: 4px;"><strong style="color: var(--clr-primary);">60%</strong> Primary (dominant)</div>
+                <div style="margin-bottom: 4px;"><strong style="color: var(--clr-primary);">30%</strong> Secondary (supporting)</div>
+                <div><strong style="color: var(--clr-primary);">10%</strong> Accent (highlight)</div>
+            </div>
+        </div>
+    `;
+                            }
+
                             // ========================================================================
                             // CONTRAST ANALYSIS FUNCTIONS
                             // ========================================================================

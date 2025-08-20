@@ -23,9 +23,10 @@ Managing color consistency and accessibility compliance across large Elementor w
 - **Elementor Theme Developers** building accessible custom themes with Global Color integration
 - **Agency Developers** managing multiple client sites with brand consistency and accessibility requirements  
 - **WordPress Developers** needing CSS variable extraction and WCAG compliance from Elementor
-- **Design System Managers** maintaining color palette documentation and accessibility standards
+- **Design System Managers** maintaining color palette documentation, accessibility standards, and design theory compliance
 - **Government/Enterprise Sites** requiring WCAG AA/AAA compliance
-- **Anyone** who wants to audit, optimize, and ensure accessibility of their Elementor color usage
+- **Branding Professionals** validating color palette proportions against 60/30/10 design theory
+- **Anyone** who wants to audit, optimize, and ensure accessibility of their Elementor color usageye
 
 ---
 
@@ -34,7 +35,8 @@ Managing color consistency and accessibility compliance across large Elementor w
 ### **🎨 Complete Color Analysis**
 - **System & Custom Colors**: Automatic detection of all Elementor Global Colors
 - **Multi-Format Conversion**: HEX, RGB, HSL with precise mathematical calculations
-- **Visual Color Swatches**: Interactive preview with contrast-optimized text overlays- 
+- **Visual Color Swatches**: Interactive preview with contrast-optimized text overlays
+- **60/30/10 Design Theory Wheel**: Interactive pie chart visualization showing proper design proportions using your actual Primary, Secondary, and Accent colors
 - **Elementor Custom Color CSS Variables:** Capture Elementors color variable naming
 
 ### **♿ WCAG Contrast Analysis & Accessibility Compliance**
@@ -186,6 +188,23 @@ The tool provides comprehensive color information:
 | CSS Variables | --e-global-color-primary | Elementor integration |
 | Usage Count | Used 15 times | Optimization decisions |
 | **WCAG Contrast** | **21:1 ratio** | **Accessibility compliance** |
+
+
+### 60/30/10 Design Theory Visualization
+Color Forge will show your Elementor Global System Colors, Primary, Secondary, and Accent (the four Elementor System Colors), the tool displays an interactive design theory wheel:
+
+**Visual Features:**
+- **60% Primary**: Dominant color section (largest pie slice)
+- **30% Secondary**: Supporting color section (medium pie slice)  
+- **10% Accent**: Highlight color section (smallest pie slice)
+- **Color Legend**: Clear percentage breakdowns with color names
+
+**Design Benefits:**
+✅ Visual validation of proper color proportions
+✅ Brand consistency checking against design theory
+✅ Client presentation tool for color palette rationale
+✅ Educational reference for design best practices
+✅ Professional documentation for design systems
 
 ### CSS Output Modes
 
@@ -344,15 +363,6 @@ Audit Process:
 5. Export CSV with WCAG compliance data
 ```
 
-### Design System Documentation
-Generate comprehensive color documentation with accessibility data:
-```csv
-Color ID, Color Name, HEX, CSS Variable, Usage Count, WCAG AA Compliant, WCAG AAA Compliant
-primary, Primary Brand, #3C2017, --e-global-color-primary, 45, Yes, Yes
-secondary, Secondary Brand, #5C3324, --e-global-color-secondary, 23, Yes, Yes
-accent, Accent Color, #FFD700, --e-global-color-accent, 12, Yes, No
-```
-
 ### Government & Enterprise Compliance
 Meet strict accessibility requirements:
 - Generate WCAG compliance reports
@@ -407,7 +417,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **WCAG Contrast Analysis**: Complete accessibility compliance checker with real-time testing
 - **Smart Color Suggestions**: Intelligent recommendations while preserving brand identity
 - **Educational Content**: Built-in WCAG guidelines and accessibility explanations
-
+- **60/30/10 Design Theory Wheel**: Interactive pie chart showing proper design proportions using your actual brand colors- 
 ### Planned Features
 - **Color Harmony Analysis**: Suggest complementary colors based on color theory
 - **Brand Compliance Checking**: Validate colors against brand guidelines
