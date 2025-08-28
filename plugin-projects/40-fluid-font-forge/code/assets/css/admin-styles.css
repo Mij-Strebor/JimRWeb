@@ -43,6 +43,7 @@
     --clr-primary: #3C2017;
     --clr-secondary: #5C3324;
     --clr-txt: #86400E;
+    --clr-txt-light: #faf9f6;
     --clr-accent: #FFD700;
 
     --clr-page-bg: #E8D8C3;
@@ -53,7 +54,6 @@
     --clr-btn-bdr: #DE0B0B;
 
     --clr-white: #fff;
-    --clr-light: #F5F1EC;
     --clr-shadow: rgba(60, 32, 23, 0.15);
     --clr-overlay: rgba(232, 216, 195, 0.95);
     --clr-secondary-hover: #dcc7a8;
@@ -468,7 +468,7 @@ label {
 
 .fcc-scale-indicator {
     background: var(--clr-secondary);
-    color: #FAF9F6;
+    color: var(--clr-txt-light);
     border: 1px solid var(--clr-primary);
     padding: var(--jimr-space-1) var(--jimr-space-3);
     border-radius: var(--jimr-border-radius);
@@ -653,7 +653,7 @@ label {
 .fcc-info-toggle {
     width: 100%;
     background: var(--clr-secondary);
-    color: #FAF9F6 !important;
+    color: var(--clr-txt-light) !important;
     border: none;
     padding: var(--jimr-space-4) var(--jimr-space-5);
     cursor: pointer;
@@ -668,14 +668,14 @@ label {
 
 .fcc-info-toggle:hover {
     background: var(--clr-primary);
-    color: #FAF9F6 !important;
+    color: var(--clr-txt-light) !important;
     transform: translateY(-1px);
 }
 
 .fcc-toggle-icon {
     transition: transform 0.3s ease;
     font-size: var(--jimr-font-base);
-    color: #FAF9F6 !important;
+    color: var(--clr-txt-light) !important;
 }
 
 .fcc-info-toggle.expanded .fcc-toggle-icon {
@@ -755,7 +755,7 @@ h2 {
 
 .unit-button.active {
     background: var(--clr-secondary);
-    color: #FAF9F6;
+    color: var(--clr-txt-light);
     font-weight: 700;
 }
 
@@ -791,7 +791,7 @@ h2 {
 
 .tab-button.active {
     background: var(--clr-secondary) !important;
-    color: #FAF9F6 !important;
+    color: var(--clr-txt-light) !important;
     border-color: var(--clr-primary) !important;
     font-weight: 700 !important;
     box-shadow: 0 0 15px rgba(92, 51, 36, 0.4) !important;
@@ -970,7 +970,7 @@ h2 {
 
 .fcc-modal-header {
     background: var(--clr-secondary);
-    color: #FAF9F6;
+    color: var(--clr-txt-light);
     padding: var(--jimr-space-4);
     display: flex;
     justify-content: space-between;
@@ -982,7 +982,7 @@ h2 {
 .fcc-modal-close {
     background: none;
     border: none;
-    color: #FAF9F6;
+    color: var(--clr-txt-light);
     font-size: 24px;
     cursor: pointer;
     padding: 0;
@@ -1058,10 +1058,10 @@ h2 {
 
 .drag-insertion-line {
     height: 4px !important;
-    background: #3b82f6 !important;
+    background: var(--jimr-info) !important;
     margin: 0 !important;
     border-radius: 2px !important;
-    box-shadow: 0 0 4px rgba(59, 130, 246, 0.5) !important;
+    box-shadow: 0 0 4px var(--clr-drag-active-bdr) !important;
 }
 
 .drag-handle {
