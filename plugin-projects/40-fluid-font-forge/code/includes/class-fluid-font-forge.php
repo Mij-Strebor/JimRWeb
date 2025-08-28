@@ -26,16 +26,6 @@ class FluidFontForge
     const PLUGIN_SLUG = 'fluid-font-forge';
     const NONCE_ACTION = 'fluid_font_nonce';
 
-    // Validation Ranges
-    // Why 1-100px: Prevents unusably small (<1px) or absurdly large (>100px) root sizes
-    const MIN_ROOT_SIZE_RANGE = [1, 100];
-    // Why 200-5000px: Covers feature phones to ultra-wide displays safely
-    const VIEWPORT_RANGE = [200, 5000];
-    // Why 0.8-3.0: Below 0.8 is unreadable, above 3.0 creates excessive spacing
-    const LINE_HEIGHT_RANGE = [0.8, 3.0];
-    // Why 1.0-3.0: Below 1.0 shrinks text, above 3.0 creates extreme size jumps
-    const SCALE_RANGE = [1.0, 3.0];
-
     // Default Values - PRIMARY CONSTANTS 
     // Why 16px: Browser default font size - ensures accessibility baseline
     const DEFAULT_MIN_ROOT_SIZE = 16;
@@ -60,13 +50,6 @@ class FluidFontForge
     // Why 16px base: 1rem = 16px by default - critical for rem/px conversions
     const CSS_UNIT_CONVERSION_BASE = 16;
 
-    // Valid Options
-    //
-    // Why these units: px and rem are most common for font sizing, ensuring compatibility
-    const VALID_UNITS = ['px', 'rem'];
-    // Why these tabs: Covers all three size management methods provided by the plugin
-    const VALID_TABS = ['class', 'vars', 'tag'];
-
     // WordPress Options Keys - use global constants
     // Why constants: Prevents typos, ensures consistency across the codebase
     const OPTION_SETTINGS = FLUID_FONT_FORGE_OPTION_SETTINGS;
@@ -74,6 +57,22 @@ class FluidFontForge
     const OPTION_CLASS_SIZES = FLUID_FONT_FORGE_OPTION_CLASS_SIZES;
     const OPTION_VARIABLE_SIZES = FLUID_FONT_FORGE_OPTION_VARIABLE_SIZES;
     const OPTION_TAG_SIZES = FLUID_FONT_FORGE_OPTION_TAG_SIZES;
+
+    // Valid Options
+    // Why these units: px and rem are most common for font sizing, ensuring compatibility
+    const VALID_UNITS = ['px', 'rem'];
+    // Why these tabs: Covers all three size management methods provided by the plugin
+    const VALID_TABS = ['class', 'vars', 'tag'];
+
+    // Validation Ranges
+    // Why 1-100px: Prevents unusably small (<1px) or absurdly large (>100px) root sizes
+    const MIN_ROOT_SIZE_RANGE = [1, 100];
+    // Why 200-5000px: Covers feature phones to ultra-wide displays safely
+    const VIEWPORT_RANGE = [200, 5000];
+    // Why 0.8-3.0: Below 0.8 is unreadable, above 3.0 creates excessive spacing
+    const LINE_HEIGHT_RANGE = [0.8, 3.0];
+    // Why 1.0-3.0: Below 1.0 shrinks text, above 3.0 creates extreme size jumps
+    const SCALE_RANGE = [1.0, 3.0];
 
     // ========================================================================
     // CLASS PROPERTIES
