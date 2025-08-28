@@ -62,14 +62,18 @@ class FluidFontForge
 
     // Valid Options
     //
+    // Why these units: px and rem are most common for font sizing, ensuring compatibility
     const VALID_UNITS = ['px', 'rem'];
+    // Why these tabs: Covers all three size management methods provided by the plugin
     const VALID_TABS = ['class', 'vars', 'tag'];
 
-    // WordPress Options Keys
-    const OPTION_SETTINGS = 'font_clamp_settings';
-    const OPTION_CLASS_SIZES = 'font_clamp_class_sizes';
-    const OPTION_VARIABLE_SIZES = 'font_clamp_variable_sizes';
-    const OPTION_TAG_SIZES = 'font_clamp_tag_sizes';
+    // WordPress Options Keys - use global constants
+    // Why constants: Prevents typos, ensures consistency across the codebase
+    const OPTION_SETTINGS = FLUID_FONT_FORGE_OPTION_SETTINGS;
+    // Why separate keys: Allows independent management of settings and size arrays
+    const OPTION_CLASS_SIZES = FLUID_FONT_FORGE_OPTION_CLASS_SIZES;
+    const OPTION_VARIABLE_SIZES = FLUID_FONT_FORGE_OPTION_VARIABLE_SIZES;
+    const OPTION_TAG_SIZES = FLUID_FONT_FORGE_OPTION_TAG_SIZES;
 
     // ========================================================================
     // CLASS PROPERTIES
