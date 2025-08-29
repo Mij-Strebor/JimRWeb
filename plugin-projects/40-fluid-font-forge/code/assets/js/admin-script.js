@@ -5,7 +5,7 @@
  * real-time CSS clamp() generation, and responsive font previews.
  *
  * @package FluidFontForge
- * @version 3.7.0
+ * @version 4.0.0
  * @author Jim R (JimRWeb)
  * @link https://jimrweb.com
  * @since 1.0.0
@@ -175,58 +175,83 @@ class FontClampEnhancedCoreInterface {
     this.initLoadingSequence();
   }
 
+  // ========================================================================
+  // INITIALIZATION & DATA METHODS
+  // ========================================================================
+
+  // Toggle expandable sections
   bindToggleEvents() {
-    setTimeout(() => {
+    // Wait for DOM to be ready and bind directly
+    const bindWhenReady = () => {
       const infoToggle = document.querySelector(
         '[data-toggle-target="info-content"]'
       );
-      if (infoToggle) {
-        infoToggle.addEventListener("click", () => this.toggleInfo());
-      }
-
       const aboutToggle = document.querySelector(
         '[data-toggle-target="about-content"]'
       );
+
+      console.log("Info toggle found:", !!infoToggle);
+      console.log("About toggle found:", !!aboutToggle);
+
+      if (infoToggle) {
+        infoToggle.addEventListener("click", (e) => {
+          e.preventDefault();
+          console.log("Info toggle clicked");
+          this.togglePanel("info-content", infoToggle);
+        });
+      }
+
       if (aboutToggle) {
-        aboutToggle.addEventListener("click", () => this.toggleAbout());
+        aboutToggle.addEventListener("click", (e) => {
+          e.preventDefault();
+          console.log("About toggle clicked");
+          this.togglePanel("about-content", aboutToggle);
+        });
       }
-    }, 100);
+    };
+
+    // Try multiple times to ensure elements are available
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bindWhenReady);
+    } else {
+      bindWhenReady();
+    }
+
+    // Also try after a delay as backup
+    setTimeout(bindWhenReady, 500);
   }
 
-  toggleInfo() {
-    const button = document.querySelector(
-      '[data-toggle-target="info-content"]'
-    );
-    const content = document.getElementById("info-content");
+  // Handle the toggle action
+  handleToggle(button, targetId) {
+    const content = document.getElementById(targetId);
 
-    if (content && button) {
-      if (content.classList.contains("expanded")) {
-        content.classList.remove("expanded");
-        button.classList.remove("expanded");
+    if (!content || !button) {
+      console.log("Toggle elements not found:", targetId);
+      return;
+    }
+
+    const isExpanded = content.classList.contains("expanded");
+
+    if (isExpanded) {
+      content.classList.remove("expanded");
+      button.classList.remove("expanded");
+    } else {
+      content.classList.add("expanded");
+      button.classList.add("expanded");
+    }
+
+    // Also toggle the icon rotation
+    const icon = button.querySelector(".fcc-toggle-icon");
+    if (icon) {
+      if (isExpanded) {
+        icon.style.transform = "rotate(0deg)";
       } else {
-        content.classList.add("expanded");
-        button.classList.add("expanded");
+        icon.style.transform = "rotate(180deg)";
       }
     }
   }
 
-  toggleAbout() {
-    const button = document.querySelector(
-      '[data-toggle-target="about-content"]'
-    );
-    const content = document.getElementById("about-content");
-
-    if (content && button) {
-      if (content.classList.contains("expanded")) {
-        content.classList.remove("expanded");
-        button.classList.remove("expanded");
-      } else {
-        content.classList.add("expanded");
-        button.classList.add("expanded");
-      }
-    }
-  }
-
+  // Manage loading sequence and interface reveal
   initLoadingSequence() {
     // Why loading steps: Users need visual feedback during complex initialization
     // Prevents flash of unstyled content and confusing intermediate states
@@ -255,6 +280,7 @@ class FontClampEnhancedCoreInterface {
     }, 5000);
   }
 
+  // Check if all loading steps are complete and reveal interface
   checkAndRevealInterface() {
     // Why wait for both: Revealing interface too early shows broken/empty state
     // Advanced features needed for interactions, content needed for display
@@ -264,6 +290,7 @@ class FontClampEnhancedCoreInterface {
     }
   }
 
+  // Reveal the main interface and hide loading screen
   revealInterface() {
     if (this.isInterfaceRevealed()) return;
 
@@ -294,11 +321,13 @@ class FontClampEnhancedCoreInterface {
     document.body.appendChild(ariaRegion);
   }
 
+  // Check if the interface is already revealed
   isInterfaceRevealed() {
     const mainContainer = document.getElementById("fcc-main-container");
     return mainContainer && mainContainer.classList.contains("ready");
   }
 
+  // Sync visual state of tabs and unit buttons
   syncVisualState() {
     document.querySelectorAll("[data-tab]").forEach((tab) => {
       tab.classList.remove("active");
@@ -308,6 +337,7 @@ class FontClampEnhancedCoreInterface {
       ?.classList.add("active");
   }
 
+  // Initialize data from localized script
   initializeData() {
     // Get data from wp_localize_script
     const data = window.fontClampAjax?.data || {};
@@ -571,7 +601,7 @@ class FontClampEnhancedCoreInterface {
  */
 class FontClampAdvanced {
   constructor() {
-    this.version = "3.6.0";
+    this.version = "4.0.0";
     this.DEBUG_MODE = true;
     this.initialized = false;
     this.dragState = this.initDragState();

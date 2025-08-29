@@ -4,7 +4,6 @@
  * Fluid Font Forge Main Class
  * 
  * @package FluidFontForge
- * @since 1.0.0
  */
 
 // Prevent direct access
@@ -57,6 +56,7 @@ class FluidFontForge
     const OPTION_CLASS_SIZES = FLUID_FONT_FORGE_OPTION_CLASS_SIZES;
     const OPTION_VARIABLE_SIZES = FLUID_FONT_FORGE_OPTION_VARIABLE_SIZES;
     const OPTION_TAG_SIZES = FLUID_FONT_FORGE_OPTION_TAG_SIZES;
+    const OPTION_TAILWIND_SIZES = FLUID_FONT_FORGE_OPTION_TAILWIND_SIZES;
 
     // Valid Options
     // Why these units: px and rem are most common for font sizing, ensuring compatibility
@@ -446,7 +446,7 @@ class FluidFontForge
     {
         static $cached_sizes = null;
         if ($cached_sizes === null) {
-            $cached_sizes = get_option('font_clamp_tailwind_sizes', $this->default_tailwind_sizes);
+            $cached_sizes = get_option(self::OPTION_TAILWIND_SIZES, $this->default_tailwind_sizes);
         }
         return $cached_sizes;
     }
@@ -857,8 +857,70 @@ class FluidFontForge
          */
         public function save_sizes()
         {
-            // Enhanced save functionality - placeholder
-            wp_send_json_success(['message' => 'Sizes saved successfully']);
+            // Verify nonce for security
+            if (!wp_verify_nonce($_POST['nonce'], self::NONCE_ACTION)) {
+                wp_send_json_error(['message' => 'Security check failed']);
+                return;
+            }
+
+            // Verify user permissions
+            if (!current_user_can('manage_options')) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            try {
+                // Get the active tab to determine which sizes to save
+                $active_tab = sanitize_text_field($_POST['activeTab'] ?? 'class');
+                $sizes_json = stripslashes($_POST['sizes'] ?? '');
+                $sizes = json_decode($sizes_json, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    wp_send_json_error(['message' => 'Invalid sizes data']);
+                    return;
+                }
+
+                // Validate sizes array
+                if (!is_array($sizes)) {
+                    wp_send_json_error(['message' => 'Sizes must be an array']);
+                    return;
+                }
+
+                // Save to appropriate option based on tab
+                switch ($active_tab) {
+                    case 'class':
+                        $result = update_option(self::OPTION_CLASS_SIZES, $sizes);
+                        break;
+                    case 'vars':
+                        $result = update_option(self::OPTION_VARIABLE_SIZES, $sizes);
+                        break;
+                    case 'tag':
+                        $result = update_option(self::OPTION_TAG_SIZES, $sizes);
+                        break;
+                    case 'tailwind':
+                        $result = update_option(FLUID_FONT_FORGE_OPTION_TAILWIND_SIZES, $sizes);
+                        break;
+                    default:
+                        wp_send_json_error(['message' => 'Invalid tab type']);
+                        return;
+                }
+
+                // Clear cached data
+                wp_cache_delete(self::OPTION_CLASS_SIZES, 'options');
+                wp_cache_delete(self::OPTION_VARIABLE_SIZES, 'options');
+                wp_cache_delete(self::OPTION_TAG_SIZES, 'options');
+                wp_cache_delete(FLUID_FONT_FORGE_OPTION_TAILWIND_SIZES, 'options');
+
+                wp_send_json_success([
+                    'message' => 'Sizes saved successfully',
+                    'saved' => $result,
+                    'count' => count($sizes),
+                    'activeTab' => $active_tab
+                ]);
+            } catch (Exception $e) {
+                error_log('Fluid Font Forge save_sizes error: ' . $e->getMessage());
+                wp_send_json_error(['message' => 'Save failed: ' . $e->getMessage()]);
+            }
         }
 
         /**

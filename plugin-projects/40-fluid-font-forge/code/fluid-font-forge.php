@@ -32,7 +32,7 @@ if (!defined('ABSPATH')) {
 // PLUGIN CONSTANTS
 // ========================================================================
 
-define('FLUID_FONT_FORGE_VERSION', '3.7.0');
+define('FLUID_FONT_FORGE_VERSION', '4.0.0');
 define('FLUID_FONT_FORGE_PATH', plugin_dir_path(__FILE__));
 define('FLUID_FONT_FORGE_URL', plugin_dir_url(__FILE__));
 

@@ -5,7 +5,7 @@
  * Implements JimRWeb brand colors with professional design patterns.
  * 
  * @package FluidFontForge
- * @version 3.7.0
+ * @version 4.0.0
  * @author Jim R (JimRWeb)
  * @link https://jimrweb.com
  * @since 1.0.0
@@ -1070,4 +1070,304 @@ h2 {
 
 .drag-handle:active {
     cursor: grabbing !important;
+}
+
+/* ========================================================================
+   TAILWIND REPLACEMENT STYLES
+   ======================================================================== */
+
+/* Main Title Styling - replaces text-2xl font-bold mb-4 */
+.fcc-main-title {
+    font-size: var(--jimr-font-2xl) !important;
+    font-weight: 700 !important;
+    margin-bottom: var(--jimr-space-4) !important;
+    color: var(--clr-primary) !important;
+    font-family: 'Georgia', serif !important;
+    text-shadow: 1px 1px 2px var(--clr-shadow) !important;
+    line-height: 1.2 !important;
+}
+
+/* Custom utility classes for spacing (replacing Tailwind) */
+.fcc-mb-2 {
+    margin-bottom: var(--jimr-space-2);
+}
+
+.fcc-mb-3 {
+    margin-bottom: var(--jimr-space-3);
+}
+
+.fcc-mb-4 {
+    margin-bottom: var(--jimr-space-4);
+}
+
+.fcc-mb-5 {
+    margin-bottom: var(--jimr-space-5);
+}
+
+.fcc-mb-6 {
+    margin-bottom: var(--jimr-space-6);
+}
+
+.fcc-mt-2 {
+    margin-top: var(--jimr-space-2);
+}
+
+.fcc-mt-3 {
+    margin-top: var(--jimr-space-3);
+}
+
+.fcc-mt-4 {
+    margin-top: var(--jimr-space-4);
+}
+
+.fcc-mt-5 {
+    margin-top: var(--jimr-space-5);
+}
+
+.fcc-p-2 {
+    padding: var(--jimr-space-2);
+}
+
+.fcc-p-3 {
+    padding: var(--jimr-space-3);
+}
+
+.fcc-p-4 {
+    padding: var(--jimr-space-4);
+}
+
+.fcc-p-5 {
+    padding: var(--jimr-space-5);
+}
+
+.fcc-px-3 {
+    padding-left: var(--jimr-space-3);
+    padding-right: var(--jimr-space-3);
+}
+
+.fcc-py-2 {
+    padding-top: var(--jimr-space-2);
+    padding-bottom: var(--jimr-space-2);
+}
+
+/* Flex utilities */
+.fcc-flex {
+    display: flex;
+}
+
+.fcc-flex-col {
+    flex-direction: column;
+}
+
+.fcc-items-center {
+    align-items: center;
+}
+
+.fcc-justify-center {
+    justify-content: center;
+}
+
+.fcc-justify-between {
+    justify-content: space-between;
+}
+
+.fcc-gap-2 {
+    gap: var(--jimr-space-2);
+}
+
+.fcc-gap-3 {
+    gap: var(--jimr-space-3);
+}
+
+.fcc-gap-4 {
+    gap: var(--jimr-space-4);
+}
+
+/* Grid utilities */
+.fcc-grid {
+    display: grid;
+}
+
+.fcc-grid-cols-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.fcc-grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Width utilities */
+.fcc-w-full {
+    width: 100%;
+}
+
+.fcc-w-auto {
+    width: auto;
+}
+
+/* Text utilities */
+.fcc-text-center {
+    text-align: center;
+}
+
+.fcc-text-left {
+    text-align: left;
+}
+
+.fcc-text-right {
+    text-align: right;
+}
+
+.fcc-font-bold {
+    font-weight: 700;
+}
+
+.fcc-font-semibold {
+    font-weight: 600;
+}
+
+.fcc-font-medium {
+    font-weight: 500;
+}
+
+.fcc-text-sm {
+    font-size: var(--jimr-font-sm);
+}
+
+.fcc-text-base {
+    font-size: var(--jimr-font-base);
+}
+
+.fcc-text-lg {
+    font-size: var(--jimr-font-lg);
+}
+
+.fcc-text-xl {
+    font-size: var(--jimr-font-xl);
+}
+
+.fcc-text-2xl {
+    font-size: var(--jimr-font-2xl);
+}
+
+/* Border utilities */
+.fcc-border {
+    border: 1px solid var(--clr-secondary);
+}
+
+.fcc-border-2 {
+    border: 2px solid var(--clr-secondary);
+}
+
+.fcc-rounded {
+    border-radius: var(--jimr-border-radius);
+}
+
+.fcc-rounded-lg {
+    border-radius: var(--jimr-border-radius-lg);
+}
+
+/* Background utilities */
+.fcc-bg-white {
+    background-color: var(--clr-white);
+}
+
+.fcc-bg-card {
+    background-color: var(--clr-card-bg);
+}
+
+.fcc-bg-page {
+    background-color: var(--clr-page-bg);
+}
+
+/* Shadow utilities */
+.fcc-shadow {
+    box-shadow: var(--clr-shadow);
+}
+
+.fcc-shadow-lg {
+    box-shadow: var(--clr-shadow-lg);
+}
+
+.fcc-shadow-xl {
+    box-shadow: var(--clr-shadow-xl);
+}
+
+/* Color utilities */
+.fcc-text-primary {
+    color: var(--clr-primary);
+}
+
+.fcc-text-secondary {
+    color: var(--clr-secondary);
+}
+
+.fcc-text-muted {
+    color: var(--jimr-gray-500);
+}
+
+/* Position utilities */
+.fcc-relative {
+    position: relative;
+}
+
+.fcc-absolute {
+    position: absolute;
+}
+
+.fcc-fixed {
+    position: fixed;
+}
+
+/* Overflow utilities */
+.fcc-overflow-hidden {
+    overflow: hidden;
+}
+
+.fcc-overflow-auto {
+    overflow: auto;
+}
+
+/* Cursor utilities */
+.fcc-cursor-pointer {
+    cursor: pointer;
+}
+
+.fcc-cursor-not-allowed {
+    cursor: not-allowed;
+}
+
+/* Display utilities */
+.fcc-block {
+    display: block;
+}
+
+.fcc-inline-block {
+    display: inline-block;
+}
+
+.fcc-hidden {
+    display: none;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .fcc-grid-cols-4 {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--jimr-space-2);
+    }
+
+    .fcc-main-title {
+        font-size: var(--jimr-font-xl) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .fcc-grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .fcc-main-title {
+        font-size: var(--jimr-font-lg) !important;
+    }
 }
