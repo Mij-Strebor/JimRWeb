@@ -99,7 +99,20 @@ class SimpleTooltips {
 // SHARED UTILITIES
 // ========================================================================
 
-const FontClampUtils = {
+// Utility to get current sizes based on active tab and ensure defaults are loaded if none exist
+// Requires access to fontClampAjax data and fontClampAdvanced instance
+// Returns array of sizes for the active tab
+// Usage: FontForgeUtils.getCurrentSizes(activeTab, fontClampAdvanced)
+// activeTab: string ("class", "vars", "tailwind", "tag")
+// fontClampAdvanced: instance of FontClampAdvanced class
+// Returns: array of size objects for the specified tab
+// Example size object for "class" tab: { id: 1, className: "small", minSize: 12, maxSize: 16, lineHeight: 1.4 }
+// Example size object for "vars" tab: { id: 1, variableName: "--fs-sm", minSize: 12, maxSize: 16, lineHeight: 1.4 }
+// Example size object for "tailwind" tab: { id: 1, tailwindName: "sm", minSize: 12, maxSize: 16, lineHeight: 1.4 }
+// Example size object for "tag" tab: { id: 1, tagName: "p", minSize: 12, maxSize: 16, lineHeight: 1.4 }
+// If no sizes exist for the tab, attempts to load defaults from fontClampAdvanced
+// If still no sizes, returns empty array
+const FontForgeUtils = {
   getCurrentSizes(activeTab = null, fontClampAdvanced = null) {
     const tab = activeTab || window.fontClampCore?.activeTab || "class";
 
@@ -155,11 +168,184 @@ const FontClampUtils = {
   },
 };
 
+// WordPress Admin Notice System
+// The WordPress Admin Notice System is a core feature that allows plugins, themes, and WordPress itself to display
+// messages and notifications within the WordPress administration area. These notices serve various purposes,
+// including:
+// + Providing feedback on actions: Confirming successful operations (e.g., "Post updated"),
+//   indicating errors (e.g., "Failed to save settings"), or giving warnings
+//   (e.g., "Plugin update available").
+// + Delivering important information: Notifying administrators about new features, security
+//   updates, or critical issues.
+// + Guiding users: Offering instructions or suggestions for using specific functionalities.
+class WordPressAdminNotices {
+  constructor() {
+    this.notices = [];
+    this.container = null;
+    this.init();
+  }
+
+  init() {
+    // Create notices container if it doesn't exist
+    this.createContainer();
+  }
+
+  createContainer() {
+    // Always create our own container at the very top of wrap
+    const wrap = document.querySelector(".wrap");
+    if (wrap) {
+      // Remove any existing container first
+      const existing = document.getElementById("fcc-admin-notices");
+      if (existing) {
+        existing.remove();
+      }
+
+      this.container = document.createElement("div");
+      this.container.id = "fcc-admin-notices";
+      this.container.style.cssText =
+        "margin: 0 0 20px 0; position: relative; z-index: 1000;";
+
+      // Insert at the very beginning, before any other content
+      const firstChild = wrap.querySelector("h1") || wrap.firstChild;
+      wrap.insertBefore(this.container, firstChild);
+    }
+  }
+
+  show(message, type = "info", dismissible = true, autoHide = true) {
+    if (!this.container) {
+      console.error("Admin notices container not available");
+      return;
+    }
+
+    const notice = document.createElement("div");
+    const noticeId =
+      "notice-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+    notice.id = noticeId;
+
+    let classes = ["notice"];
+    switch (type) {
+      case "success":
+        classes.push("notice-success");
+        break;
+      case "error":
+        classes.push("notice-error");
+        break;
+      case "warning":
+        classes.push("notice-warning");
+        break;
+      default:
+        classes.push("notice-info");
+        break;
+    }
+
+    if (dismissible) classes.push("is-dismissible");
+    notice.className = classes.join(" ");
+
+    notice.innerHTML = `
+      <p style="margin: 0.5em 0;">${message}</p>
+      ${
+        dismissible
+          ? '<button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>'
+          : ""
+      }
+    `;
+
+    this.container.appendChild(notice);
+
+    // Handle dismiss button
+    if (dismissible) {
+      const dismissBtn = notice.querySelector(".notice-dismiss");
+      if (dismissBtn) {
+        dismissBtn.addEventListener("click", () => {
+          this.dismiss(noticeId);
+        });
+      }
+    }
+
+    // Auto-hide after delay
+    if (autoHide && type !== "error") {
+      setTimeout(
+        () => {
+          this.dismiss(noticeId);
+        },
+        type === "success" ? 4000 : 6000
+      );
+    }
+
+    // Scroll to notice for visibility
+    notice.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    return noticeId;
+  }
+
+  dismiss(noticeId) {
+    const notice = document.getElementById(noticeId);
+    if (notice) {
+      notice.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+      notice.style.opacity = "0";
+      notice.style.transform = "translateX(-10px)";
+
+      setTimeout(() => {
+        if (notice.parentNode) {
+          notice.parentNode.removeChild(notice);
+        }
+      }, 300);
+    }
+  }
+
+  // Simple confirm dialog with callbacks
+  confirm(message, onConfirm, onCancel = null) {
+    const result = confirm(
+      // replace <br> with newlines for better readability and strip HTML tags
+      message.replace(/<br>/g, "\n").replace(/<[^>]*>/g, "")
+    );
+
+    if (result && onConfirm) {
+      onConfirm();
+    } else if (!result && onCancel) {
+      onCancel();
+    }
+  }
+
+  success(message, dismissible = true) {
+    return this.show(message, "success", dismissible);
+  }
+
+  error(message, dismissible = true) {
+    return this.show(message, "error", dismissible, false);
+  }
+
+  warning(message, dismissible = true) {
+    return this.show(message, "warning", dismissible);
+  }
+
+  info(message, dismissible = true) {
+    return this.show(message, "info", dismissible);
+  }
+}
+
 // Enhanced Core Interface Controller
+// Manages tabs, unit selection, and coordination with advanced features
+// Initializes data from localized script and triggers events for other segments
+// Handles toggling of expandable sections and loading sequence
+// Ensures interface is only revealed when fully ready
+// Syncs visual state of tabs and unit buttons
+// Provides utility to get current sizes based on active tab
+// Usage: new FontClampEnhancedCoreInterface()
+// Returns: instance of FontClampEnhancedCoreInterface
+// Example usage: const coreInterface = new FontClampEnhancedCoreInterface();
+// Access current sizes: const sizes = coreInterface.getCurrentSizes();
+// Switch tabs: coreInterface.switchTab('vars');
+// Switch unit type: coreInterface.switchUnitType('rem');
+// Update data: coreInterface.updateData({ settings: newSettings, classSizes: newClassSizes });
+// Trigger custom hooks: coreInterface.triggerHook('customEvent', { key: value });
+// Note: Requires FontForgeUtils to be defined
+// Note: Requires fontClampAjax and fontClampAdvanced to be available globally
+// Note: Designed to work within WordPress admin environment
+// Note: Integrates with FontClampAdvanced for full functionality
+
 class FontClampEnhancedCoreInterface {
   constructor() {
-    console.log("🚀 Fluid Font Forge");
-
     this.initializeData();
     this.cacheElements();
     this.bindBasicEvents();
@@ -173,6 +359,7 @@ class FontClampEnhancedCoreInterface {
     }, 100);
 
     this.initLoadingSequence();
+    this.loadingSteps.coreReady = true; // Mark core interface as ready
   }
 
   // ========================================================================
@@ -180,6 +367,18 @@ class FontClampEnhancedCoreInterface {
   // ========================================================================
 
   // Toggle expandable sections
+  // Uses direct event binding to ensure reliability
+  // Handles multiple attempts to bind in case of delayed DOM availability
+  // Toggles 'expanded' class on target content and button
+  // Rotates icon to indicate expanded/collapsed state
+  // Usage: Call bindToggleEvents() during initialization
+  // Example: this.bindToggleEvents();
+  // Note: Requires elements with data-toggle-target attributes on buttons
+  // Note: Target content must have corresponding IDs (e.g., info-content, about-content)
+  // Note: Icon within button should have class 'fcc-toggle-icon' for rotation
+  // Note: Prevents default link behavior to avoid page jumps
+  // Note: Ensures accessibility by allowing keyboard interaction
+  // Note: Designed to work within WordPress admin environment
   bindToggleEvents() {
     // Wait for DOM to be ready and bind directly
     const bindWhenReady = () => {
@@ -190,22 +389,15 @@ class FontClampEnhancedCoreInterface {
         '[data-toggle-target="about-content"]'
       );
 
-      console.log("Info toggle found:", !!infoToggle);
-      console.log("About toggle found:", !!aboutToggle);
-
-      if (infoToggle) {
-        infoToggle.addEventListener("click", (e) => {
-          e.preventDefault();
-          console.log("Info toggle clicked");
-          this.togglePanel("info-content", infoToggle);
-        });
-      }
+      infoToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.handleToggle(infoToggle, "info-content");
+      });
 
       if (aboutToggle) {
         aboutToggle.addEventListener("click", (e) => {
           e.preventDefault();
-          console.log("About toggle clicked");
-          this.togglePanel("about-content", aboutToggle);
+          this.handleToggle(aboutToggle, "about-content");
         });
       }
     };
@@ -222,11 +414,11 @@ class FontClampEnhancedCoreInterface {
   }
 
   // Handle the toggle action
+  //
   handleToggle(button, targetId) {
     const content = document.getElementById(targetId);
 
     if (!content || !button) {
-      console.log("Toggle elements not found:", targetId);
       return;
     }
 
@@ -252,6 +444,10 @@ class FontClampEnhancedCoreInterface {
   }
 
   // Manage loading sequence and interface reveal
+  // Uses event listeners to track readiness of components
+  // Implements timeout fallback to ensure interface is revealed eventually
+  // Prevents flash of unstyled content by hiding interface until ready
+
   initLoadingSequence() {
     // Why loading steps: Users need visual feedback during complex initialization
     // Prevents flash of unstyled content and confusing intermediate states
@@ -356,6 +552,10 @@ class FontClampEnhancedCoreInterface {
   // EVENT BINDING & SETUP METHODS
   // ========================================================================
 
+  // Cache frequently accessed DOM elements
+  // Improves performance and simplifies code by reducing repeated queries
+  // Centralizes element references for easier maintenance and updates
+  // Ensures elements are available before binding events (avoids null reference errors)
   cacheElements() {
     this.elements = {
       classTab: document.getElementById("class-tab"),
@@ -376,6 +576,9 @@ class FontClampEnhancedCoreInterface {
     };
   }
 
+  // Bind basic event listeners for tab and unit switching
+  // Uses optional chaining to avoid errors if elements are missing
+  // Triggers calculation on input changes to keep data up-to-date
   bindBasicEvents() {
     this.elements.classTab?.addEventListener("click", () =>
       this.switchTab("class")
@@ -388,8 +591,6 @@ class FontClampEnhancedCoreInterface {
     const tailwindTab = document.getElementById("tailwind-tab");
     if (tailwindTab) {
       tailwindTab.addEventListener("click", () => this.switchTab("tailwind"));
-    } else {
-      console.log("❌ Tailwind tab not found!");
     }
 
     this.elements.tagTab?.addEventListener("click", () =>
@@ -423,6 +624,8 @@ class FontClampEnhancedCoreInterface {
       ?.addEventListener("change", () => this.triggerCalculation());
   }
 
+  // Trigger calculation in advanced features segment
+  // Dispatches custom event to notify advanced features of settings change
   triggerCalculation() {
     window.dispatchEvent(new CustomEvent("fontClamp_settingsChanged"));
     if (window.fontClampAdvanced && window.fontClampAdvanced.calculateSizes) {
@@ -430,6 +633,9 @@ class FontClampEnhancedCoreInterface {
     }
   }
 
+  // Bind enhanced event listeners for real-time display updates
+  // Updates viewport size displays as sliders are adjusted
+  // Uses optional chaining to avoid errors if elements are missing
   bindEnhancedEvents() {
     document.getElementById("min-viewport")?.addEventListener("input", (e) => {
       if (this.elements.minViewportDisplay) {
@@ -444,6 +650,11 @@ class FontClampEnhancedCoreInterface {
     });
   }
 
+  // ========================================================================
+  // TAB & UNIT MANAGEMENT METHODS
+  // ========================================================================
+
+  // Switch active tab and update interface accordingly
   switchTab(tabName) {
     this.activeTab = tabName;
 
@@ -482,6 +693,8 @@ class FontClampEnhancedCoreInterface {
     });
   }
 
+  // Update base value dropdown options based on active tab
+  // Filters out custom sizes to keep list manageable
   updateBaseValueDropdown(tabName) {
     const baseValueSelect = document.getElementById("base-value");
     if (!baseValueSelect) {
@@ -505,13 +718,12 @@ class FontClampEnhancedCoreInterface {
       propertyName = "variableName";
       defaultValue = "--fs-md";
     } else if (tabName === "tailwind") {
-      currentSizes = FontClampUtils.getCurrentSizes(
+      currentSizes = FontForgeUtils.getCurrentSizes(
         "tailwind",
         window.fontClampAdvanced
       );
       propertyName = "tailwindName";
       defaultValue = "base";
-      console.log("🔍 Fixed tailwind sizes:", currentSizes);
     } else if (tabName === "tag") {
       currentSizes = this.tagSizes.filter(
         (size) => !size.tagName || !size.tagName.startsWith("custom-")
@@ -543,6 +755,7 @@ class FontClampEnhancedCoreInterface {
     }
   }
 
+  // Switch unit type and update interface accordingly
   switchUnitType(unitType) {
     this.unitType = unitType;
 
@@ -558,6 +771,12 @@ class FontClampEnhancedCoreInterface {
     });
   }
 
+  // ========================================================================
+  // CUSTOM EVENT & DATA MANAGEMENT METHODS
+  // ========================================================================
+
+  // Trigger custom event to notify other segments of readiness
+  // Passes current settings and sizes for synchronization
   triggerSegmentHooks() {
     window.dispatchEvent(
       new CustomEvent("fontClampCoreReady", {
@@ -575,6 +794,8 @@ class FontClampEnhancedCoreInterface {
     );
   }
 
+  // Trigger custom hooks for extensibility
+  // Dispatches event with core interface reference and additional data
   triggerHook(hookName, data) {
     window.dispatchEvent(
       new CustomEvent(`fontClamp_${hookName}`, {
@@ -587,9 +808,10 @@ class FontClampEnhancedCoreInterface {
   }
 
   getCurrentSizes() {
-    return FontClampUtils.getCurrentSizes(this.activeTab);
+    return FontForgeUtils.getCurrentSizes(this.activeTab);
   }
 
+  // Update internal data and notify other segments
   updateData(newData) {
     Object.assign(this, newData);
     this.triggerHook("dataUpdated", newData);
@@ -599,6 +821,10 @@ class FontClampEnhancedCoreInterface {
 /**
  * Fluid Font Advanced Features Controller
  */
+
+// Manages advanced features like drag-and-drop, modal editing, real-time preview updates, and autosave
+// Provides robust error handling and debugging utilities
+// Ensures initialization only occurs when all dependencies are ready
 class FontClampAdvanced {
   constructor() {
     this.version = "4.0.0";
@@ -721,12 +947,14 @@ class FontClampAdvanced {
     }
   }
 
+  // Simple debug utility
   log(message, ...args) {
     if (this.DEBUG_MODE) {
-      console.log(`[FontClamp] ${message}`, ...args);
+      console.log(`[FluidFontForge] ${message}`, ...args);
     }
   }
 
+  // Initialize drag state
   initDragState() {
     return {
       isDragging: false,
@@ -768,6 +996,23 @@ class FontClampAdvanced {
   // ELEMENT & EVENT MANAGEMENT
   // ========================================================================
 
+  // Cache frequently used DOM elements
+  // Why caching: Improves performance by reducing repeated DOM queries
+  // Simplifies code by centralizing element references in one place
+  // Ensures elements are available before binding events to them (avoids null reference errors)
+  // Facilitates easier maintenance and updates to element selectors (only need to change in one location)
+  // Enhances readability by providing clear variable names for elements
+  // Supports dynamic interfaces where elements may be added/removed (can re-cache as needed)
+  // Enables bulk operations on groups of elements (e.g., adding event listeners to multiple inputs)
+  // Provides a single source of truth for element references (reduces risk of inconsistencies across codebase)
+  // Aids in debugging by allowing quick inspection of cached elements (can log or breakpoint on cached variables)
+  // Improves scalability for larger interfaces with many elements (easier to manage and organize)
+  // Facilitates integration with other components/modules (can pass cached elements as needed)
+  // Supports advanced features like drag-and-drop or modals (centralized access to required elements)
+  // Enables better separation of concerns (UI logic can focus on cached elements rather than querying DOM)
+  // Helps ensure elements are only queried once (reduces redundant operations)
+  // Provides a foundation for building more complex interactions (e.g., synchronized previews, dynamic tables)
+  // Overall, caching DOM elements is a best practice for efficient, maintainable, and robust front-end code.
   cacheElements() {
     this.elements = {
       minRootSizeInput: document.getElementById("min-root-size"),
@@ -793,6 +1038,10 @@ class FontClampAdvanced {
     };
   }
 
+  // Bind event listeners to elements
+  // Why binding: Enables interactivity and dynamic behavior in the interface
+  // Centralizes event management for easier maintenance and updates
+  // Ensures events are only bound once (avoids duplicate handlers)
   bindEvents() {
     const settingsInputs = [
       "minRootSizeInput",
@@ -801,6 +1050,7 @@ class FontClampAdvanced {
       "maxViewportInput",
     ];
 
+    // Why input events: Capture real-time changes for immediate feedback
     settingsInputs.forEach((elementKey) => {
       const element = this.elements[elementKey];
       if (element) {
@@ -808,12 +1058,14 @@ class FontClampAdvanced {
       }
     });
 
+    // Why change events: Capture final selection changes (e.g., dropdowns)
     const settingsSelects = [
       "baseValueSelect",
       "minScaleSelect",
       "maxScaleSelect",
     ];
 
+    // Bind change events to dropdowns and selects
     settingsSelects.forEach((elementKey) => {
       const element = this.elements[elementKey];
       if (element) {
@@ -821,6 +1073,7 @@ class FontClampAdvanced {
       }
     });
 
+    // Debounced font URL input for preview updates
     if (this.elements.previewFontUrlInput) {
       this.elements.previewFontUrlInput.addEventListener(
         "input",
@@ -828,6 +1081,7 @@ class FontClampAdvanced {
       );
     }
 
+    // Autosave toggle change handler
     if (this.elements.autosaveToggle) {
       this.elements.autosaveToggle.addEventListener("change", () => {
         this.handleAutosaveToggle();
@@ -934,20 +1188,29 @@ class FontClampAdvanced {
             saveBtn.disabled = false;
             saveBtn.textContent = "Save";
 
-            alert("Error saving data");
+            // Show WordPress admin error notice
+            if (!window.fluidFontNotices) {
+              window.fluidFontNotices = new WordPressAdminNotices();
+            }
+            window.fluidFontNotices.error(
+              `<strong>Save Failed:</strong> Unable to save your font settings. Please check your connection and try again.`
+            );
           });
       });
     }
 
+    // Listen for tab and unit changes from core interface
     window.addEventListener("fontClamp_tabChanged", (e) => {
       this.handleTabChange(e.detail);
     });
 
+    // Recalculate sizes when unit type changes
     window.addEventListener("fontClamp_unitTypeChanged", () => {
       this.calculateSizes();
     });
   }
 
+  // Handle autosave toggle changes
   handleAutosaveToggle() {
     const isEnabled = this.elements.autosaveToggle?.checked;
 
@@ -960,6 +1223,7 @@ class FontClampAdvanced {
     this.updateSettings();
   }
 
+  // Start autosave timer
   startAutosaveTimer() {
     this.stopAutosaveTimer(); // Clear any existing timer
 
@@ -968,6 +1232,7 @@ class FontClampAdvanced {
     }, 30000); // 30 seconds
   }
 
+  // Stop autosave timer
   stopAutosaveTimer() {
     if (this.autosaveTimer) {
       clearInterval(this.autosaveTimer);
@@ -975,6 +1240,7 @@ class FontClampAdvanced {
     }
   }
 
+  // Perform save action
   performSave(isAutosave = false) {
     const saveBtn = document.getElementById("save-btn");
     if (saveBtn) {
@@ -982,6 +1248,10 @@ class FontClampAdvanced {
     }
   }
 
+  // Setup action buttons above the sizes table
+  // Why setup: Centralizes button creation and event binding
+  // Ensures buttons are only created once (avoids duplicates)
+  // Facilitates easier updates to button functionality (single location)
   setupTableActions() {
     const tableButtons = this.elements.tableActionButtons;
     if (!tableButtons) return;
@@ -1035,6 +1305,9 @@ class FontClampAdvanced {
 
   /**
    * Initialize display with proper constants instead of magic numbers
+   * Why initialization: Ensures interface reflects current settings and data
+   * Provides immediate feedback to user on current configuration
+   * Sets up necessary event bindings and calculations for interactivity
    */
   initializeDisplay() {
     this.populateSettings();
@@ -1061,8 +1334,6 @@ class FontClampAdvanced {
     this.createCopyButtons();
     this.setupKeyboardShortcuts();
     this.updatePreview();
-
-    this.log("Display initialization complete with constants");
   }
 
   /**
@@ -1140,6 +1411,14 @@ class FontClampAdvanced {
     }
   }
 
+  // ========================================================================
+  // BASE VALUE MANAGEMENT
+  // ========================================================================
+
+  // Populate base value dropdown based on active tab and available sizes
+  // Why dynamic population: Different tabs have different size options
+  // Ensures relevant options are presented to user
+  // Improves usability by adapting to current context
   updateBaseValueOptions() {
     const select = this.elements.baseValueSelect;
     if (!select) return;
@@ -1216,10 +1495,13 @@ class FontClampAdvanced {
   // DATA MANAGEMENT & CALCULATION METHODS
   // ========================================================================
 
+  // Calculate sizes based on current settings and base value
+  // Why calculation: Core functionality to determine fluid font sizes
+  // Uses mathematical scaling principles for responsive typography
+  // Updates UI and preview to reflect new calculations
   calculateSizes() {
     const baseValue = this.elements.baseValueSelect?.value;
     if (!baseValue) {
-      this.log("❌ No base value selected");
       return;
     }
 
@@ -1294,6 +1576,8 @@ class FontClampAdvanced {
   // UI RENDERING & PREVIEW METHODS
   // ========================================================================
 
+  // Render sizes table based on current data
+  // Why rendering: Visual representation of data for user interaction
   updatePreview() {
     try {
       const sizes = this.getCurrentSizes();
@@ -1392,6 +1676,10 @@ class FontClampAdvanced {
       console.error("❌ Preview update error:", error);
     }
   }
+
+  // Create a single preview row element
+  // Why modular row creation: Encapsulates row structure and styling
+  // Facilitates consistent appearance across all preview rows
   createPreviewRow(
     displayName,
     fontSize,
@@ -1452,6 +1740,10 @@ class FontClampAdvanced {
     return row;
   }
 
+  // Highlight corresponding data table row when a preview row is clicked
+  // Why highlighting: Provides visual feedback on selection
+  // Enhances user experience by linking preview and data table
+  // Improves navigation in larger datasets
   highlightDataTableRow(sizeId, index) {
     document.querySelectorAll(".size-row.selected").forEach((row) => {
       row.classList.remove("selected");
@@ -1469,6 +1761,10 @@ class FontClampAdvanced {
     }
   }
 
+  // Highlight preview rows corresponding to selected data table row
+  // Why highlighting: Links data table selection to visual preview
+  // Aids in understanding size relationships
+  // Enhances overall interactivity of the interface
   highlightPreviewRows(sizeId) {
     document.querySelectorAll(".preview-row.selected").forEach((row) => {
       row.classList.remove("selected");
@@ -1481,6 +1777,10 @@ class FontClampAdvanced {
       });
   }
 
+  // Add synchronized hover effect between two elements
+  // Why synchronized hover: Enhances user experience by linking related elements
+  // Provides clear visual feedback on relationships
+  // Improves discoverability of connections between data and preview
   addSynchronizedHover(element1, element2) {
     const hoverIn = () => {
       element1.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
@@ -1498,6 +1798,10 @@ class FontClampAdvanced {
     element2.addEventListener("mouseleave", hoverOut);
   }
 
+  // Render sizes table with current size data
+  // Why rendering: Visual representation of sizes for user interaction
+  // Enables editing, deleting, and reordering of sizes
+  // Reflects real-time changes from calculations and settings
   renderSizes() {
     const wrapper = this.elements.sizesTableWrapper;
     if (!wrapper) return;
@@ -1562,6 +1866,10 @@ class FontClampAdvanced {
     this.updateCSS();
   }
 
+  // Bind event listeners to a table row
+  // Why binding: Enables interactivity for editing, deleting, selecting, and dragging
+  // Centralizes event management for easier maintenance and updates
+  // Ensures events are only bound once (avoids duplicate handlers)
   bindRowEvents(row) {
     const editBtn = row.querySelector(".edit-btn");
     if (editBtn) {
@@ -1671,11 +1979,7 @@ class FontClampAdvanced {
             this.renderSizes();
             this.updatePreview();
             this.markDataChanged();
-          } else {
-            console.log("Could not find indices for reordering");
           }
-        } else {
-          console.log("Drop conditions not met");
         }
       });
 
@@ -1697,6 +2001,14 @@ class FontClampAdvanced {
     }
   }
 
+  // ========================================================================
+  // CSS GENERATION & COPY METHODS
+  // ========================================================================
+
+  // Generate and update CSS code snippets based on current selection and settings
+  // Why CSS generation: Provides users with ready-to-use code for their projects
+  // Reflects real-time changes in settings and selections
+  // Enhances usability by simplifying the implementation process
   updateCSS() {
     try {
       const selectedElement = document.getElementById("class-code");
@@ -1727,6 +2039,10 @@ class FontClampAdvanced {
   // COPY & CSS GENERATION
   // ========================================================================
 
+  // Generate CSS code snippets and update the display elements
+  // Why modular generation: Encapsulates complex logic for maintainability
+  // Supports multiple output formats (class, vars, tailwind, tag)
+  // Dynamically adapts to user settings and selections
   generateAndUpdateCSS(selectedElement, generatedElement) {
     try {
       const sizes = this.getCurrentSizes();
@@ -1849,6 +2165,10 @@ class FontClampAdvanced {
     }
   }
 
+  // Create copy buttons and bind their events
+  // Why modular buttons: Encapsulates button creation and event binding
+  // Ensures buttons are always in sync with current state and tooltips
+  // Enhances user experience with clear actions for copying CSS
   createCopyButtons() {
     // Create selected CSS copy button
     const selectedCopyContainer = document.getElementById(
@@ -1907,7 +2227,6 @@ class FontClampAdvanced {
   copySelectedCSS() {
     const cssElement = document.getElementById("class-code");
     if (!cssElement) {
-      console.log("❌ No CSS element found");
       return;
     }
 
@@ -1918,7 +2237,6 @@ class FontClampAdvanced {
       cssText.includes("Loading CSS") ||
       cssText.includes("No CSS")
     ) {
-      console.log("⚠️ No CSS available to copy");
       return;
     }
     const button = document.getElementById("copy-selected-btn");
@@ -1931,7 +2249,6 @@ class FontClampAdvanced {
   copyGeneratedCSS() {
     const cssElement = document.getElementById("generated-code");
     if (!cssElement) {
-      console.log("❌ No CSS element found");
       return;
     }
 
@@ -1942,7 +2259,6 @@ class FontClampAdvanced {
       cssText.includes("Loading CSS") ||
       cssText.includes("No CSS")
     ) {
-      console.log("⚠️ No CSS available to copy");
       return;
     }
     const button = document.getElementById("copy-all-btn");
@@ -1953,6 +2269,11 @@ class FontClampAdvanced {
    * Copy text to clipboard with visual feedback
    */
   copyToClipboard(text, button) {
+    if (!text || text.trim() === "") {
+      console.warn("No text to copy");
+      return;
+    }
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(text)
@@ -2057,6 +2378,10 @@ class FontClampAdvanced {
     });
   }
 
+  // Get the currently selected size ID
+  // Why selection logic: Determines which size to generate CSS for
+  // Prioritizes explicit row selection, falls back to base value dropdown
+  // Ensures consistent behavior across different tabs and contexts
   getSelectedSizeId() {
     // If a row is specifically selected, use that
     if (this.selectedRowId) {
@@ -2083,6 +2408,14 @@ class FontClampAdvanced {
 
     return selectedSize ? selectedSize.id : null;
   }
+
+  // ========================================================================
+  // FONT PREVIEW METHODS
+  // ========================================================================
+  // Dynamically load and apply custom font for preview
+  // Why dynamic font loading: Allows users to see their selected font in action
+  // Enhances preview realism and usability
+  // Provides immediate visual feedback on font choices
   updatePreviewFont() {
     const fontUrl = this.elements.previewFontUrlInput?.value;
     const filenameSpan = this.elements.fontFilenameSpan;
@@ -2125,6 +2458,10 @@ class FontClampAdvanced {
   // MODAL & EDITING METHODS
   // ========================================================================
 
+  // Setup modal HTML structure and bind events
+  // Why modular modal setup: Encapsulates modal creation and event binding
+  // Ensures modal is always in sync with current state and inputs
+  // Enhances user experience with clear editing interface
   setupModal() {
     const existing = document.getElementById("edit-modal");
     if (existing) existing.remove();
@@ -2160,6 +2497,10 @@ class FontClampAdvanced {
     this.bindModalEvents(modal);
   }
 
+  // Bind event listeners to modal elements
+  // Why binding: Enables interactivity for closing and saving edits
+  // Centralizes event management for easier maintenance and updates
+  // Ensures accessibility with keyboard support
   bindModalEvents(modal) {
     const closeBtn = modal.querySelector(".fcc-modal-close");
     const cancelBtn = modal.querySelector("#modal-cancel");
@@ -2185,6 +2526,10 @@ class FontClampAdvanced {
     });
   }
 
+  // Open modal for editing a specific size
+  // Why modal editing: Provides a focused interface for modifying size properties
+  // Enhances user experience with clear input fields and validation
+  // Supports both editing existing sizes and adding new ones
   editSize(id) {
     const sizes = this.getCurrentSizes();
     const size = sizes.find((s) => s.id == id);
@@ -2230,6 +2575,9 @@ class FontClampAdvanced {
     }, 100);
   }
 
+  // Open modal for adding a new size
+  // Why add modal: Provides a clear interface for creating new size entries
+  // Pre-fills default values to streamline the creation process
   saveEdit() {
     if (!this.editingId) return;
 
@@ -2314,6 +2662,10 @@ class FontClampAdvanced {
     this.closeModal();
   }
 
+  // Close the modal and reset state
+  // Why modal closure: Cleans up state and UI after editing
+  // Resets editing context to prevent accidental edits
+  // Hides modal to return focus to main interface
   closeModal() {
     const modal = document.getElementById("edit-modal");
     if (modal) {
@@ -2322,13 +2674,51 @@ class FontClampAdvanced {
     this.editingId = null;
   }
 
+  // Show error state on input field
+  // Why field error display: Provides immediate feedback on input validation
+  // Highlights the specific field with an error
+  // Displays a clear error message within the modal
   showFieldError(field, message) {
     field.classList.add("error");
     field.focus();
-    alert(message);
-    setTimeout(() => field.classList.remove("error"), 3000);
+
+    // Show error within the modal instead of main window
+    const modal = document.getElementById("edit-modal");
+    let errorDiv = modal.querySelector(".modal-error");
+
+    if (!errorDiv) {
+      errorDiv = document.createElement("div");
+      errorDiv.className = "modal-error";
+      errorDiv.style.cssText = `
+        background: #dc3545;
+        color: white;
+        padding: 12px;
+        margin: 0 0 16px 0;
+        border-radius: 4px;
+        font-size: 14px;
+        border: 1px solid #c82333;
+      `;
+
+      const modalContent = modal.querySelector(".fcc-modal-content");
+      modalContent.insertBefore(errorDiv, modalContent.firstChild);
+    }
+
+    errorDiv.innerHTML = `<strong>⚠️ Validation Error:</strong> ${message}`;
+    errorDiv.style.display = "block";
+
+    // Auto-hide error after 5 seconds
+    setTimeout(() => {
+      if (errorDiv) {
+        errorDiv.style.display = "none";
+      }
+      field.classList.remove("error");
+    }, 5000);
   }
 
+  // Delete size entry
+  // Why deletion logic: Provides a way to remove unwanted size entries
+  // Confirms action to prevent accidental deletions
+  // Updates UI and state to reflect changes immediately
   deleteSize(id) {
     if (confirm("Delete this size?")) {
       const sizes = this.getCurrentSizes();
@@ -2346,6 +2736,7 @@ class FontClampAdvanced {
   // TABLE ACTIONS & CONTROLS
   // ========================================================================
 
+  // Open add new size modal with pre-filled data
   addNewSize() {
     const activeTab = window.fontClampCore?.activeTab || "class";
 
@@ -2479,11 +2870,9 @@ class FontClampAdvanced {
       this.updatePreview();
       this.markDataChanged();
 
-      // Update only the current tab's data in core interface
       setTimeout(() => {
         if (window.fontClampCore) {
           const activeTab = window.fontClampCore.activeTab;
-          // Update only the specific tab's data
           switch (activeTab) {
             case "class":
               window.fontClampCore.classSizes =
@@ -2502,17 +2891,30 @@ class FontClampAdvanced {
                 window.fontClampAjax.data.tagSizes;
               break;
           }
-          // Then update dropdown with fresh data for current tab only
           window.fontClampCore.updateBaseValueDropdown(activeTab);
         }
       }, 200);
 
-      // Show success notification
-      this.showResetNotification(tabName);
+      // Show admin notice using WordPressAdminNotices if available
+      try {
+        if (!window.fluidFontNotices) {
+          window.fluidFontNotices = new WordPressAdminNotices();
+        }
+        window.fluidFontNotices.success(
+          `${tabName} have been reset to defaults successfully.`
+        );
+      } catch (error) {
+        console.error("Failed to create success notification:", error);
+        // Fallback: simple alert for user feedback
+        alert(`${tabName} have been reset to defaults successfully.`);
+      }
     }
   }
 
   // Show reset success notification
+  // Why notification: Provides user feedback confirming the reset action
+  // Enhances user experience with clear communication
+  // Auto-dismisses to avoid cluttering the interface
   showResetNotification(tabName) {
     // Create reset notification
     const notification = document.createElement("div");
@@ -2561,6 +2963,10 @@ class FontClampAdvanced {
     }, 3000);
   }
 
+  // Clear all sizes with confirmation and undo option
+  // Why clear functionality: Allows users to quickly remove all entries
+  // Confirms action to prevent accidental data loss
+  // Provides an undo option for immediate recovery
   clearSizes() {
     const activeTab = window.fontClampCore?.activeTab || "class";
     const tabName =
@@ -2619,6 +3025,10 @@ class FontClampAdvanced {
     this.showUndoNotification(tabName, currentData, dataArrayRef, activeTab);
   }
 
+  // Show undo notification after clearing sizes
+  // Why undo notification: Provides immediate recovery option after clearing
+  // Enhances user experience with clear communication and control
+  // Auto-dismisses to avoid cluttering the interface
   showUndoNotification(tabName, backupData, dataArrayRef, tabType) {
     // Create undo notification
     const notification = document.createElement("div");
@@ -2732,6 +3142,10 @@ class FontClampAdvanced {
     }, 10000);
   }
 
+  // Remove notification with animation
+  // Why animated removal: Provides a smooth visual transition when dismissing
+  // Enhances user experience with polished UI interactions
+  // Prevents abrupt disappearance that can be jarring
   removeNotification(notification) {
     // Prevent multiple calls
     if (notification.dataset.removing === "true") return;
@@ -2750,6 +3164,10 @@ class FontClampAdvanced {
     }, 250);
   }
 
+  // Render a friendly message when no sizes are present
+  // Why empty state: Provides clear guidance when no data is available
+  // Encourages user action to add new sizes or reset to defaults
+  // Enhances overall user experience with a polished interface
   renderEmptyTable() {
     const wrapper = this.elements.sizesTableWrapper;
     if (!wrapper) return;
@@ -2781,6 +3199,11 @@ class FontClampAdvanced {
     // Note: The existing event delegation in setupTableActions() will handle these buttons
     // since they use the same IDs as the main action buttons
   }
+
+  // Update settings and recalculate sizes
+  // Why settings update: Centralizes the process of recalculating and rendering
+  // Ensures all dependent components are updated consistently
+  // Marks data as changed for potential save operations
   updateSettings() {
     this.calculateSizes();
     this.renderSizes();
@@ -2788,6 +3211,10 @@ class FontClampAdvanced {
     this.markDataChanged();
   }
 
+  // Mark data as changed for save tracking
+  // Why change tracking: Enables save button when data is modified
+  // Prevents unnecessary saves when no changes have occurred
+  // Enhances user experience with clear save state indication
   markDataChanged() {
     this.dataChanged = true;
   }
@@ -2796,13 +3223,20 @@ class FontClampAdvanced {
   // DATA MANAGEMENT & UTILITY METHODS
   // ========================================================================
 
+  // Get sizes for the currently active tab
+  // Why dynamic size retrieval: Ensures operations always use the correct dataset
+  // Adapts to user context for accurate calculations and rendering
+  // Simplifies code by centralizing size access logic
   getCurrentSizes() {
     const activeTab = window.fontClampCore?.activeTab || "class";
-    const sizes = FontClampUtils.getCurrentSizes(activeTab, this);
-    console.log(`🔍 getCurrentSizes for ${activeTab}:`, sizes);
+    const sizes = FontForgeUtils.getCurrentSizes(activeTab, this);
     return sizes;
   }
 
+  // Get display name for a size based on active tab
+  // Why dynamic naming: Adapts to different naming conventions across tabs
+  // Ensures consistent display of size names in the UI
+  // Simplifies code by centralizing name retrieval logic
   getSizeDisplayName(size, activeTab) {
     switch (activeTab) {
       case "class":
@@ -2818,6 +3252,10 @@ class FontClampAdvanced {
     }
   }
 
+  // Format size value with appropriate unit
+  // Why size formatting: Ensures consistent display of size values
+  // Adapts formatting based on unit type for clarity
+  // Handles empty or null values gracefully
   formatSize(value, unitType) {
     if (!value) return "—";
     if (unitType === "px") {
@@ -2826,6 +3264,10 @@ class FontClampAdvanced {
     return `${value.toFixed(3)} ${unitType}`;
   }
 
+  // Debounce function to limit how often a function can be called
+  // Why debounce: Improves performance by reducing excessive calls
+  // Enhances user experience by preventing laggy interactions
+  // Useful for input events where rapid changes can occur
   debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -2838,6 +3280,10 @@ class FontClampAdvanced {
     };
   }
 
+  // Show error message in console
+  // Why error logging: Provides feedback for debugging and issue tracking
+  // Centralizes error handling for easier maintenance
+  // Can be expanded to include user-facing notifications if needed
   showError(message) {
     console.error(message);
   }
@@ -2846,6 +3292,10 @@ class FontClampAdvanced {
   // DEFAULT DATA FACTORIES
   // ========================================================================
 
+  // Default sizes for classes, variables, and tags
+  // Why default data: Provides a baseline for users to start with
+  // Ensures consistent initial state across installations
+  // Simplifies reset functionality by having predefined defaults
   getDefaultClassSizes() {
     return [
       {
@@ -2891,6 +3341,10 @@ class FontClampAdvanced {
     ];
   }
 
+  // Default variable sizes
+  // Why variable defaults: Provides a standard set of CSS variables for users
+  // Ensures consistency with class sizes for easier adoption
+  // Simplifies reset functionality by having predefined defaults
   getDefaultVariableSizes() {
     return [
       {
@@ -2936,6 +3390,10 @@ class FontClampAdvanced {
     ];
   }
 
+  // Default tag sizes
+  // Why tag defaults: Provides a standard set of HTML tags for users
+  // Ensures consistency with class and variable sizes for easier adoption
+  // Simplifies reset functionality by having predefined defaults
   getDefaultTagSizes() {
     return [
       {
@@ -2976,6 +3434,10 @@ class FontClampAdvanced {
     ];
   }
 
+  // Tailwind sizes are read-only defaults
+  // Why tailwind defaults: Provides a reference set of Tailwind CSS sizes
+  // Ensures users have a familiar baseline for Tailwind integration
+  // Simplifies reset functionality by having predefined defaults
   getDefaultTailwindSizes() {
     return [
       {
@@ -3023,6 +3485,9 @@ class FontClampAdvanced {
 }
 
 // Initialize Advanced Features
+// Why initialization: Sets up the advanced features of the plugin
+// Ensures all event listeners and UI components are ready
+// Provides a seamless experience for users interacting with size management
 document.addEventListener("DOMContentLoaded", () => {
   window.fontClampAdvanced = new FontClampAdvanced();
 });
