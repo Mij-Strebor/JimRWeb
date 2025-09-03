@@ -21,7 +21,7 @@ class FluidFontForge
     // ========================================================================
 
     // Configuration Constants
-    const VERSION = '4.0.0';
+    const VERSION = FLUID_FONT_FORGE_VERSION;
     const PLUGIN_SLUG = 'fluid-font-forge';
     const NONCE_ACTION = 'fluid_font_nonce';
 

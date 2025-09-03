@@ -135,7 +135,10 @@ const FontForgeUtils = {
     }
 
     // Handle defaults if needed and fontClampAdvanced instance is available
-    if (sizes.length === 0 && fontClampAdvanced) {
+    // But don't restore if this tab was explicitly cleared by user
+    const isExplicitlyCleared =
+      window.fontClampAjax?.data?.explicitlyClearedTabs?.[tab];
+    if (sizes.length === 0 && fontClampAdvanced && !isExplicitlyCleared) {
       switch (tab) {
         case "class":
           sizes = fontClampAdvanced.getDefaultClassSizes();
@@ -2845,6 +2848,8 @@ class FontClampAdvanced {
         ? "Classes"
         : activeTab === "vars"
         ? "Variables"
+        : activeTab === "tailwind"
+        ? "Tailwind Sizes"
         : "Tags";
 
     if (
@@ -2860,9 +2865,18 @@ class FontClampAdvanced {
           window.fontClampAjax.data.variableSizes =
             this.getDefaultVariableSizes();
           break;
+        case "tailwind":
+          window.fontClampAjax.data.tailwindSizes =
+            this.getDefaultTailwindSizes();
+          break;
         case "tag":
           window.fontClampAjax.data.tagSizes = this.getDefaultTagSizes();
           break;
+      }
+
+      // Clear the explicitly cleared flag since we're restoring defaults
+      if (window.fontClampAjax.data.explicitlyClearedTabs) {
+        delete window.fontClampAjax.data.explicitlyClearedTabs[activeTab];
       }
 
       this.calculateSizes();
@@ -2969,6 +2983,7 @@ class FontClampAdvanced {
   // Provides an undo option for immediate recovery
   clearSizes() {
     const activeTab = window.fontClampCore?.activeTab || "class";
+    console.log("clearSizes called for tab:", activeTab);
     const tabName =
       activeTab === "class"
         ? "Classes"
@@ -2984,10 +2999,29 @@ class FontClampAdvanced {
     } else if (activeTab === "vars") {
       currentData = [...(window.fontClampAjax?.data?.variableSizes || [])];
       dataArrayRef = "variableSizes";
+    } else if (activeTab === "tailwind") {
+      currentData = [...(window.fontClampAjax?.data?.tailwindSizes || [])];
+      dataArrayRef = "tailwindSizes";
     } else if (activeTab === "tag") {
       currentData = [...(window.fontClampAjax?.data?.tagSizes || [])];
       dataArrayRef = "tagSizes";
     }
+
+    // Guard against undefined data
+    if (!currentData || !dataArrayRef) {
+      console.error(
+        "Unable to clear sizes - invalid tab or missing data:",
+        activeTab
+      );
+      return;
+    }
+
+    console.log("currentData:", currentData);
+    console.log("dataArrayRef:", dataArrayRef);
+    console.log(
+      "currentData length:",
+      currentData ? currentData.length : "undefined"
+    );
 
     // Show confirmation dialog
     const confirmed = confirm(
@@ -2999,6 +3033,28 @@ class FontClampAdvanced {
     // Clear the data source
     if (window.fontClampAjax?.data) {
       window.fontClampAjax.data[dataArrayRef] = [];
+      // Mark this tab as explicitly cleared to prevent auto-restoration
+      window.fontClampAjax.data.explicitlyClearedTabs =
+        window.fontClampAjax.data.explicitlyClearedTabs || {};
+      window.fontClampAjax.data.explicitlyClearedTabs[activeTab] = true;
+    }
+
+    // Update core interface data to stay in sync
+    if (window.fontClampCore) {
+      switch (activeTab) {
+        case "class":
+          window.fontClampCore.classSizes = [];
+          break;
+        case "vars":
+          window.fontClampCore.variableSizes = [];
+          break;
+        case "tag":
+          window.fontClampCore.tagSizes = [];
+          break;
+        case "tailwind":
+          window.fontClampCore.tailwindSizes = [];
+          break;
+      }
     }
 
     // Directly render empty table instead of calling renderSizes()
@@ -3012,6 +3068,8 @@ class FontClampAdvanced {
           ? "No classes"
           : activeTab === "vars"
           ? "No variables"
+          : activeTab === "tailwind"
+          ? "No sizes"
           : "No tags";
       baseSelect.innerHTML = `<option>${emptyOptionText}</option>`;
       baseSelect.disabled = true;
@@ -3103,6 +3161,10 @@ class FontClampAdvanced {
       // Restore the data
       if (window.fontClampAjax?.data) {
         window.fontClampAjax.data[dataArrayRef] = backupData;
+        // Clear the explicitly cleared flag since data is restored
+        if (window.fontClampAjax.data.explicitlyClearedTabs) {
+          delete window.fontClampAjax.data.explicitlyClearedTabs[tabType];
+        }
       }
 
       // Regenerate the table
