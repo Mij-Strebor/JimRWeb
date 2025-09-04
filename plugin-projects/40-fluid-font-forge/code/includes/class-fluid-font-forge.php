@@ -21,7 +21,6 @@ class FluidFontForge
     // ========================================================================
 
     // Configuration Constants
-    const VERSION = FLUID_FONT_FORGE_VERSION;
     const PLUGIN_SLUG = 'fluid-font-forge';
     const NONCE_ACTION = 'fluid_font_nonce';
 
@@ -296,7 +295,7 @@ class FluidFontForge
             'font-clamp-tailwind',
             'https://cdn.tailwindcss.com',
             [],
-            self::VERSION
+            FLUID_FONT_FORGE_VERSION
         );
 
         // Enqueue our admin styles
@@ -336,7 +335,7 @@ class FluidFontForge
                 'tagSizes' => $this->get_font_clamp_tag_sizes()
             ],
             'constants' => $this->get_all_constants(),
-            'version' => self::VERSION,
+            'version' => FLUID_FONT_FORGE_VERSION,
             'debug' => defined('WP_DEBUG') && WP_DEBUG
         ]);
     }
@@ -493,7 +492,7 @@ class FluidFontForge
 ?>
         <div class="wrap" style="background: var(--clr-page-bg); padding: 20px; min-height: 100vh;">
             <div class="fcc-header-section">
-                <h1 class="text-2xl font-bold mb-4">Fluid Font Forge (<?php echo self::VERSION; ?>)</h1><br>
+                <h1 class="text-2xl font-bold mb-4">Fluid Font Forge (<?php echo FLUID_FONT_FORGE_VERSION; ?>)</h1><br>
 
                 <!-- About Section -->
                 <div class="fcc-info-toggle-section">
