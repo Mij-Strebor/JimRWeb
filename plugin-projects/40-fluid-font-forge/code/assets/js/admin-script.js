@@ -102,37 +102,13 @@ class SimpleTooltips {
 // Utility to get current sizes based on active tab and ensure defaults are loaded if none exist
 // Requires access to fontClampAjax data and fontClampAdvanced instance
 // Returns array of sizes for the active tab
-// Usage: FontForgeUtils.getCurrentSizes(activeTab, fontClampAdvanced)
-// activeTab: string ("class", "vars", "tailwind", "tag")
-// fontClampAdvanced: instance of FontClampAdvanced class
-// Returns: array of size objects for the specified tab
-// Example size object for "class" tab: { id: 1, className: "small", minSize: 12, maxSize: 16, lineHeight: 1.4 }
-// Example size object for "vars" tab: { id: 1, variableName: "--fs-sm", minSize: 12, maxSize: 16, lineHeight: 1.4 }
-// Example size object for "tailwind" tab: { id: 1, tailwindName: "sm", minSize: 12, maxSize: 16, lineHeight: 1.4 }
-// Example size object for "tag" tab: { id: 1, tagName: "p", minSize: 12, maxSize: 16, lineHeight: 1.4 }
-// If no sizes exist for the tab, attempts to load defaults from fontClampAdvanced
-// If still no sizes, returns empty array
 const FontForgeUtils = {
   getCurrentSizes(activeTab = null, fontClampAdvanced = null) {
     const tab = activeTab || window.fontClampCore?.activeTab || "class";
 
-    let sizes = [];
-    switch (tab) {
-      case "class":
-        sizes = window.fontClampAjax?.data?.classSizes || [];
-        break;
-      case "vars":
-        sizes = window.fontClampAjax?.data?.variableSizes || [];
-        break;
-      case "tailwind":
-        sizes = window.fontClampAjax?.data?.tailwindSizes || [];
-        break;
-      case "tag":
-        sizes = window.fontClampAjax?.data?.tagSizes || [];
-        break;
-      default:
-        sizes = [];
-    }
+    // Get data from localized script
+    const data = window.fontClampAjax?.data || {};
+    let sizes = TabDataUtils.getDataForTab(tab, data);
 
     // Handle defaults if needed and fontClampAdvanced instance is available
     // But don't restore if this tab was explicitly cleared by user
@@ -666,26 +642,11 @@ class FontClampEnhancedCoreInterface {
     });
     document.querySelector(`[data-tab="${tabName}"]`)?.classList.add("active");
 
-    if (tabName === "class") {
-      this.elements.tableTitle.textContent = "Font Size Classes";
-      this.elements.selectedCodeTitle.textContent = "Selected Class CSS";
-      this.elements.generatedCodeTitle.textContent =
-        "Generated CSS (All Classes)";
-    } else if (tabName === "vars") {
-      this.elements.tableTitle.textContent = "CSS Variables";
-      this.elements.selectedCodeTitle.textContent = "Selected Variable CSS";
-      this.elements.generatedCodeTitle.textContent =
-        "Generated CSS (All Variables)";
-    } else if (tabName === "tailwind") {
-      this.elements.tableTitle.textContent = "Tailwind Font Sizes";
-      this.elements.selectedCodeTitle.textContent = "Selected Size Config";
-      this.elements.generatedCodeTitle.textContent =
-        "Tailwind Config (fontSize Object)";
-    } else if (tabName === "tag") {
-      this.elements.tableTitle.textContent = "HTML Tag Styles";
-      this.elements.selectedCodeTitle.textContent = "Selected Tag CSS";
-      this.elements.generatedCodeTitle.textContent = "Generated CSS (All Tags)";
-    }
+    this.elements.tableTitle.textContent = TabDataUtils.getTableTitle(tabName);
+    this.elements.selectedCodeTitle.textContent =
+      TabDataUtils.getSelectedCSSTitle(tabName);
+    this.elements.generatedCodeTitle.textContent =
+      TabDataUtils.getGeneratedCSSTitle(tabName);
 
     if (typeof this.updateBaseValueDropdown === "function") {
       this.updateBaseValueDropdown(tabName);
@@ -706,33 +667,27 @@ class FontClampEnhancedCoreInterface {
 
     baseValueSelect.innerHTML = "";
 
-    let currentSizes, propertyName, defaultValue;
+    const propertyName = TabDataUtils.getPropertyName(tabName);
+    const defaultValue = TabDataUtils.getBaseDefaultValue(tabName);
 
-    if (tabName === "class") {
-      currentSizes = this.classSizes.filter(
-        (size) => !size.className || !size.className.startsWith("custom-")
-      );
-      propertyName = "className";
-      defaultValue = "medium";
-    } else if (tabName === "vars") {
-      currentSizes = this.variableSizes.filter(
-        (size) => !size.variableName || !size.variableName.startsWith("custom-")
-      );
-      propertyName = "variableName";
-      defaultValue = "--fs-md";
-    } else if (tabName === "tailwind") {
+    let currentSizes;
+    if (tabName === "tailwind") {
       currentSizes = FontForgeUtils.getCurrentSizes(
         "tailwind",
         window.fontClampAdvanced
       );
-      propertyName = "tailwindName";
-      defaultValue = "base";
-    } else if (tabName === "tag") {
-      currentSizes = this.tagSizes.filter(
-        (size) => !size.tagName || !size.tagName.startsWith("custom-")
-      );
-      propertyName = "tagName";
-      defaultValue = "p";
+    } else {
+      const allSizes = TabDataUtils.getDataForTab(tabName, {
+        classSizes: this.classSizes,
+        variableSizes: this.variableSizes,
+        tagSizes: this.tagSizes,
+      });
+
+      // Filter out custom entries for base dropdown
+      currentSizes = allSizes.filter((size) => {
+        const name = TabDataUtils.getSizeDisplayName(size, tabName);
+        return !name.startsWith("custom-") && !name.startsWith("--fs-custom-");
+      });
     }
 
     if (!currentSizes || currentSizes.length === 0) {

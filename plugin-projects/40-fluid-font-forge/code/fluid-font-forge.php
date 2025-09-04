@@ -151,8 +151,12 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'fluid_font_forge
 // Check for plugin updates
 add_action('plugins_loaded', 'fluid_font_forge_check_version');
 
+// Load the data factory
+require_once FLUID_FONT_FORGE_PATH . 'includes/class-default-data-factory.php';
+
 // Load the main class
 require_once FLUID_FONT_FORGE_PATH . 'includes/class-fluid-font-forge.php';
+
 // Initialize the plugin
 if (is_admin()) {
     global $fluidFontForge;

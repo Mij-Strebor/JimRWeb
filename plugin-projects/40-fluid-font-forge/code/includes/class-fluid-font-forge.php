@@ -99,15 +99,16 @@ class FluidFontForge
     }
 
     /**
-     * Initialize default values using factory methods
+     * Initialize default values using data factory
      */
     private function init_defaults()
     {
-        $this->default_settings = $this->create_default_settings();
-        $this->default_class_sizes = $this->create_default_sizes('class');
-        $this->default_variable_sizes = $this->create_default_sizes('vars');
-        $this->default_tag_sizes = $this->create_default_sizes('tags');
-        $this->default_tailwind_sizes = $this->create_default_sizes('tailwind');
+        $defaults = FluidFontForgeDefaultData::getAllDefaults();
+        $this->default_settings = $defaults['settings'];
+        $this->default_class_sizes = $defaults['classSizes'];
+        $this->default_variable_sizes = $defaults['variableSizes'];
+        $this->default_tag_sizes = $defaults['tagSizes'];
+        $this->default_tailwind_sizes = $defaults['tailwindSizes'];
     }
 
     /**
@@ -119,116 +120,6 @@ class FluidFontForge
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
         add_action('wp_ajax_save_font_clamp_sizes', [$this, 'save_sizes']);
         add_action('wp_ajax_save_font_clamp_settings', [$this, 'save_settings']);
-    }
-
-    // ========================================================================
-    // DATA MANAGEMENT METHODS
-    // ========================================================================
-
-    /**
-     * Create default settings array using constants
-     */
-    private function create_default_settings()
-    {
-        return [
-            'minRootSize' => self::DEFAULT_MIN_ROOT_SIZE,
-            'maxRootSize' => self::DEFAULT_MAX_ROOT_SIZE,
-            'minViewport' => self::DEFAULT_MIN_VIEWPORT,
-            'maxViewport' => self::DEFAULT_MAX_VIEWPORT,
-            'unitType' => 'px',
-            'selectedClassSizeId' => 5,
-            'selectedVariableSizeId' => 5,
-            'selectedTagSizeId' => 1,
-            'activeTab' => 'class',
-            'previewFontUrl' => '',
-            'minScale' => self::DEFAULT_MIN_SCALE,
-            'maxScale' => self::DEFAULT_MAX_SCALE,
-            'autosaveEnabled' => true,
-            'classBaseValue' => 'medium',
-            'varsBaseValue' => '--fs-md',
-            'tagBaseValue' => 'p'
-        ];
-    }
-
-    /**
-     * Create default sizes array for specified type using constants
-     */
-    private function create_default_sizes($type)
-    {
-        $configs = [
-            'class' => [
-                ['id' => 1, 'name' => 'xxxlarge', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 2, 'name' => 'xxlarge', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 3, 'name' => 'xlarge', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 4, 'name' => 'large', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 5, 'name' => 'medium', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 6, 'name' => 'small', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 7, 'name' => 'xsmall', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 8, 'name' => 'xxsmall', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT]
-            ],
-            'vars' => [
-                ['id' => 1, 'name' => '--fs-xxxl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 2, 'name' => '--fs-xxl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 3, 'name' => '--fs-xl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 4, 'name' => '--fs-lg', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 5, 'name' => '--fs-md', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 6, 'name' => '--fs-sm', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 7, 'name' => '--fs-xs', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 8, 'name' => '--fs-xxs', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT]
-            ],
-            'tailwind' => [
-                ['id' => 1, 'name' => '4xl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 2, 'name' => '3xl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 3, 'name' => '2xl', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 4, 'name' => 'xl', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 5, 'name' => 'base', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 6, 'name' => 'lg', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 7, 'name' => 'sm', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 8, 'name' => 'xs', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT]
-            ],
-            'tags' => [
-                ['id' => 1, 'name' => 'h1', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 2, 'name' => 'h2', 'lineHeight' => self::DEFAULT_HEADING_LINE_HEIGHT],
-                ['id' => 3, 'name' => 'h3', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 4, 'name' => 'h4', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 5, 'name' => 'h5', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 6, 'name' => 'h6', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT],
-                ['id' => 7, 'name' => 'p', 'lineHeight' => self::DEFAULT_BODY_LINE_HEIGHT]
-            ]
-        ];
-
-        if (!isset($configs[$type])) {
-            error_log("Fluid Font: Invalid size type: {$type}");
-            return [];
-        }
-
-        $config = $configs[$type];
-        $property_name = $this->get_size_property_name($type);
-
-        return array_map(function ($item) use ($property_name) {
-            return [
-                'id' => $item['id'],
-                $property_name => $item['name'],
-                'lineHeight' => $item['lineHeight']
-            ];
-        }, $config);
-    }
-
-    /**
-     * Get the property name for a size type
-     * @param string $type Size type ('class', 'vars', 'tailwind', 'tags')
-     * @return string Corresponding property name (e.g. 'className', 'variableName', etc.)
-     */
-    private function get_size_property_name($type)
-    {
-        $property_map = [
-            'class' => 'className',
-            'vars' => 'variableName',
-            'tailwind' => 'tailwindName',
-            'tags' => 'tagName'
-        ];
-
-        return $property_map[$type] ?? 'className';
     }
 
     // ========================================================================
@@ -309,11 +200,20 @@ class FluidFontForge
         // Enqueue WordPress utilities
         wp_enqueue_script('wp-util');
 
+        // Enqueue tab utilities first
+        wp_enqueue_script(
+            'fluid-font-forge-tab-utils',
+            FLUID_FONT_FORGE_URL . 'assets/js/tab-data-utilities.js',
+            [],
+            FLUID_FONT_FORGE_VERSION,
+            true
+        );
+
         // Enqueue our admin script
         wp_enqueue_script(
             'fluid-font-forge-admin',
             FLUID_FONT_FORGE_URL . 'assets/js/admin-script.js',
-            ['wp-util'],
+            ['wp-util', 'fluid-font-forge-tab-utils'],
             FLUID_FONT_FORGE_VERSION,
             true
         );
@@ -346,24 +246,7 @@ class FluidFontForge
      */
     public function get_all_constants()
     {
-        return [
-            'DEFAULT_MIN_ROOT_SIZE' => self::DEFAULT_MIN_ROOT_SIZE,
-            'DEFAULT_MAX_ROOT_SIZE' => self::DEFAULT_MAX_ROOT_SIZE,
-            'DEFAULT_MIN_VIEWPORT' => self::DEFAULT_MIN_VIEWPORT,
-            'DEFAULT_MAX_VIEWPORT' => self::DEFAULT_MAX_VIEWPORT,
-            'DEFAULT_MIN_SCALE' => self::DEFAULT_MIN_SCALE,
-            'DEFAULT_MAX_SCALE' => self::DEFAULT_MAX_SCALE,
-            'DEFAULT_HEADING_LINE_HEIGHT' => self::DEFAULT_HEADING_LINE_HEIGHT,
-            'DEFAULT_BODY_LINE_HEIGHT' => self::DEFAULT_BODY_LINE_HEIGHT,
-            'BROWSER_DEFAULT_FONT_SIZE' => self::BROWSER_DEFAULT_FONT_SIZE,
-            'CSS_UNIT_CONVERSION_BASE' => self::CSS_UNIT_CONVERSION_BASE,
-            'MIN_ROOT_SIZE_RANGE' => self::MIN_ROOT_SIZE_RANGE,
-            'VIEWPORT_RANGE' => self::VIEWPORT_RANGE,
-            'LINE_HEIGHT_RANGE' => self::LINE_HEIGHT_RANGE,
-            'SCALE_RANGE' => self::SCALE_RANGE,
-            'VALID_UNITS' => self::VALID_UNITS,
-            'VALID_TABS' => self::VALID_TABS
-        ];
+        return FluidFontForgeDefaultData::getConstants();
     }
 
     // ========================================================================
