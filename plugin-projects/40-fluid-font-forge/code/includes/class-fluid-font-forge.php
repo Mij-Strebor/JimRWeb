@@ -327,21 +327,27 @@ class FluidFontForge
 
     /**
      * Main Admin Page Renderer - Complete Interface
-     * // Combines all segments into a single cohesive interface
-     * // Uses output buffering to capture and return the complete HTML
-     * 
      */
     public function render_admin_page()
     {
-        $data = [
+        $data = $this->prepare_admin_page_data();
+        echo $this->get_complete_interface($data);
+    }
+
+    /**
+     * Prepare all data needed for admin page rendering
+     * 
+     * @return array Complete data array for interface rendering
+     */
+    private function prepare_admin_page_data()
+    {
+        return [
             'settings' => $this->get_font_clamp_settings(),
             'classSizes' => $this->get_font_clamp_class_sizes(),
             'variableSizes' => $this->get_font_clamp_variable_sizes(),
             'tagSizes' => $this->get_font_clamp_tag_sizes(),
             'tailwindSizes' => $this->get_font_clamp_tailwind_sizes()
         ];
-
-        echo $this->get_complete_interface($data);
     }
 
     /**

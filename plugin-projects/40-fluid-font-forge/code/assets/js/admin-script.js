@@ -1623,105 +1623,140 @@ class FontClampAdvanced {
   // UI RENDERING & PREVIEW METHODS
   // ========================================================================
 
-  // Render sizes table based on current data
-  // Why rendering: Visual representation of data for user interaction
+  // Update preview containers with current size data
   updatePreview() {
     try {
-      const sizes = this.getCurrentSizes();
-      const previewMin = this.elements.previewMinContainer;
-      const previewMax = this.elements.previewMaxContainer;
+      const previewContext = this.createPreviewContext();
+      if (!this.validatePreviewContext(previewContext)) return;
 
-      if (!previewMin || !previewMax) {
+      this.clearPreviewContainers(previewContext);
+
+      if (previewContext.sizes.length === 0) {
+        this.renderEmptyPreview(previewContext);
         return;
       }
 
-      previewMin.innerHTML = "";
-      previewMax.innerHTML = "";
-
-      if (sizes.length === 0) {
-        previewMin.innerHTML =
-          '<div style="text-align: center; color: #6b7280; font-style: italic; padding: 60px 20px;">No sizes to preview</div>';
-        previewMax.innerHTML =
-          '<div style="text-align: center; color: #6b7280; font-style: italic; padding: 60px 20px;">No sizes to preview</div>';
-        return;
-      }
-
-      const minRootSize = parseFloat(this.elements.minRootSizeInput?.value);
-      const maxRootSize = parseFloat(this.elements.maxRootSizeInput?.value);
-      const unitType = window.fontClampCore?.unitType || "rem";
-
-      if (isNaN(minRootSize) || isNaN(maxRootSize)) {
-        console.error("❌ Invalid root size values in updatePreview");
-        return;
-      }
-
-      const activeTab = window.fontClampCore?.activeTab || "class";
-
-      sizes.forEach((size, index) => {
-        const displayName = this.getSizeDisplayName(size, activeTab);
-        const minSize = size.min || this.constants.DEFAULT_MIN_ROOT_SIZE;
-        const maxSize = size.max || this.constants.DEFAULT_MAX_ROOT_SIZE;
-
-        let minSizePx, maxSizePx;
-        if (unitType === "rem") {
-          // Why multiply: Convert rem back to pixels for preview display
-          // Formula: pixels = rem_value × current_root_font_size
-          minSizePx = minSize * minRootSize;
-          maxSizePx = maxSize * maxRootSize;
-        } else {
-          // Why direct use: px values are already in display units
-          minSizePx = minSize;
-          maxSizePx = maxSize;
-        }
-
-        const lineHeight =
-          size.lineHeight || this.constants.DEFAULT_LINE_HEIGHT;
-
-        // Why multiply by line height: Total text height includes line spacing
-        // Typography formula: rendered_height = font_size × line_height
-        const minTextHeight = minSizePx * lineHeight;
-        const maxTextHeight = maxSizePx * lineHeight;
-
-        // Why Math.max + 16: Use tallest text height + padding for consistent alignment
-        // Prevents smaller text from floating, creates visual rhythm
-        const unifiedRowHeight = Math.max(minTextHeight, maxTextHeight) + 16;
-
-        // Why abs(): Get positive difference regardless of which size is larger
-        const paddingDiff = Math.abs(maxSizePx - minSizePx);
-
-        // Why conditional padding: Align smaller text to same baseline as larger text
-        // Bottom-alignment math: smaller_size + padding = larger_size
-        const minPadding = minSizePx < maxSizePx ? paddingDiff : 0;
-        const maxPadding = maxSizePx < minSizePx ? paddingDiff : 0;
-
-        const minRow = this.createPreviewRow(
-          displayName,
-          minSizePx,
-          "px",
-          lineHeight,
-          unifiedRowHeight,
-          size.id,
-          index,
-          minPadding
-        );
-        const maxRow = this.createPreviewRow(
-          displayName,
-          maxSizePx,
-          "px",
-          lineHeight,
-          unifiedRowHeight,
-          size.id,
-          index,
-          maxPadding
-        );
-        this.addSynchronizedHover(minRow, maxRow);
-
-        previewMin.appendChild(minRow);
-        previewMax.appendChild(maxRow);
-      });
+      this.renderPreviewRows(previewContext);
     } catch (error) {
-      console.error("❌ Preview update error:", error);
+      console.error("⚠ Preview update error:", error);
     }
+  }
+
+  // Create preview context with all needed data
+  createPreviewContext() {
+    return {
+      sizes: this.getCurrentSizes(),
+      previewMin: this.elements.previewMinContainer,
+      previewMax: this.elements.previewMaxContainer,
+      minRootSize: parseFloat(this.elements.minRootSizeInput?.value),
+      maxRootSize: parseFloat(this.elements.maxRootSizeInput?.value),
+      unitType: window.fontClampCore?.unitType || "rem",
+      activeTab: window.fontClampCore?.activeTab || "class",
+    };
+  }
+
+  // Validate preview context data
+  // Why validation: Prevents runtime errors from missing/invalid data
+  // Ensures all required elements and values are present before proceeding
+  // Provides clear error messages for easier debugging
+  validatePreviewContext(context) {
+    if (!context.previewMin || !context.previewMax) {
+      return false;
+    }
+
+    if (isNaN(context.minRootSize) || isNaN(context.maxRootSize)) {
+      console.error("⚠ Invalid root size values in updatePreview");
+      return false;
+    }
+
+    return true;
+  }
+
+  // Clear preview containers
+  // Why clearing: Removes old preview rows before rendering new ones
+  // Prevents duplication and ensures accurate display of current data
+  clearPreviewContainers(context) {
+    context.previewMin.innerHTML = "";
+    context.previewMax.innerHTML = "";
+  }
+
+  // Render empty state message
+  // Why empty state: Provides user feedback when no sizes are available
+  // Enhances user experience by guiding next steps (e.g., add sizes)
+  renderEmptyPreview(context) {
+    const emptyMessage =
+      '<div style="text-align: center; color: #6b7280; font-style: italic; padding: 60px 20px;">No sizes to preview</div>';
+    context.previewMin.innerHTML = emptyMessage;
+    context.previewMax.innerHTML = emptyMessage;
+  }
+
+  // Render preview rows for all sizes
+  // Why modular rendering: Separates concerns for cleaner code
+  // Facilitates easier updates to row structure and styling
+  // Enhances maintainability by isolating row rendering logic
+  renderPreviewRows(context) {
+    context.sizes.forEach((size, index) => {
+      const rowData = this.calculatePreviewRowData(size, index, context);
+      const minRow = this.createPreviewRow(
+        rowData.displayName,
+        rowData.minSizePx,
+        "px",
+        rowData.lineHeight,
+        rowData.unifiedRowHeight,
+        size.id,
+        index,
+        rowData.minPadding
+      );
+      const maxRow = this.createPreviewRow(
+        rowData.displayName,
+        rowData.maxSizePx,
+        "px",
+        rowData.lineHeight,
+        rowData.unifiedRowHeight,
+        size.id,
+        index,
+        rowData.maxPadding
+      );
+
+      this.addSynchronizedHover(minRow, maxRow);
+      context.previewMin.appendChild(minRow);
+      context.previewMax.appendChild(maxRow);
+    });
+  }
+
+  // Calculate data needed for a preview row
+  // Why calculation: Centralizes logic for determining row appearance
+  // Ensures consistent styling and sizing across all preview rows
+  // Facilitates easier adjustments to row calculations in one location
+  calculatePreviewRowData(size, index, context) {
+    const displayName = this.getSizeDisplayName(size, context.activeTab);
+    const minSize = size.min || this.constants.DEFAULT_MIN_ROOT_SIZE;
+    const maxSize = size.max || this.constants.DEFAULT_MAX_ROOT_SIZE;
+
+    let minSizePx, maxSizePx;
+    if (context.unitType === "rem") {
+      minSizePx = minSize * context.minRootSize;
+      maxSizePx = maxSize * context.maxRootSize;
+    } else {
+      minSizePx = minSize;
+      maxSizePx = maxSize;
+    }
+
+    const lineHeight = size.lineHeight || this.constants.DEFAULT_LINE_HEIGHT;
+    const minTextHeight = minSizePx * lineHeight;
+    const maxTextHeight = maxSizePx * lineHeight;
+    const unifiedRowHeight = Math.max(minTextHeight, maxTextHeight) + 16;
+    const paddingDiff = Math.abs(maxSizePx - minSizePx);
+
+    return {
+      displayName,
+      minSizePx,
+      maxSizePx,
+      lineHeight,
+      unifiedRowHeight,
+      minPadding: minSizePx < maxSizePx ? paddingDiff : 0,
+      maxPadding: maxSizePx < minSizePx ? paddingDiff : 0,
+    };
   }
 
   // Create a single preview row element
@@ -1846,78 +1881,123 @@ class FontClampAdvanced {
   }
 
   // Render sizes table with current size data
-  // Why rendering: Visual representation of sizes for user interaction
-  // Enables editing, deleting, and reordering of sizes
-  // Reflects real-time changes from calculations and settings
   renderSizes() {
     const wrapper = this.elements.sizesTableWrapper;
     if (!wrapper) return;
 
-    const sizes = this.getCurrentSizes();
-    const activeTab = window.fontClampCore?.activeTab || "class";
-    const unitType = window.fontClampCore?.unitType || "rem";
+    const renderContext = this.createRenderContext();
+    this.createTableStructure(wrapper);
+    this.populateTableRows(renderContext);
+    this.finalizeTableRender();
+  }
 
+  // Create rendering context with all needed data
+  // Why context: Encapsulates all necessary data for rendering
+  // Simplifies function signatures by passing a single object
+  // Facilitates easier debugging and state management
+  createRenderContext() {
+    return {
+      sizes: this.getCurrentSizes(),
+      activeTab: window.fontClampCore?.activeTab || "class",
+      unitType: window.fontClampCore?.unitType || "rem",
+      tbody: null, // Will be set after table creation
+    };
+  }
+
+  // Create the table HTML structure
+  // Why structure creation: Separates HTML layout from data population
+  // Ensures consistent table format
+  // Facilitates easier updates to table layout
+  createTableStructure(wrapper) {
     wrapper.innerHTML = `
-                        <table class="font-table">
-                            <thead>
-                                <tr id="table-header">
-                                    <th style="width: 24px;">⋮</th>
-                                    <th style="width: 90px;">Name</th>
-                                    <th style="width: 70px;">Min Size</th>
-                                    <th style="width: 70px;">Max Size</th>
-                                    <th style="width: 40px;">Line Height</th>
-                                    <th style="width: 30px;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sizes-table"></tbody>
-                        </table>
-                    `;
+    <table class="font-table">
+      <thead>
+        <tr id="table-header">
+          <th style="width: 24px;">⋮</th>
+          <th style="width: 90px;">Name</th>
+          <th style="width: 70px;">Min Size</th>
+          <th style="width: 70px;">Max Size</th>
+          <th style="width: 40px;">Line Height</th>
+          <th style="width: 30px;">Action</th>
+        </tr>
+      </thead>
+      <tbody id="sizes-table"></tbody>
+    </table>
+  `;
+  }
 
-    const tbody = document.getElementById("sizes-table");
+  // Populate table rows with size data
+  // Why row population: Dynamically fills table with current data
+  // Separates data handling from HTML structure
+  // Facilitates easier updates to row content and event binding
+  populateTableRows(context) {
+    context.tbody = document.getElementById("sizes-table");
 
-    sizes.forEach((size, index) => {
-      const row = document.createElement("tr");
-      row.className = "size-row";
-      row.draggable = true;
-      row.dataset.id = size.id;
-      row.dataset.index = index;
-
-      const displayName = this.getSizeDisplayName(size, activeTab);
-
-      row.innerHTML = `
-                            <td class="drag-handle" style="text-align: center; color: #9ca3af; cursor: grab; user-select: none;" 
-            data-tooltip="Drag to reorder" data-tooltip-position="right">⋮⋮</td>
-                            <td style="font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${displayName}">${displayName}</td>
-                            <td style="text-align: center; font-family: monospace; font-size: 10px;">${this.formatSize(
-                              size.min,
-                              unitType
-                            )}</td>
-                            <td style="text-align: center; font-family: monospace; font-size: 10px;">${this.formatSize(
-                              size.max,
-                              unitType
-                            )}</td>
-                            <td style="text-align: center; font-size: 11px;">${
-                              size.lineHeight
-                            }</td>
-                            <td style="text-align: center; padding: 2px;">
-                                <button class="edit-btn" style="color: #3b82f6; background: none; border: none; cursor: pointer; margin-right: 6px; font-size: 13px; padding: 2px;" title="Edit">✎</button>
-                                <button class="delete-btn" style="color: #ef4444; background: none; border: none; cursor: pointer; font-size: 12px; padding: 2px;" title="Delete">🗑️</button>
-                            </td>
-                        `;
-
+    context.sizes.forEach((size, index) => {
+      const row = this.createTableRow(size, index, context);
       this.bindRowEvents(row);
-      tbody.appendChild(row);
+      context.tbody.appendChild(row);
     });
+  }
 
+  // Create individual table row
+  // Why modular row creation: Encapsulates row structure and styling
+  // Facilitates consistent appearance across all rows
+  createTableRow(size, index, context) {
+    const row = document.createElement("tr");
+    row.className = "size-row";
+    row.draggable = true;
+    row.dataset.id = size.id;
+    row.dataset.index = index;
+
+    const displayName = this.getSizeDisplayName(size, context.activeTab);
+
+    row.innerHTML = `
+    <td class="drag-handle" style="text-align: center; color: #9ca3af; cursor: grab; user-select: none;" 
+      data-tooltip="Drag to reorder" data-tooltip-position="right">⋮⋮</td>
+    <td style="font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${displayName}">${displayName}</td>
+    <td style="text-align: center; font-family: monospace; font-size: 10px;">${this.formatSize(
+      size.min,
+      context.unitType
+    )}</td>
+    <td style="text-align: center; font-family: monospace; font-size: 10px;">${this.formatSize(
+      size.max,
+      context.unitType
+    )}</td>
+    <td style="text-align: center; font-size: 11px;">${size.lineHeight}</td>
+    <td style="text-align: center; padding: 2px;">
+      <button class="edit-btn" style="color: #3b82f6; background: none; border: none; cursor: pointer; margin-right: 6px; font-size: 13px; padding: 2px;" title="Edit">✎</button>
+      <button class="delete-btn" style="color: #ef4444; background: none; border: none; cursor: pointer; font-size: 12px; padding: 2px;" title="Delete">🗑️</button>
+    </td>
+  `;
+
+    return row;
+  }
+
+  // Finalize table rendering
+  // Why finalization: Completes rendering process with necessary updates
+  // Ensures headers reflect current context
+  // Applies any necessary CSS updates post-render
+  finalizeTableRender() {
     this.updateTableHeaders();
     this.updateCSS();
   }
 
   // Bind event listeners to a table row
-  // Why binding: Enables interactivity for editing, deleting, selecting, and dragging
-  // Centralizes event management for easier maintenance and updates
-  // Ensures events are only bound once (avoids duplicate handlers)
+  // Why event binding: Enables interactivity for each row
+  // Separates event logic from row creation for cleaner code
+  // Facilitates easier updates to event handling in one location
   bindRowEvents(row) {
+    this.bindRowButtonEvents(row);
+    this.bindRowSelectionEvents(row);
+    this.bindRowDragEvents(row);
+  }
+
+  // Bind edit and delete button events
+  // Why button events: Provides functionality for editing and deleting sizes
+  // Enhances user control over size data
+  // Improves overall interactivity of the interface
+  bindRowButtonEvents(row) {
     const editBtn = row.querySelector(".edit-btn");
     if (editBtn) {
       editBtn.addEventListener("click", (e) => {
@@ -1933,119 +2013,184 @@ class FontClampAdvanced {
         this.deleteSize(parseInt(row.dataset.id));
       });
     }
+  }
+
+  // Bind row selection events
+  // Why selection events: Allows users to select a row for detailed view/editing
+  // Provides visual feedback on selection
+  // Links selection to preview highlighting for better context
+  bindRowSelectionEvents(row) {
     row.addEventListener("click", (e) => {
       if (e.target.closest("button")) return;
 
       const sizeId = parseInt(row.dataset.id);
-      const index = row.dataset.index;
 
+      // Clear previous selections
       document.querySelectorAll(".size-row.selected").forEach((r) => {
         r.classList.remove("selected");
       });
 
+      // Select current row
       row.classList.add("selected");
       this.selectedRowId = sizeId;
       this.highlightPreviewRows(sizeId);
       this.updateCSS();
     });
+  }
 
-    // Only allow dragging from the drag handle
+  // Bind drag and drop events
+  // Why drag events: Enables reordering of sizes via drag-and-drop
+  // Enhances user experience by allowing intuitive rearrangement
+  // Provides visual feedback during drag operations
+  bindRowDragEvents(row) {
     const dragHandle = row.querySelector(".drag-handle");
-    if (dragHandle) {
-      // Make only the handle initiate drag, but set data on the row
-      dragHandle.addEventListener("mousedown", (e) => {
-        row.draggable = true;
-      });
+    if (!dragHandle) return;
 
-      row.addEventListener("dragstart", (e) => {
-        this.dragState.draggedRow = row;
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", row.dataset.id);
-        row.style.opacity = "0.5";
-        row.classList.add("dragging");
-      });
+    this.bindDragInitiation(row, dragHandle);
+    this.bindDragEvents(row);
+  }
 
-      row.addEventListener("dragenter", (e) => {
-        if (this.dragState.draggedRow && this.dragState.draggedRow !== row) {
-          // Remove existing insertion indicators
-          document.querySelectorAll(".size-row").forEach((r) => {
-            r.style.borderTop = "";
-            r.style.boxShadow = "";
-          });
+  // Bind drag initiation events
+  // Why initiation events: Sets up the row to be draggable
+  // Provides visual feedback when dragging starts
+  // Prepares necessary data for drag-and-drop operations
+  bindDragInitiation(row, dragHandle) {
+    dragHandle.addEventListener("mousedown", (e) => {
+      row.draggable = true;
+    });
 
-          // Add border insertion line
-          row.style.borderTop = "4px solid #3b82f6";
-          row.style.boxShadow = "0 -2px 8px rgba(59, 130, 246, 0.5)";
-        }
-      });
+    row.addEventListener("dragstart", (e) => {
+      this.dragState.draggedRow = row;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", row.dataset.id);
+      row.style.opacity = "0.5";
+      row.classList.add("dragging");
+    });
+  }
 
-      row.addEventListener("dragend", (e) => {
-        row.style.opacity = "1";
-        row.classList.remove("dragging");
-        row.draggable = false;
-        this.dragState.draggedRow = null;
+  // Bind drag interaction events
+  // Why interaction events: Manages the drag-and-drop lifecycle
+  // Provides visual cues for drop targets
+  // Handles the actual reordering logic upon drop
+  bindDragEvents(row) {
+    row.addEventListener("dragenter", (e) => {
+      if (this.dragState.draggedRow && this.dragState.draggedRow !== row) {
+        this.showDragInsertionIndicator(row);
+      }
+    });
 
-        // Clean up visual feedback
-        document.querySelectorAll(".size-row").forEach((r) => {
-          r.classList.remove("drag-over");
-        });
+    row.addEventListener("dragend", (e) => {
+      this.cleanupDragState(row);
+    });
 
-        // Remove insertion line
-        const insertionLine = document.getElementById("drag-insertion-line");
-        if (insertionLine) insertionLine.remove();
-      });
+    row.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    });
 
-      row.addEventListener("dragover", (e) => {
-        e.preventDefault(); // Always prevent default to allow drop
-        e.dataTransfer.dropEffect = "move";
-      });
+    row.addEventListener("drop", (e) => {
+      e.preventDefault();
+      this.handleRowDrop(row);
+    });
 
-      row.addEventListener("drop", (e) => {
-        e.preventDefault();
+    row.addEventListener("dragleave", (e) => {
+      this.handleDragLeave();
+    });
+  }
 
-        if (this.dragState.draggedRow && this.dragState.draggedRow !== row) {
-          // Remove insertion line
-          const insertionLine = document.getElementById("drag-insertion-line");
-          if (insertionLine) insertionLine.remove();
+  // Show drag insertion indicator
+  // Why indicator: Provides visual feedback on where the row will be dropped
+  // Enhances user experience by clarifying drop target
+  // Improves overall interactivity of the drag-and-drop process
+  showDragInsertionIndicator(row) {
+    // Remove existing insertion indicators
+    document.querySelectorAll(".size-row").forEach((r) => {
+      r.style.borderTop = "";
+      r.style.boxShadow = "";
+    });
 
-          // Get the current sizes array
-          const sizes = this.getCurrentSizes();
-          const draggedId = parseInt(this.dragState.draggedRow.dataset.id);
-          const targetId = parseInt(row.dataset.id);
+    // Add border insertion line
+    row.style.borderTop = "4px solid #3b82f6";
+    row.style.boxShadow = "0 -2px 8px rgba(59, 130, 246, 0.5)";
+  }
 
-          // Find the items to reorder
-          const draggedIndex = sizes.findIndex((s) => s.id === draggedId);
-          const targetIndex = sizes.findIndex((s) => s.id === targetId);
+  // Clean up drag state
+  // Why cleanup: Resets visual and state changes after drag operation
+  // Prevents lingering styles or states that could confuse users
+  // Ensures interface returns to normal state post-drag
+  cleanupDragState(row) {
+    row.style.opacity = "1";
+    row.classList.remove("dragging");
+    row.draggable = false;
+    this.dragState.draggedRow = null;
 
-          if (draggedIndex !== -1 && targetIndex !== -1) {
-            // Remove the dragged item and insert it at the target position
-            const [draggedItem] = sizes.splice(draggedIndex, 1);
-            sizes.splice(targetIndex, 0, draggedItem);
+    // Clean up visual feedback
+    document.querySelectorAll(".size-row").forEach((r) => {
+      r.classList.remove("drag-over");
+      r.style.borderTop = "";
+      r.style.boxShadow = "";
+    });
 
-            // Re-render the table with new order
-            this.renderSizes();
-            this.updatePreview();
-            this.markDataChanged();
-          }
-        }
-      });
+    // Remove insertion line
+    const insertionLine = document.getElementById("drag-insertion-line");
+    if (insertionLine) insertionLine.remove();
+  }
 
-      row.addEventListener("dragleave", (e) => {
-        // Add small delay to prevent immediate removal during cursor movement
-        setTimeout(() => {
-          // Only remove if we're not actively dragging over another row
-          if (
-            this.dragState.draggedRow &&
-            !document.querySelector(".size-row:hover")
-          ) {
-            document.querySelectorAll(".size-row").forEach((r) => {
-              r.style.borderTop = "";
-              r.style.boxShadow = "";
-            });
-          }
-        }, 100);
-      });
+  // Handle row drop operation
+  // Why drop handling: Finalizes the drag-and-drop operation
+  // Performs the actual reordering of sizes
+  // Updates UI and data to reflect new order
+  handleRowDrop(row) {
+    if (!this.dragState.draggedRow || this.dragState.draggedRow === row) return;
+
+    // Remove insertion line
+    const insertionLine = document.getElementById("drag-insertion-line");
+    if (insertionLine) insertionLine.remove();
+
+    // Perform the reorder
+    this.reorderSizes(this.dragState.draggedRow, row);
+  }
+
+  // Reorder sizes based on drag and drop
+  // Why reordering: Updates the underlying data to match new visual order
+  // Ensures consistency between UI and data model
+  // Triggers necessary updates to reflect changes
+  reorderSizes(draggedRow, targetRow) {
+    const sizes = this.getCurrentSizes();
+    const draggedId = parseInt(draggedRow.dataset.id);
+    const targetId = parseInt(targetRow.dataset.id);
+
+    const draggedIndex = sizes.findIndex((s) => s.id === draggedId);
+    const targetIndex = sizes.findIndex((s) => s.id === targetId);
+
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+      // Remove dragged item and insert at target position
+      const [draggedItem] = sizes.splice(draggedIndex, 1);
+      sizes.splice(targetIndex, 0, draggedItem);
+
+      // Re-render and update
+      this.renderSizes();
+      this.updatePreview();
+      this.markDataChanged();
     }
+  }
+
+  // Handle drag leave
+  // Why drag leave: Cleans up visual feedback when dragging leaves a row
+  // Prevents confusion from lingering styles
+  // Ensures a clean interface during drag operations
+  handleDragLeave() {
+    setTimeout(() => {
+      if (
+        this.dragState.draggedRow &&
+        !document.querySelector(".size-row:hover")
+      ) {
+        document.querySelectorAll(".size-row").forEach((r) => {
+          r.style.borderTop = "";
+          r.style.boxShadow = "";
+        });
+      }
+    }, 100);
   }
 
   // ========================================================================
@@ -2087,7 +2232,6 @@ class FontClampAdvanced {
   // ========================================================================
 
   // Generate CSS code snippets and update the display elements
-  // Now split into focused methods for better maintainability
   generateAndUpdateCSS(selectedElement, generatedElement) {
     try {
       const context = this.getGenerationContext();
@@ -2684,6 +2828,7 @@ class FontClampAdvanced {
     if (!size) return;
 
     this.editingId = id;
+    this.isAddingNew = false; // Explicitly set to false for editing existing items
 
     const modal = document.getElementById("edit-modal");
     const nameInput = document.getElementById("edit-name");
@@ -2751,9 +2896,12 @@ class FontClampAdvanced {
         size.tagName = "";
       }
     } else {
-      // Edit existing size
+      // Edit existing size - find by ID
       size = sizes.find((s) => s.id == this.editingId);
-      if (!size) return;
+      if (!size) {
+        console.error("Cannot find size to edit with ID:", this.editingId);
+        return;
+      }
     }
 
     const nameInput = document.getElementById("edit-name");
@@ -2801,6 +2949,8 @@ class FontClampAdvanced {
     if (this.isAddingNew) {
       sizes.push(size);
     }
+    // Note: For editing existing items, the size object is already
+    // in the array and has been modified by reference
 
     this.updateBaseValueOptions();
     this.calculateSizes();
@@ -2820,6 +2970,7 @@ class FontClampAdvanced {
       modal.classList.remove("show");
     }
     this.editingId = null;
+    this.isAddingNew = false; // Reset the adding flag
   }
 
   // Show error state on input field
@@ -3136,109 +3287,211 @@ class FontClampAdvanced {
   }
 
   // Clear all sizes with confirmation and undo option
-  // Why clear functionality: Allows users to quickly remove all entries
-  // Confirms action to prevent accidental data loss
-  // Provides an undo option for immediate recovery
   clearSizes() {
-    const activeTab = window.fontClampCore?.activeTab || "class";
-    console.log("clearSizes called for tab:", activeTab);
-    const tabName =
-      activeTab === "class"
-        ? "Classes"
-        : activeTab === "vars"
-        ? "Variables"
-        : "Tags";
+    const clearContext = this.createClearContext();
+    if (!this.validateClearContext(clearContext)) return;
 
-    // Get current data for backup
+    if (!this.confirmClear(clearContext)) return;
+
+    this.performClear(clearContext);
+    this.showUndoNotification(
+      clearContext.tabName,
+      clearContext.currentData,
+      clearContext.dataArrayRef,
+      clearContext.activeTab
+    );
+  }
+
+  // Create context for clear operation
+  // Why context creation: Encapsulates all necessary data for the clear operation
+  // Simplifies passing multiple parameters through functions
+  // Enhances code readability and maintainability
+  createClearContext() {
+    const activeTab = window.fontClampCore?.activeTab || "class";
+    const tabName = this.getTabDisplayName(activeTab);
+    const { currentData, dataArrayRef } = this.getTabDataForClear(activeTab);
+
+    return {
+      activeTab,
+      tabName,
+      currentData,
+      dataArrayRef,
+    };
+  }
+
+  // Get display name for tab
+  // Why display name: Provides user-friendly names for confirmation dialogs and notifications
+  // Enhances clarity in user communications
+  // Supports multiple tab types with appropriate naming
+  getTabDisplayName(activeTab) {
+    switch (activeTab) {
+      case "class":
+        return "Classes";
+      case "vars":
+        return "Variables";
+      case "tailwind":
+        return "Tailwind Sizes";
+      case "tag":
+        return "Tags";
+      default:
+        return "Items";
+    }
+  }
+
+  // Get current data and reference for clear operation
+  // Why data retrieval: Centralizes logic for accessing tab-specific data
+  // Simplifies validation and manipulation of the correct data array
+  // Supports multiple tab types with appropriate data handling
+  getTabDataForClear(activeTab) {
     let currentData, dataArrayRef;
-    if (activeTab === "class") {
-      currentData = [...(window.fontClampAjax?.data?.classSizes || [])];
-      dataArrayRef = "classSizes";
-    } else if (activeTab === "vars") {
-      currentData = [...(window.fontClampAjax?.data?.variableSizes || [])];
-      dataArrayRef = "variableSizes";
-    } else if (activeTab === "tailwind") {
-      currentData = [...(window.fontClampAjax?.data?.tailwindSizes || [])];
-      dataArrayRef = "tailwindSizes";
-    } else if (activeTab === "tag") {
-      currentData = [...(window.fontClampAjax?.data?.tagSizes || [])];
-      dataArrayRef = "tagSizes";
+
+    switch (activeTab) {
+      case "class":
+        currentData = [...(window.fontClampAjax?.data?.classSizes || [])];
+        dataArrayRef = "classSizes";
+        break;
+      case "vars":
+        currentData = [...(window.fontClampAjax?.data?.variableSizes || [])];
+        dataArrayRef = "variableSizes";
+        break;
+      case "tailwind":
+        currentData = [...(window.fontClampAjax?.data?.tailwindSizes || [])];
+        dataArrayRef = "tailwindSizes";
+        break;
+      case "tag":
+        currentData = [...(window.fontClampAjax?.data?.tagSizes || [])];
+        dataArrayRef = "tagSizes";
+        break;
+      default:
+        currentData = null;
+        dataArrayRef = null;
     }
 
-    // Guard against undefined data
-    if (!currentData || !dataArrayRef) {
+    return { currentData, dataArrayRef };
+  }
+
+  // Validate clear context
+  // Why validation: Ensures all necessary data is present before proceeding
+  // Prevents errors during the clear operation
+  // Provides clear error messaging for debugging
+  validateClearContext(context) {
+    if (!context.currentData || !context.dataArrayRef) {
       console.error(
         "Unable to clear sizes - invalid tab or missing data:",
-        activeTab
+        context.activeTab
       );
-      return;
+      return false;
     }
+    return true;
+  }
 
-    console.log("currentData:", currentData);
-    console.log("dataArrayRef:", dataArrayRef);
-    console.log(
-      "currentData length:",
-      currentData ? currentData.length : "undefined"
+  // Show confirmation dialog
+  // Why confirmation dialog: Prevents accidental data loss
+  // Clearly communicates the consequences of the action
+  // Provides an opportunity to cancel before proceeding
+  confirmClear(context) {
+    return confirm(
+      `Are you sure you want to clear all ${context.tabName}?\n\nThis will remove all ${context.currentData.length} entries from the current tab.\n\nYou can undo this action immediately after.`
     );
+  }
 
-    // Show confirmation dialog
-    const confirmed = confirm(
-      `Are you sure you want to clear all ${tabName}?\n\nThis will remove all ${currentData.length} entries from the current tab.\n\nYou can undo this action immediately after.`
-    );
+  // Perform the clear operation
+  // Why clear operation: Encapsulates all steps needed to clear data and update the UI
+  // Ensures data sources, UI, and state are all updated consistently
+  // Provides a single point of change for easier maintenance
+  performClear(context) {
+    this.clearDataSources(context);
+    this.updateCoreInterfaceData(context.activeTab);
+    this.renderClearedState(context.activeTab);
+    this.updateAfterClear();
+  }
 
-    if (!confirmed) return;
-
-    // Clear the data source
+  // Clear data sources
+  // Why data clearing: Removes all entries from the relevant data array
+  // Marks the tab as explicitly cleared for state tracking
+  // Ensures consistency across the application state
+  clearDataSources(context) {
     if (window.fontClampAjax?.data) {
-      window.fontClampAjax.data[dataArrayRef] = [];
-      // Mark this tab as explicitly cleared to prevent auto-restoration
+      window.fontClampAjax.data[context.dataArrayRef] = [];
+      // Mark tab as explicitly cleared
       window.fontClampAjax.data.explicitlyClearedTabs =
         window.fontClampAjax.data.explicitlyClearedTabs || {};
-      window.fontClampAjax.data.explicitlyClearedTabs[activeTab] = true;
+      window.fontClampAjax.data.explicitlyClearedTabs[context.activeTab] = true;
     }
+  }
 
-    // Update core interface data to stay in sync
-    if (window.fontClampCore) {
-      switch (activeTab) {
-        case "class":
-          window.fontClampCore.classSizes = [];
-          break;
-        case "vars":
-          window.fontClampCore.variableSizes = [];
-          break;
-        case "tag":
-          window.fontClampCore.tagSizes = [];
-          break;
-        case "tailwind":
-          window.fontClampCore.tailwindSizes = [];
-          break;
-      }
+  // Update core interface data
+  // Why core data update: Ensures the core interface reflects the cleared state
+  // Prevents stale data from causing inconsistencies
+  // Supports immediate UI updates without waiting for other processes
+  updateCoreInterfaceData(activeTab) {
+    if (!window.fontClampCore) return;
+
+    switch (activeTab) {
+      case "class":
+        window.fontClampCore.classSizes = [];
+        break;
+      case "vars":
+        window.fontClampCore.variableSizes = [];
+        break;
+      case "tag":
+        window.fontClampCore.tagSizes = [];
+        break;
+      case "tailwind":
+        window.fontClampCore.tailwindSizes = [];
+        break;
     }
+  }
 
-    // Directly render empty table instead of calling renderSizes()
+  // Render cleared state UI
+  // Why UI rendering: Provides immediate visual feedback of the cleared state
+  // Updates table and dropdown to reflect no available sizes
+  // Enhances user experience with clear communication of current state
+  renderClearedState(activeTab) {
     this.renderEmptyTable();
+    this.updateBaseDropdownForClear(activeTab);
+  }
 
-    // Handle empty base dropdown directly
+  // Update base dropdown for cleared state
+  // Why dropdown update: Reflects the absence of sizes in the dropdown
+  // Disables the dropdown to prevent invalid selections
+  // Provides clear messaging about the lack of available options
+  updateBaseDropdownForClear(activeTab) {
     const baseSelect = document.getElementById("base-value");
-    if (baseSelect) {
-      const emptyOptionText =
-        activeTab === "class"
-          ? "No classes"
-          : activeTab === "vars"
-          ? "No variables"
-          : activeTab === "tailwind"
-          ? "No sizes"
-          : "No tags";
-      baseSelect.innerHTML = `<option>${emptyOptionText}</option>`;
-      baseSelect.disabled = true;
-    }
+    if (!baseSelect) return;
 
+    const emptyOptionText = this.getEmptyOptionText(activeTab);
+    baseSelect.innerHTML = `<option>${emptyOptionText}</option>`;
+    baseSelect.disabled = true;
+  }
+
+  // Get empty option text for base dropdown
+  // Why empty option text: Provides contextually relevant messaging
+  // Enhances user understanding of the current state
+  // Supports multiple tab types with appropriate messaging
+  getEmptyOptionText(activeTab) {
+    switch (activeTab) {
+      case "class":
+        return "No classes";
+      case "vars":
+        return "No variables";
+      case "tailwind":
+        return "No sizes";
+      case "tag":
+        return "No tags";
+      default:
+        return "No items";
+    }
+  }
+
+  // Update UI after clear operation
+  // Why UI update: Ensures all dependent components reflect the cleared state
+  // Triggers preview and CSS updates for consistency
+  // Marks data as changed for state tracking
+  updateAfterClear() {
     this.updatePreview();
     this.updateCSS();
     this.markDataChanged();
-
-    // Show undo notification
-    this.showUndoNotification(tabName, currentData, dataArrayRef, activeTab);
   }
 
   // Show undo notification after clearing sizes
