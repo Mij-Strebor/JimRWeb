@@ -27,7 +27,96 @@
  * Enhanced and developed with Claude AI assistance
  */
 
+/**
+ * Tab Data Utilities - Embedded temporarily to fix 404 issue
+ */
+const TabDataMap = {
+  class: {
+    dataKey: "classSizes",
+    nameProperty: "className",
+    displayName: "Classes",
+    tableTitle: "Font Size Classes",
+    selectedCSSTitle: "Selected Class CSS",
+    generatedCSSTitle: "Generated CSS (All Classes)",
+    addButtonText: "add first class",
+    baseDefaultValue: "medium",
+    baseDefaultId: 5,
+  },
+  vars: {
+    dataKey: "variableSizes",
+    nameProperty: "variableName",
+    displayName: "Variables",
+    tableTitle: "CSS Variables",
+    selectedCSSTitle: "Selected Variable CSS",
+    generatedCSSTitle: "Generated CSS (All Variables)",
+    addButtonText: "add first variable",
+    baseDefaultValue: "--fs-md",
+    baseDefaultId: 5,
+  },
+  tailwind: {
+    dataKey: "tailwindSizes",
+    nameProperty: "tailwindName",
+    displayName: "Tailwind Sizes",
+    tableTitle: "Tailwind Font Sizes",
+    selectedCSSTitle: "Selected Size Config",
+    generatedCSSTitle: "Tailwind Config (fontSize Object)",
+    addButtonText: "add first size",
+    baseDefaultValue: "base",
+    baseDefaultId: 5,
+  },
+  tag: {
+    dataKey: "tagSizes",
+    nameProperty: "tagName",
+    displayName: "Tags",
+    tableTitle: "HTML Tag Styles",
+    selectedCSSTitle: "Selected Tag CSS",
+    generatedCSSTitle: "Generated CSS (All Tags)",
+    addButtonText: "add first tag",
+    baseDefaultValue: "p",
+    baseDefaultId: 7,
+  },
+};
+
+// Utility functions for tab data management
+// Centralizes logic for accessing tab-specific data and properties
+const TabDataUtils = {
+  getDataForTab(activeTab, data) {
+    const config = TabDataMap[activeTab];
+    return config && data ? data[config.dataKey] || [] : [];
+  },
+
+  getPropertyName(activeTab) {
+    return TabDataMap[activeTab]?.nameProperty || "className";
+  },
+
+  getSizeDisplayName(size, activeTab) {
+    const propertyName = this.getPropertyName(activeTab);
+    return size[propertyName] || "";
+  },
+
+  getTableTitle(activeTab) {
+    return TabDataMap[activeTab]?.tableTitle || "Font Sizes";
+  },
+
+  getSelectedCSSTitle(activeTab) {
+    return TabDataMap[activeTab]?.selectedCSSTitle || "Selected CSS";
+  },
+
+  getGeneratedCSSTitle(activeTab) {
+    return TabDataMap[activeTab]?.generatedCSSTitle || "Generated CSS";
+  },
+
+  getBaseDefaultValue(activeTab) {
+    return TabDataMap[activeTab]?.baseDefaultValue || "medium";
+  },
+};
+
+// Make available globally for other segments to use
+window.TabDataMap = TabDataMap;
+window.TabDataUtils = TabDataUtils;
+
 // Simple JavaScript Tooltips
+// Lightweight tooltip system for elements with data-tooltip attribute
 class SimpleTooltips {
   constructor() {
     this.tooltip = null;
@@ -1998,129 +2087,229 @@ class FontClampAdvanced {
   // ========================================================================
 
   // Generate CSS code snippets and update the display elements
-  // Why modular generation: Encapsulates complex logic for maintainability
-  // Supports multiple output formats (class, vars, tailwind, tag)
-  // Dynamically adapts to user settings and selections
+  // Now split into focused methods for better maintainability
   generateAndUpdateCSS(selectedElement, generatedElement) {
     try {
-      const sizes = this.getCurrentSizes();
-      const activeTab = window.fontClampCore?.activeTab || "class";
-      const unitType = window.fontClampCore?.unitType || "rem";
+      const context = this.getGenerationContext();
+      const selectedCSS = this.generateSelectedCSS(context);
+      const allCSS = this.generateAllCSS(context);
 
-      const generateClampCSS = (minSize, maxSize) => {
-        const minViewport = parseFloat(
-          this.elements?.minViewportInput?.value ||
-            document.getElementById("min-viewport")?.value ||
-            this.constants.DEFAULT_MIN_VIEWPORT
-        );
-        const maxViewport = parseFloat(
-          this.elements?.maxViewportInput?.value ||
-            document.getElementById("max-viewport")?.value ||
-            this.constants.DEFAULT_MAX_VIEWPORT
-        );
-
-        const minRootSize = parseFloat(this.elements.minRootSizeInput?.value);
-        const maxRootSize = parseFloat(this.elements.maxRootSizeInput?.value);
-
-        if (isNaN(minRootSize) || isNaN(maxRootSize)) {
-          this.log("❌ Invalid root size value from Settings inputs");
-          return "clamp(1rem, 1rem, 1rem)";
-        }
-
-        let minValue, maxValue;
-        if (unitType === "rem") {
-          minValue = `${minSize}rem`;
-          maxValue = `${maxSize}rem`;
-        } else {
-          minValue = `${minSize}px`;
-          maxValue = `${maxSize}px`;
-        }
-
-        // Why slope calculation: Creates linear interpolation between viewport sizes
-        // Formula: rise over run - how much font size changes per pixel of viewport
-        const slope = (maxSize - minSize) / (maxViewport - minViewport);
-
-        // Why intersection: Y-intercept where the scaling line crosses viewport=0
-        // Mathematical formula: y = mx + b, solving for b when x=minViewport, y=minSize
-        const intersection = -minViewport * slope + minSize;
-
-        // Why multiply by 100: Convert decimal slope to vw units (1vw = 1% of viewport width)
-        const slopeInViewportWidth = (slope * 100).toFixed(4);
-
-        const intersectionValue =
-          unitType === "rem"
-            ? `${intersection.toFixed(4)}rem`
-            : `${intersection.toFixed(4)}px`;
-
-        // Why clamp() structure: min(floor), preferred(linear scaling), max(ceiling)
-        // Creates smooth font scaling between viewports with safe boundaries
-        return `clamp(${minValue}, ${intersectionValue} + ${slopeInViewportWidth}vw, ${maxValue})`;
-      };
-
-      const selectedId = this.getSelectedSizeId();
-      const selectedSize = sizes.find((s) => s.id === selectedId);
-      if (selectedSize && selectedSize.min && selectedSize.max) {
-        const clampValue = generateClampCSS(selectedSize.min, selectedSize.max);
-        const displayName = this.getSizeDisplayName(selectedSize, activeTab);
-
-        let selectedCSS = "";
-        if (activeTab === "class") {
-          selectedCSS = `.${displayName} {\n  font-size: ${clampValue};\n  line-height: ${selectedSize.lineHeight};\n}`;
-        } else if (activeTab === "vars") {
-          selectedCSS = `:root {\n  ${displayName}: ${clampValue};\n}`;
-        } else if (activeTab === "tailwind") {
-          selectedCSS = `'${displayName}': '${clampValue}'`;
-        } else {
-          selectedCSS = `${displayName} {\n  font-size: ${clampValue};\n  line-height: ${selectedSize.lineHeight};\n}`;
-        }
-
-        selectedElement.textContent = selectedCSS;
-      } else {
-        selectedElement.textContent = "/* No size selected or calculated */";
-      }
-
-      let allCSS = "";
-
-      if (activeTab === "class") {
-        sizes.forEach((size) => {
-          if (size.min && size.max) {
-            const clampValue = generateClampCSS(size.min, size.max);
-            allCSS += `.${size.className} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
-          }
-        });
-      } else if (activeTab === "vars") {
-        allCSS = ":root {\n";
-        sizes.forEach((size) => {
-          if (size.min && size.max) {
-            const clampValue = generateClampCSS(size.min, size.max);
-            allCSS += `  ${size.variableName}: ${clampValue};\n`;
-          }
-        });
-        allCSS += "}";
-      } else if (activeTab === "tailwind") {
-        allCSS =
-          "module.exports = {\n  theme: {\n    extend: {\n      fontSize: {\n";
-        sizes.forEach((size, index) => {
-          if (size.min && size.max) {
-            const clampValue = generateClampCSS(size.min, size.max);
-            const comma = index < sizes.length - 1 ? "," : "";
-            allCSS += `        '${size.tailwindName}': '${clampValue}'${comma}\n`;
-          }
-        });
-        allCSS += "      }\n    }\n  }\n}";
-      } else {
-        sizes.forEach((size) => {
-          if (size.min && size.max) {
-            const clampValue = generateClampCSS(size.min, size.max);
-            allCSS += `${size.tagName} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
-          }
-        });
-      }
-
-      generatedElement.textContent = allCSS || "/* No sizes calculated */";
+      this.updateCSSElements(
+        selectedElement,
+        generatedElement,
+        selectedCSS,
+        allCSS
+      );
     } catch (error) {
-      console.error("❌ CSS generation error:", error);
+      console.error("⚠ CSS generation error:", error);
     }
+  }
+
+  // Get all data needed for CSS generation
+  // Why context gathering: Centralizes data retrieval for generation methods
+  // Simplifies parameter passing and method signatures
+  // Ensures consistency across different generation functions
+  getGenerationContext() {
+    const sizes = this.getCurrentSizes();
+    const activeTab = window.fontClampCore?.activeTab || "class";
+    const unitType = window.fontClampCore?.unitType || "rem";
+    const selectedId = this.getSelectedSizeId();
+
+    const minViewport = parseFloat(
+      this.elements?.minViewportInput?.value ||
+        document.getElementById("min-viewport")?.value ||
+        this.constants.DEFAULT_MIN_VIEWPORT
+    );
+    const maxViewport = parseFloat(
+      this.elements?.maxViewportInput?.value ||
+        document.getElementById("max-viewport")?.value ||
+        this.constants.DEFAULT_MAX_VIEWPORT
+    );
+    const minRootSize = parseFloat(this.elements.minRootSizeInput?.value);
+    const maxRootSize = parseFloat(this.elements.maxRootSizeInput?.value);
+
+    return {
+      sizes,
+      activeTab,
+      unitType,
+      selectedId,
+      minViewport,
+      maxViewport,
+      minRootSize,
+      maxRootSize,
+    };
+  }
+
+  // Generate clamp() CSS function for given min/max sizes
+  // Why clamp() generation: Core of fluid typography implementation
+  // Uses mathematical principles for responsive scaling
+  // Produces clean, efficient CSS for real-world use
+  generateClampCSS(minSize, maxSize, context) {
+    const { unitType, minViewport, maxViewport, minRootSize, maxRootSize } =
+      context;
+
+    if (isNaN(minRootSize) || isNaN(maxRootSize)) {
+      this.log("⚠ Invalid root size value from Settings inputs");
+      return "clamp(1rem, 1rem, 1rem)";
+    }
+
+    let minValue, maxValue;
+    if (unitType === "rem") {
+      minValue = `${minSize}rem`;
+      maxValue = `${maxSize}rem`;
+    } else {
+      minValue = `${minSize}px`;
+      maxValue = `${maxSize}px`;
+    }
+
+    // Why slope calculation: Creates linear interpolation between viewport sizes
+    const slope = (maxSize - minSize) / (maxViewport - minViewport);
+
+    // Why intersection: Y-intercept where the scaling line crosses viewport=0
+    const intersection = -minViewport * slope + minSize;
+
+    // Why multiply by 100: Convert decimal slope to vw units
+    const slopeInViewportWidth = (slope * 100).toFixed(4);
+
+    const intersectionValue =
+      unitType === "rem"
+        ? `${intersection.toFixed(4)}rem`
+        : `${intersection.toFixed(4)}px`;
+
+    // Why clamp() structure: min(floor), preferred(linear scaling), max(ceiling)
+    return `clamp(${minValue}, ${intersectionValue} + ${slopeInViewportWidth}vw, ${maxValue})`;
+  }
+
+  // Generate CSS for the selected size only
+  // Why focused generation: Allows users to quickly copy code for a specific size
+  // Tailors output to current tab context for relevance
+  // Simplifies implementation by providing only necessary code
+  generateSelectedCSS(context) {
+    const { sizes, activeTab, selectedId } = context;
+
+    const selectedSize = sizes.find((s) => s.id === selectedId);
+    if (!selectedSize || !selectedSize.min || !selectedSize.max) {
+      return "/* No size selected or calculated */";
+    }
+
+    const clampValue = this.generateClampCSS(
+      selectedSize.min,
+      selectedSize.max,
+      context
+    );
+    const displayName = this.getSizeDisplayName(selectedSize, activeTab);
+    console.log(
+      "🔍 Debug: Display name:",
+      displayName,
+      "for size:",
+      selectedSize,
+      "tab:",
+      activeTab
+    );
+
+    switch (activeTab) {
+      case "class":
+        return `.${displayName} {\n  font-size: ${clampValue};\n  line-height: ${selectedSize.lineHeight};\n}`;
+      case "vars":
+        return `:root {\n  ${displayName}: ${clampValue};\n}`;
+      case "tailwind":
+        return `'${displayName}': '${clampValue}'`;
+      default:
+        return `${displayName} {\n  font-size: ${clampValue};\n  line-height: ${selectedSize.lineHeight};\n}`;
+    }
+  }
+
+  // Generate CSS for all sizes
+  // Why comprehensive generation: Provides full codebase for entire size set
+  // Useful for initial setup or complete implementation
+  // Reflects all current settings and selections for accuracy
+  generateAllCSS(context) {
+    const { sizes, activeTab } = context;
+
+    if (!sizes || sizes.length === 0) {
+      return "/* No sizes calculated */";
+    }
+
+    switch (activeTab) {
+      case "class":
+        return this.generateClassCSS(sizes, context);
+      case "vars":
+        return this.generateVariableCSS(sizes, context);
+      case "tailwind":
+        return this.generateTailwindCSS(sizes, context);
+      default:
+        return this.generateTagCSS(sizes, context);
+    }
+  }
+
+  // Generate CSS for class-based output
+  // Why modular generation: Encapsulates class-specific CSS structure
+  // Ensures consistent formatting across all class definitions
+  generateClassCSS(sizes, context) {
+    let css = "";
+    sizes.forEach((size) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        css += `.${size.className} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
+      }
+    });
+    return css;
+  }
+
+  // Generate CSS for variable-based output
+  // Why modular generation: Encapsulates variable-specific CSS structure
+  // Ensures consistent formatting across all variable definitions
+  generateVariableCSS(sizes, context) {
+    let css = ":root {\n";
+    sizes.forEach((size) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        css += `  ${size.variableName}: ${clampValue};\n`;
+      }
+    });
+    css += "}";
+    return css;
+  }
+
+  // Generate Tailwind config for fontSize object
+  // Why modular generation: Encapsulates Tailwind-specific config structure
+  // Ensures consistent formatting across all Tailwind size definitions
+  generateTailwindCSS(sizes, context) {
+    let css =
+      "module.exports = {\n  theme: {\n    extend: {\n      fontSize: {\n";
+    sizes.forEach((size, index) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        const comma = index < sizes.length - 1 ? "," : "";
+        css += `        '${size.tailwindName}': '${clampValue}'${comma}\n`;
+      }
+    });
+    css += "      }\n    }\n  }\n}";
+    return css;
+  }
+
+  // Generate CSS for tag-based output
+  // Why modular generation: Encapsulates tag-specific CSS structure
+  // Ensures consistent formatting across all tag definitions
+  generateTagCSS(sizes, context) {
+    let css = "";
+    sizes.forEach((size) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        css += `${size.tagName} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
+      }
+    });
+    return css;
+  }
+
+  // Update CSS display elements and create copy buttons
+  // Why modular update: Separates UI update logic from generation logic
+  // Ensures display elements are always in sync with generated CSS
+  // Facilitates easy addition of copy functionality
+  updateCSSElements(selectedElement, generatedElement, selectedCSS, allCSS) {
+    selectedElement.textContent = selectedCSS;
+    generatedElement.textContent = allCSS;
+    this.createCopyButtons();
   }
 
   // Create copy buttons and bind their events
@@ -2370,6 +2559,7 @@ class FontClampAdvanced {
   // ========================================================================
   // FONT PREVIEW METHODS
   // ========================================================================
+
   // Dynamically load and apply custom font for preview
   // Why dynamic font loading: Allows users to see their selected font in action
   // Enhances preview realism and usability
@@ -2695,6 +2885,9 @@ class FontClampAdvanced {
   // ========================================================================
 
   // Open add new size modal with pre-filled data
+  // Why add new size: Streamlines the process of creating new size entries
+  // Pre-fills default values to reduce user effort
+  // Ensures unique naming to prevent conflicts
   addNewSize() {
     const activeTab = window.fontClampCore?.activeTab || "class";
 
@@ -2706,6 +2899,9 @@ class FontClampAdvanced {
   }
 
   // Generate next custom entry data
+  // Why unique naming: Prevents conflicts with existing entries
+  // Ensures a clear naming convention for custom sizes
+  // Simplifies user experience when adding new sizes
   generateNextCustomEntry(activeTab) {
     let currentData;
     if (activeTab === "class") {
@@ -2747,6 +2943,9 @@ class FontClampAdvanced {
   }
 
   // Open add modal with pre-filled data
+  // Why modal opening: Provides a clear interface for adding new sizes
+  // Pre-fills default values to streamline the creation process
+  // Focuses input for immediate user interaction
   openAddModal(activeTab, newId, defaultName) {
     const modal = document.getElementById("edit-modal");
     const header = modal.querySelector(".fcc-modal-header");
@@ -2796,6 +2995,10 @@ class FontClampAdvanced {
     }, 100);
   }
 
+  // Reset sizes to default with confirmation
+  // Why reset functionality: Allows users to quickly restore original settings
+  // Confirms action to prevent accidental data loss
+  // Updates UI and state to reflect changes immediately
   resetDefaults() {
     const activeTab = window.fontClampCore?.activeTab || "class";
     const tabName =
@@ -3498,6 +3701,68 @@ class FontClampAdvanced {
         lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
       },
     ];
+  }
+
+  // Generate CSS for class-based output
+  // Why class CSS generation: Provides ready-to-use CSS for font size classes
+  // Ensures consistent application of responsive font sizing
+  // Simplifies user implementation with clear class definitions
+  generateClassCSS(sizes, context) {
+    let css = "";
+    sizes.forEach((size) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        css += `.${size.className} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
+      }
+    });
+    return css;
+  }
+
+  // Generate CSS for variable-based output
+  // Why variable CSS generation: Provides ready-to-use CSS for font size variables
+  // Ensures consistent application of responsive font sizing
+  // Simplifies user implementation with clear variable definitions
+  generateVariableCSS(sizes, context) {
+    let css = ":root {\n";
+    sizes.forEach((size) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        css += `  ${size.variableName}: ${clampValue};\n`;
+      }
+    });
+    css += "}";
+    return css;
+  }
+
+  // Generate Tailwind config for fontSize object
+  // Why Tailwind config generation: Provides a ready-to-use Tailwind CSS configuration
+  // Ensures seamless integration with Tailwind projects
+  // Simplifies user implementation with clear configuration structure
+  generateTailwindCSS(sizes, context) {
+    let css =
+      "module.exports = {\n  theme: {\n    extend: {\n      fontSize: {\n";
+    sizes.forEach((size, index) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        const comma = index < sizes.length - 1 ? "," : "";
+        css += `        '${size.tailwindName}': '${clampValue}'${comma}\n`;
+      }
+    });
+    css += "      }\n    }\n  }\n}";
+    return css;
+  }
+
+  // Generate CSS for tag-based output
+  // Why tag CSS generation: Provides ready-to-use CSS for HTML tags
+  generateTagCSS(sizes, context) {
+    let css = "";
+    sizes.forEach((size) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        css += `${size.tagName} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
+      }
+    });
+    return css;
   }
 }
 

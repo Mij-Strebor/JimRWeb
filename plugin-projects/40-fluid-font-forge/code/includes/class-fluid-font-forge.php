@@ -197,23 +197,11 @@ class FluidFontForge
             FLUID_FONT_FORGE_VERSION
         );
 
-        // Enqueue WordPress utilities
-        wp_enqueue_script('wp-util');
-
-        // Enqueue tab utilities first
-        wp_enqueue_script(
-            'fluid-font-forge-tab-utils',
-            FLUID_FONT_FORGE_URL . 'assets/js/tab-data-utilities.js',
-            [],
-            FLUID_FONT_FORGE_VERSION,
-            true
-        );
-
-        // Enqueue our admin script
+        // Enqueue our admin script (tab utilities now embedded directly)
         wp_enqueue_script(
             'fluid-font-forge-admin',
             FLUID_FONT_FORGE_URL . 'assets/js/admin-script.js',
-            ['wp-util', 'fluid-font-forge-tab-utils'],
+            ['wp-util'],
             FLUID_FONT_FORGE_VERSION,
             true
         );
