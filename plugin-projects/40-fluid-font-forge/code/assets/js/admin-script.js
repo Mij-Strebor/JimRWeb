@@ -410,6 +410,71 @@ class WordPressAdminNotices {
   info(message, dismissible = true) {
     return this.show(message, "info", dismissible);
   }
+
+  // Enhanced confirm dialog with custom styling
+  confirm(message, onConfirm, onCancel = null) {
+    // Remove any existing confirm modal first
+    const existing = document.getElementById("confirm-dialog-modal");
+    if (existing) existing.remove();
+
+    const confirmModal = document.createElement("div");
+    confirmModal.id = "confirm-dialog-modal";
+    confirmModal.className = "fcc-modal";
+    confirmModal.innerHTML = `
+      <div class="fcc-modal-dialog" style="max-width: 500px;">
+        <div class="fcc-modal-header" style="background: var(--clr-secondary); color: var(--clr-txt-light);">
+          <span>Confirm Action</span>
+        </div>
+        <div class="fcc-modal-content">
+          <p style="margin: 0 0 20px 0; line-height: 1.5; color: var(--clr-txt);">${message}</p>
+          <div class="fcc-btn-group">
+            <button type="button" class="fcc-btn fcc-btn-ghost" id="confirm-cancel">Cancel</button>
+            <button type="button" class="fcc-btn" id="confirm-ok">Confirm</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(confirmModal);
+
+    // Force the modal to show after a brief delay to ensure proper CSS application
+    setTimeout(() => {
+      confirmModal.classList.add("show");
+    }, 10);
+
+    document.body.appendChild(confirmModal);
+
+    // Event handlers
+    const cancelBtn = confirmModal.querySelector("#confirm-cancel");
+    const confirmBtn = confirmModal.querySelector("#confirm-ok");
+
+    const cleanup = () => {
+      document.body.removeChild(confirmModal);
+    };
+
+    cancelBtn.addEventListener("click", () => {
+      cleanup();
+      if (onCancel) onCancel();
+    });
+
+    confirmBtn.addEventListener("click", () => {
+      cleanup();
+      if (onConfirm) onConfirm();
+    });
+
+    // ESC key support
+    const handleKeydown = (e) => {
+      if (e.key === "Escape") {
+        cleanup();
+        if (onCancel) onCancel();
+        document.removeEventListener("keydown", handleKeydown);
+      }
+    };
+    document.addEventListener("keydown", handleKeydown);
+
+    // Focus confirm button
+    setTimeout(() => confirmBtn.focus(), 100);
+  }
 }
 
 // Enhanced Core Interface Controller
@@ -3025,6 +3090,7 @@ class FontClampAdvanced {
     this.renderSizes();
     this.updatePreview();
     this.markDataChanged();
+
     this.closeModal();
   }
 
@@ -3087,16 +3153,23 @@ class FontClampAdvanced {
   // Confirms action to prevent accidental deletions
   // Updates UI and state to reflect changes immediately
   deleteSize(id) {
-    if (confirm("Delete this size?")) {
-      const sizes = this.getCurrentSizes();
-      const index = sizes.findIndex((s) => s.id == id);
-      if (index !== -1) {
-        sizes.splice(index, 1);
-        this.renderSizes();
-        this.updatePreview();
-        this.markDataChanged();
-      }
+    if (!window.fluidFontNotices) {
+      window.fluidFontNotices = new WordPressAdminNotices();
     }
+
+    window.fluidFontNotices.confirm(
+      "Delete this size?<br><br>This action cannot be undone.",
+      () => {
+        const sizes = this.getCurrentSizes();
+        const index = sizes.findIndex((s) => s.id == id);
+        if (index !== -1) {
+          sizes.splice(index, 1);
+          this.renderSizes();
+          this.updatePreview();
+          this.markDataChanged();
+        }
+      }
+    );
   }
 
   // ========================================================================
@@ -3229,77 +3302,80 @@ class FontClampAdvanced {
         ? "Tailwind Sizes"
         : "Tags";
 
-    if (
-      confirm(
-        `Reset ${tabName} to defaults?\n\nThis will replace all current entries with the original default sizes.\n\nAny custom entries will be lost.`
-      )
-    ) {
-      switch (activeTab) {
-        case "class":
-          window.fontClampAjax.data.classSizes = this.getDefaultClassSizes();
-          break;
-        case "vars":
-          window.fontClampAjax.data.variableSizes =
-            this.getDefaultVariableSizes();
-          break;
-        case "tailwind":
-          window.fontClampAjax.data.tailwindSizes =
-            this.getDefaultTailwindSizes();
-          break;
-        case "tag":
-          window.fontClampAjax.data.tagSizes = this.getDefaultTagSizes();
-          break;
-      }
-
-      // Clear the explicitly cleared flag since we're restoring defaults
-      if (window.fontClampAjax.data.explicitlyClearedTabs) {
-        delete window.fontClampAjax.data.explicitlyClearedTabs[activeTab];
-      }
-
-      this.calculateSizes();
-      this.renderSizes();
-      this.updatePreview();
-      this.markDataChanged();
-
-      setTimeout(() => {
-        if (window.fontClampCore) {
-          const activeTab = window.fontClampCore.activeTab;
-          switch (activeTab) {
-            case "class":
-              window.fontClampCore.classSizes =
-                window.fontClampAjax.data.classSizes;
-              break;
-            case "vars":
-              window.fontClampCore.variableSizes =
-                window.fontClampAjax.data.variableSizes;
-              break;
-            case "tailwind":
-              window.fontClampCore.tailwindSizes =
-                window.fontClampAjax.data.tailwindSizes;
-              break;
-            case "tag":
-              window.fontClampCore.tagSizes =
-                window.fontClampAjax.data.tagSizes;
-              break;
-          }
-          window.fontClampCore.updateBaseValueDropdown(activeTab);
-        }
-      }, 200);
-
-      // Show admin notice using WordPressAdminNotices if available
-      try {
-        if (!window.fluidFontNotices) {
-          window.fluidFontNotices = new WordPressAdminNotices();
-        }
-        window.fluidFontNotices.success(
-          `${tabName} have been reset to defaults successfully.`
-        );
-      } catch (error) {
-        console.error("Failed to create success notification:", error);
-        // Fallback: simple alert for user feedback
-        alert(`${tabName} have been reset to defaults successfully.`);
-      }
+    if (!window.fluidFontNotices) {
+      window.fluidFontNotices = new WordPressAdminNotices();
     }
+
+    if (!window.fluidFontNotices) {
+      window.fluidFontNotices = new WordPressAdminNotices();
+    }
+
+    window.fluidFontNotices.confirm(
+      `Reset ${tabName} to defaults?<br><br>This will replace all current entries with the original default sizes.<br><br><strong>Any custom entries will be lost.</strong>`,
+      () => {
+        switch (activeTab) {
+          case "class":
+            window.fontClampAjax.data.classSizes = this.getDefaultClassSizes();
+            break;
+          case "vars":
+            window.fontClampAjax.data.variableSizes =
+              this.getDefaultVariableSizes();
+            break;
+          case "tailwind":
+            window.fontClampAjax.data.tailwindSizes =
+              this.getDefaultTailwindSizes();
+            break;
+          case "tag":
+            window.fontClampAjax.data.tagSizes = this.getDefaultTagSizes();
+            break;
+        }
+
+        // Clear the explicitly cleared flag since we're restoring defaults
+        if (window.fontClampAjax.data.explicitlyClearedTabs) {
+          delete window.fontClampAjax.data.explicitlyClearedTabs[activeTab];
+        }
+
+        this.calculateSizes();
+        this.renderSizes();
+        this.updatePreview();
+        this.markDataChanged();
+
+        setTimeout(() => {
+          if (window.fontClampCore) {
+            const activeTab = window.fontClampCore.activeTab;
+            switch (activeTab) {
+              case "class":
+                window.fontClampCore.classSizes =
+                  window.fontClampAjax.data.classSizes;
+                break;
+              case "vars":
+                window.fontClampCore.variableSizes =
+                  window.fontClampAjax.data.variableSizes;
+                break;
+              case "tailwind":
+                window.fontClampCore.tailwindSizes =
+                  window.fontClampAjax.data.tailwindSizes;
+                break;
+              case "tag":
+                window.fontClampCore.tagSizes =
+                  window.fontClampAjax.data.tagSizes;
+                break;
+            }
+            window.fontClampCore.updateBaseValueDropdown(activeTab);
+          }
+        }, 200);
+
+        // Show admin notice using WordPressAdminNotices if available
+        try {
+          // Show sliding notification like Clear All uses
+          this.showResetNotification(tabName);
+        } catch (error) {
+          console.error("Failed to create success notification:", error);
+          // Fallback: simple alert for user feedback
+          alert(`${tabName} have been reset to defaults successfully.`);
+        }
+      }
+    );
   }
 
   // Show reset success notification
@@ -3458,9 +3534,25 @@ class FontClampAdvanced {
   // Clearly communicates the consequences of the action
   // Provides an opportunity to cancel before proceeding
   confirmClear(context) {
-    return confirm(
-      `Are you sure you want to clear all ${context.tabName}?\n\nThis will remove all ${context.currentData.length} entries from the current tab.\n\nYou can undo this action immediately after.`
+    if (!window.fluidFontNotices) {
+      window.fluidFontNotices = new WordPressAdminNotices();
+    }
+
+    window.fluidFontNotices.confirm(
+      `Are you sure you want to clear all ${context.tabName}?<br><br>This will remove all ${context.currentData.length} entries from the current tab.<br><br>You can undo this action immediately after.`,
+      () => {
+        // Execute the rest of the clear workflow
+        this.performClear(context);
+        this.showUndoNotification(
+          context.tabName,
+          context.currentData,
+          context.dataArrayRef,
+          context.activeTab
+        );
+      }
     );
+
+    return false; // Always return false since confirm is now handled asynchronously
   }
 
   // Perform the clear operation
