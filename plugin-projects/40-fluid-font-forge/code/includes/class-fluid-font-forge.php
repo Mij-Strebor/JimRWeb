@@ -197,11 +197,23 @@ class FluidFontForge
             FLUID_FONT_FORGE_VERSION
         );
 
+        // Enqueue unified size access system first
+        wp_enqueue_script(
+            'fluid-font-forge-unified-access',
+            FLUID_FONT_FORGE_URL . 'assets/js/unified-size-access.js',
+            ['wp-util'],
+            FLUID_FONT_FORGE_VERSION,
+            true
+        );
+
+        error_log('Plugin URL: ' . FLUID_FONT_FORGE_URL);
+        error_log('Full script URL: ' . FLUID_FONT_FORGE_URL . 'assets/js/unified-size-access.js');
+
         // Enqueue our admin script (tab utilities now embedded directly)
         wp_enqueue_script(
             'fluid-font-forge-admin',
             FLUID_FONT_FORGE_URL . 'assets/js/admin-script.js',
-            ['wp-util'],
+            ['wp-util', 'fluid-font-forge-unified-access'],
             FLUID_FONT_FORGE_VERSION,
             true
         );

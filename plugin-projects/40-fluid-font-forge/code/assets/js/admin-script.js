@@ -236,6 +236,9 @@ const FontForgeUtils = {
   },
 };
 
+// Make FontForgeUtils available globally
+window.FontForgeUtils = FontForgeUtils;
+
 // WordPress Admin Notice System
 // The WordPress Admin Notice System is a core feature that allows plugins, themes, and WordPress itself to display
 // messages and notifications within the WordPress administration area. These notices serve various purposes,
