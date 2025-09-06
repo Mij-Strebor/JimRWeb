@@ -77,6 +77,19 @@ const TabDataMap = {
   },
 };
 
+/*
+ * Custom Event Names
+ */
+const FONTFORGE_EVENTS = {
+  TAB_CHANGED: "fontforge:tab:changed",
+  DATA_UPDATED: "fontforge:data:updated",
+  SETTINGS_CHANGED: "fontforge:settings:changed",
+  CORE_READY: "fontforge:core:ready",
+  ADVANCED_READY: "fontforge:advanced:ready",
+  SIZE_SELECTED: "fontforge:size:selected",
+  CALCULATION_COMPLETE: "fontforge:calculation:complete",
+};
+
 // Utility functions for tab data management
 // Centralizes logic for accessing tab-specific data and properties
 const TabDataUtils = {
@@ -530,12 +543,12 @@ class FontClampEnhancedCoreInterface {
 
     // Why event listeners: Components signal readiness asynchronously
     // Can't predict which loads first in WordPress admin environment
-    window.addEventListener("fontClampAdvancedReady", () => {
+    window.addEventListener("fontforge:advanced:ready", () => {
       this.loadingSteps.advancedReady = true;
       this.checkAndRevealInterface();
     });
 
-    window.addEventListener("fontClamp_dataUpdated", () => {
+    window.addEventListener("fontforge:data:updated", () => {
       this.loadingSteps.contentPopulated = true;
       this.checkAndRevealInterface();
     });
@@ -744,7 +757,7 @@ class FontClampEnhancedCoreInterface {
       this.updateBaseValueDropdown(tabName);
     }
 
-    this.triggerHook("tabChanged", {
+    this.triggerHook("tab:changed", {
       activeTab: tabName,
     });
   }
@@ -847,8 +860,13 @@ class FontClampEnhancedCoreInterface {
   // Trigger custom hooks for extensibility
   // Dispatches event with core interface reference and additional data
   triggerHook(hookName, data) {
+    // Support both new unified format and legacy format
+    const eventName = hookName.includes(":")
+      ? `fontforge:${hookName}`
+      : `fontClamp_${hookName}`;
+
     window.dispatchEvent(
-      new CustomEvent(`fontClamp_${hookName}`, {
+      new CustomEvent(eventName, {
         detail: {
           ...data,
           coreInterface: this,
@@ -1026,7 +1044,7 @@ class FontClampAdvanced {
       this.initialized = true;
 
       window.dispatchEvent(
-        new CustomEvent("fontClampAdvancedReady", {
+        new CustomEvent("fontforge:advanced:ready", {
           detail: {
             advancedFeatures: this,
             version: this.version,
@@ -1250,12 +1268,11 @@ class FontClampAdvanced {
     }
 
     // Listen for tab and unit changes from core interface
-    window.addEventListener("fontClamp_tabChanged", (e) => {
+    window.addEventListener("fontforge:tab:changed", (e) => {
       this.handleTabChange(e.detail);
     });
 
-    // Recalculate sizes when unit type changes
-    window.addEventListener("fontClamp_unitTypeChanged", () => {
+    window.addEventListener("fontforge:unit:changed", () => {
       this.calculateSizes();
     });
   }
@@ -2372,23 +2389,57 @@ class FontClampAdvanced {
   // Reflects all current settings and selections for accuracy
   generateAllCSS(context) {
     const { sizes, activeTab } = context;
-
     if (!sizes || sizes.length === 0) {
       return "/* No sizes calculated */";
     }
 
-    switch (activeTab) {
-      case "class":
-        return this.generateClassCSS(sizes, context);
-      case "vars":
-        return this.generateVariableCSS(sizes, context);
-      case "tailwind":
-        return this.generateTailwindCSS(sizes, context);
-      default:
-        return this.generateTagCSS(sizes, context);
-    }
+    return this.generateCSSByType(sizes, context, activeTab);
   }
 
+  /**
+   * Unified CSS generator using strategy pattern
+   * Why unified generation: Consolidates all CSS generation logic
+   * Reduces code duplication and improves maintainability
+   * Facilitates easy addition of new output types in the future
+   */
+  generateCSSByType(sizes, context, type) {
+    const generators = {
+      class: {
+        wrapper: (content) => content,
+        rule: (size, clampValue) =>
+          `.${size.className} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`,
+      },
+      vars: {
+        wrapper: (content) => `:root {\n${content}}`,
+        rule: (size, clampValue) => `  ${size.variableName}: ${clampValue};\n`,
+      },
+      tailwind: {
+        wrapper: (content) =>
+          `module.exports = {\n  theme: {\n    extend: {\n      fontSize: {\n${content}      }\n    }\n  }\n}`,
+        rule: (size, clampValue, index, total) => {
+          const comma = index < total - 1 ? "," : "";
+          return `        '${size.tailwindName}': '${clampValue}'${comma}\n`;
+        },
+      },
+      tag: {
+        wrapper: (content) => content,
+        rule: (size, clampValue) =>
+          `${size.tagName} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`,
+      },
+    };
+
+    const generator = generators[type] || generators.class;
+    let content = "";
+
+    sizes.forEach((size, index) => {
+      if (size.min && size.max) {
+        const clampValue = this.generateClampCSS(size.min, size.max, context);
+        content += generator.rule(size, clampValue, index, sizes.length);
+      }
+    });
+
+    return generator.wrapper(content);
+  }
   // Generate CSS for class-based output
   // Why modular generation: Encapsulates class-specific CSS structure
   // Ensures consistent formatting across all class definitions
