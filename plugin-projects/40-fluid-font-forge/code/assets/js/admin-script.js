@@ -291,7 +291,11 @@ class WordPressAdminNotices {
 
       // Insert at the very beginning, before any other content
       const firstChild = wrap.querySelector("h1") || wrap.firstChild;
-      wrap.insertBefore(this.container, firstChild);
+      if (firstChild && firstChild.parentNode === wrap) {
+        wrap.insertBefore(this.container, firstChild);
+      } else {
+        wrap.appendChild(this.container);
+      }
     }
   }
 
@@ -3002,6 +3006,16 @@ class FontClampAdvanced {
     // Add new size to array if we're adding
     if (this.isAddingNew) {
       sizes.push(size);
+
+      // Update the main data source to persist the change
+      const activeTab = window.fontClampCore?.activeTab || "class";
+      if (activeTab === "class") {
+        window.fontClampAjax.data.classSizes = sizes;
+      } else if (activeTab === "vars") {
+        window.fontClampAjax.data.variableSizes = sizes;
+      } else if (activeTab === "tag") {
+        window.fontClampAjax.data.tagSizes = sizes;
+      }
     }
     // Note: For editing existing items, the size object is already
     // in the array and has been modified by reference
