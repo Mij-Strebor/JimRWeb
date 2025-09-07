@@ -36,6 +36,9 @@
 - ✅ Self-documenting with clear variable names and comments
 - ✅ Follow existing WordPress coding standards
 - ✅ Comment methods and classes thouroughly
+- ✅ Use CSS variables for colors and sizes; found in main file
+- ✅ Use "--clr-" as a color CSS variable prefix
+- ✅ Use camelcase for naming
 - ✅ Maintain JimRWeb architectural patterns
 
 ### **Communication Standards:**
