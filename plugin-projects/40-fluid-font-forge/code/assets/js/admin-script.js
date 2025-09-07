@@ -3060,6 +3060,8 @@ class FontClampAdvanced {
         size.variableName = "";
       } else if (activeTab === "tag") {
         size.tagName = "";
+      } else if (activeTab === "tailwind") {
+        size.tailwindName = "";
       }
     } else {
       // Edit existing size - find by ID
@@ -3108,25 +3110,34 @@ class FontClampAdvanced {
       size.variableName = newName;
     } else if (activeTab === "tag") {
       size.tagName = newName;
+    } else if (activeTab === "tailwind") {
+      size.tailwindName = newName;
     }
     size.lineHeight = newLineHeight;
 
     // Add new size to array if we're adding
     if (this.isAddingNew) {
-      sizes.push(size);
-
-      // Update the main data source to persist the change
       const activeTab = window.fontClampCore?.activeTab || "class";
-      if (activeTab === "class") {
-        window.fontClampAjax.data.classSizes = sizes;
-      } else if (activeTab === "vars") {
-        window.fontClampAjax.data.variableSizes = sizes;
-      } else if (activeTab === "tag") {
-        window.fontClampAjax.data.tagSizes = sizes;
+
+      // Use unified system if available
+      if (window.FontForgeData) {
+        window.FontForgeData.addSize(activeTab, size);
+      } else {
+        // Fallback to direct manipulation
+        sizes.push(size);
+
+        // Update the main data source to persist the change
+        if (activeTab === "class") {
+          window.fontClampAjax.data.classSizes = sizes;
+        } else if (activeTab === "vars") {
+          window.fontClampAjax.data.variableSizes = sizes;
+        } else if (activeTab === "tag") {
+          window.fontClampAjax.data.tagSizes = sizes;
+        } else if (activeTab === "tailwind") {
+          window.fontClampAjax.data.tailwindSizes = sizes;
+        }
       }
     }
-    // Note: For editing existing items, the size object is already
-    // in the array and has been modified by reference
 
     this.updateBaseValueOptions();
     this.calculateSizes();
@@ -3203,13 +3214,26 @@ class FontClampAdvanced {
     window.fluidFontNotices.confirm(
       "Delete this size?<br><br>This action cannot be undone.",
       () => {
-        const sizes = this.getCurrentSizes();
-        const index = sizes.findIndex((s) => s.id == id);
-        if (index !== -1) {
-          sizes.splice(index, 1);
-          this.renderSizes();
-          this.updatePreview();
-          this.markDataChanged();
+        const activeTab = window.fontClampCore?.activeTab || "class";
+
+        // Use unified system if available
+        if (window.FontForgeData) {
+          const success = window.FontForgeData.removeSize(activeTab, id);
+          if (success) {
+            this.renderSizes();
+            this.updatePreview();
+            this.markDataChanged();
+          }
+        } else {
+          // Fallback to direct manipulation
+          const sizes = this.getCurrentSizes();
+          const index = sizes.findIndex((s) => s.id == id);
+          if (index !== -1) {
+            sizes.splice(index, 1);
+            this.renderSizes();
+            this.updatePreview();
+            this.markDataChanged();
+          }
         }
       }
     );
@@ -3245,6 +3269,8 @@ class FontClampAdvanced {
       currentData = window.fontClampAjax?.data?.variableSizes || [];
     } else if (activeTab === "tag") {
       currentData = window.fontClampAjax?.data?.tagSizes || [];
+    } else if (activeTab === "tailwind") {
+      currentData = window.fontClampAjax?.data?.tailwindSizes || [];
     }
 
     // Find next available ID
@@ -3260,6 +3286,12 @@ class FontClampAdvanced {
       return name.includes("custom-") || name.includes("--fs-custom-");
     });
 
+    // Add debugging
+    console.log(`Debug Tailwind: activeTab=${activeTab}`);
+    console.log(`Debug Tailwind: currentData=`, currentData);
+    console.log(`Debug Tailwind: customEntries=`, customEntries);
+    console.log(`Debug Tailwind: nextCustomNumber=${customEntries.length + 1}`);
+
     const nextCustomNumber = customEntries.length + 1;
     let customName;
 
@@ -3269,6 +3301,8 @@ class FontClampAdvanced {
       customName = `--fs-custom-${nextCustomNumber}`;
     } else if (activeTab === "tag") {
       customName = "span";
+    } else if (activeTab === "tailwind") {
+      customName = `custom-${nextCustomNumber}`;
     }
 
     return {
@@ -3349,33 +3383,36 @@ class FontClampAdvanced {
       window.fluidFontNotices = new WordPressAdminNotices();
     }
 
-    if (!window.fluidFontNotices) {
-      window.fluidFontNotices = new WordPressAdminNotices();
-    }
-
     window.fluidFontNotices.confirm(
       `Reset ${tabName} to defaults?<br><br>This will replace all current entries with the original default sizes.<br><br><strong>Any custom entries will be lost.</strong>`,
       () => {
-        switch (activeTab) {
-          case "class":
-            window.fontClampAjax.data.classSizes = this.getDefaultClassSizes();
-            break;
-          case "vars":
-            window.fontClampAjax.data.variableSizes =
-              this.getDefaultVariableSizes();
-            break;
-          case "tailwind":
-            window.fontClampAjax.data.tailwindSizes =
-              this.getDefaultTailwindSizes();
-            break;
-          case "tag":
-            window.fontClampAjax.data.tagSizes = this.getDefaultTagSizes();
-            break;
-        }
+        // Use unified system if available
+        if (window.FontForgeData) {
+          window.FontForgeData.resetToDefaults(activeTab);
+        } else {
+          // Fallback to direct manipulation
+          switch (activeTab) {
+            case "class":
+              window.fontClampAjax.data.classSizes =
+                this.getDefaultClassSizes();
+              break;
+            case "vars":
+              window.fontClampAjax.data.variableSizes =
+                this.getDefaultVariableSizes();
+              break;
+            case "tailwind":
+              window.fontClampAjax.data.tailwindSizes =
+                this.getDefaultTailwindSizes();
+              break;
+            case "tag":
+              window.fontClampAjax.data.tagSizes = this.getDefaultTagSizes();
+              break;
+          }
 
-        // Clear the explicitly cleared flag since we're restoring defaults
-        if (window.fontClampAjax.data.explicitlyClearedTabs) {
-          delete window.fontClampAjax.data.explicitlyClearedTabs[activeTab];
+          // Clear the explicitly cleared flag since we're restoring defaults
+          if (window.fontClampAjax.data.explicitlyClearedTabs) {
+            delete window.fontClampAjax.data.explicitlyClearedTabs[activeTab];
+          }
         }
 
         this.calculateSizes();
@@ -3614,12 +3651,20 @@ class FontClampAdvanced {
   // Marks the tab as explicitly cleared for state tracking
   // Ensures consistency across the application state
   clearDataSources(context) {
-    if (window.fontClampAjax?.data) {
-      window.fontClampAjax.data[context.dataArrayRef] = [];
-      // Mark tab as explicitly cleared
-      window.fontClampAjax.data.explicitlyClearedTabs =
-        window.fontClampAjax.data.explicitlyClearedTabs || {};
-      window.fontClampAjax.data.explicitlyClearedTabs[context.activeTab] = true;
+    // Use unified system if available
+    if (window.FontForgeData) {
+      window.FontForgeData.clearSizes(context.activeTab);
+    } else {
+      // Fallback to direct manipulation
+      if (window.fontClampAjax?.data) {
+        window.fontClampAjax.data[context.dataArrayRef] = [];
+        // Mark tab as explicitly cleared
+        window.fontClampAjax.data.explicitlyClearedTabs =
+          window.fontClampAjax.data.explicitlyClearedTabs || {};
+        window.fontClampAjax.data.explicitlyClearedTabs[
+          context.activeTab
+        ] = true;
+      }
     }
   }
 
@@ -3728,7 +3773,7 @@ class FontClampAdvanced {
             <div style="font-weight: 600; margin-bottom: 4px;">Cleared ${backupData.length} ${tabName}</div>
             <div style="font-size: 12px; opacity: 0.9;">This action can be undone</div>
         </div>
-        <button id="undo-clear-btn" style="
+<button id="undo-clear-btn" style="
             background: var(--clr-accent);
             color: var(--clr-btn-txt);
             border: 1px solid var(--clr-btn-bdr);
@@ -3738,7 +3783,7 @@ class FontClampAdvanced {
             font-weight: 600;
             cursor: pointer;
             transition: var(--jimr-transition);
-        ">UNDO</button>
+        " onmouseover="this.style.background='var(--clr-btn-hover)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--clr-shadow-lg)';" onmouseout="this.style.background='var(--clr-accent)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">UNDO</button>
         <button id="dismiss-clear-btn" style="
             background: none;
             border: none;
@@ -3772,12 +3817,21 @@ class FontClampAdvanced {
 
     // Undo button functionality
     document.getElementById("undo-clear-btn").addEventListener("click", () => {
-      // Restore the data
-      if (window.fontClampAjax?.data) {
-        window.fontClampAjax.data[dataArrayRef] = backupData;
+      // Restore the data using unified system if available
+      if (window.FontForgeData) {
+        window.FontForgeData.setSizes(tabType, backupData);
         // Clear the explicitly cleared flag since data is restored
-        if (window.fontClampAjax.data.explicitlyClearedTabs) {
+        if (window.fontClampAjax?.data?.explicitlyClearedTabs) {
           delete window.fontClampAjax.data.explicitlyClearedTabs[tabType];
+        }
+      } else {
+        // Fallback: Restore the data directly
+        if (window.fontClampAjax?.data) {
+          window.fontClampAjax.data[dataArrayRef] = backupData;
+          // Clear the explicitly cleared flag since data is restored
+          if (window.fontClampAjax.data.explicitlyClearedTabs) {
+            delete window.fontClampAjax.data.explicitlyClearedTabs[tabType];
+          }
         }
       }
 
