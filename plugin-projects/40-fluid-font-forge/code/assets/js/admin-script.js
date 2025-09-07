@@ -260,7 +260,6 @@ const FontForgeUtils = {
 // Test unified system on load with timing check
 function checkUnifiedSystem() {
   if (window.FontForgeData) {
-    console.log("✅ Unified system available:", window.FontForgeData);
     return true;
   } else {
     console.warn("⚠️ Unified system not loaded yet, retrying...");
@@ -876,20 +875,33 @@ class FontClampEnhancedCoreInterface {
         window.fontClampAdvanced
       );
     } else {
-      // Use unified system if available, fallback to TabDataUtils
-      const allSizes = window.FontForgeData
-        ? window.FontForgeData.getSizes(tabName, { useDefaults: false })
-        : TabDataUtils.getDataForTab(tabName, {
-            classSizes: this.classSizes,
-            variableSizes: this.variableSizes,
-            tagSizes: this.tagSizes,
-          });
-
-      // Filter out custom entries for base dropdown
-      currentSizes = allSizes.filter((size) => {
-        const name = TabDataUtils.getSizeDisplayName(size, tabName);
-        return !name.startsWith("custom-") && !name.startsWith("--fs-custom-");
-      });
+      // Use unified system for all size operations
+      let currentSizes;
+      if (window.FontForgeData) {
+        const allSizes = window.FontForgeData.getSizes(tabName, {
+          useDefaults: false,
+        });
+        // Filter out custom entries for base dropdown
+        currentSizes = allSizes.filter((size) => {
+          const name = window.FontForgeData.getSizeDisplayName(size, tabName);
+          return (
+            !name.startsWith("custom-") && !name.startsWith("--fs-custom-")
+          );
+        });
+      } else {
+        // Fallback pattern
+        const allSizes = TabDataUtils.getDataForTab(tabName, {
+          classSizes: this.classSizes,
+          variableSizes: this.variableSizes,
+          tagSizes: this.tagSizes,
+        });
+        currentSizes = allSizes.filter((size) => {
+          const name = TabDataUtils.getSizeDisplayName(size, tabName);
+          return (
+            !name.startsWith("custom-") && !name.startsWith("--fs-custom-")
+          );
+        });
+      }
     }
 
     if (!currentSizes || currentSizes.length === 0) {
@@ -1587,6 +1599,12 @@ class FontClampAdvanced {
     const select = this.elements.baseValueSelect;
     if (!select) return;
 
+    // Skip during initialization - queue for later
+    if (!this.initialized) {
+      setTimeout(() => this.updateBaseValueOptions(), 500);
+      return;
+    }
+
     const activeTab = window.fontClampCore?.activeTab || "class";
     const sizes = this.getCurrentSizes();
 
@@ -1648,7 +1666,6 @@ class FontClampAdvanced {
       }
       select.appendChild(option);
     });
-
     // If current selection wasn't found, select first option
     if (!selectionFound && select.options.length > 0) {
       select.options[0].selected = true;
@@ -2474,14 +2491,6 @@ class FontClampAdvanced {
       context
     );
     const displayName = this.getSizeDisplayName(selectedSize, activeTab);
-    console.log(
-      "🔍 Debug: Display name:",
-      displayName,
-      "for size:",
-      selectedSize,
-      "tab:",
-      activeTab
-    );
 
     switch (activeTab) {
       case "class":
@@ -3262,16 +3271,10 @@ class FontClampAdvanced {
   // Ensures a clear naming convention for custom sizes
   // Simplifies user experience when adding new sizes
   generateNextCustomEntry(activeTab) {
-    let currentData;
-    if (activeTab === "class") {
-      currentData = window.fontClampAjax?.data?.classSizes || [];
-    } else if (activeTab === "vars") {
-      currentData = window.fontClampAjax?.data?.variableSizes || [];
-    } else if (activeTab === "tag") {
-      currentData = window.fontClampAjax?.data?.tagSizes || [];
-    } else if (activeTab === "tailwind") {
-      currentData = window.fontClampAjax?.data?.tailwindSizes || [];
-    }
+    // Use unified system for data access
+    const currentData = window.FontForgeData
+      ? window.FontForgeData.getSizes(activeTab, { useDefaults: false })
+      : this.getCurrentSizes(activeTab);
 
     // Find next available ID
     const maxId =
@@ -3285,12 +3288,6 @@ class FontClampAdvanced {
       const name = this.getSizeDisplayName(item, activeTab);
       return name.includes("custom-") || name.includes("--fs-custom-");
     });
-
-    // Add debugging
-    console.log(`Debug Tailwind: activeTab=${activeTab}`);
-    console.log(`Debug Tailwind: currentData=`, currentData);
-    console.log(`Debug Tailwind: customEntries=`, customEntries);
-    console.log(`Debug Tailwind: nextCustomNumber=${customEntries.length + 1}`);
 
     const nextCustomNumber = customEntries.length + 1;
     let customName;
