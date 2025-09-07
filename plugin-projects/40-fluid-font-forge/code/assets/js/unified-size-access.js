@@ -339,7 +339,7 @@ class FontForgeDataAccessor {
       return;
     }
 
-    const dataKey = TabDataUtils.getTabConfig(tabType)?.dataKey;
+    const dataKey = TabDataMap[tabType]?.dataKey;
     if (dataKey) {
       // Update core interface data
       window.fontClampCore[dataKey] = [...sizes];
@@ -486,8 +486,6 @@ function initializeUnifiedSizeAccess() {
   window.getCurrentSizes = (tabType = null) => {
     return window.FontForgeData.getSizes(tabType);
   };
-
-  console.log("✅ Unified Size Access System initialized");
 }
 
 /**

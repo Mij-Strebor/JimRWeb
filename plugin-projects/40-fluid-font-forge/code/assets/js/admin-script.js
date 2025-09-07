@@ -209,6 +209,7 @@ const FontForgeUtils = {
     const tab = activeTab || window.fontClampCore?.activeTab || "class";
 
     // Try unified system first, fallback to direct access
+    // Try unified system first, fallback to direct access
     if (window.FontForgeData) {
       return window.FontForgeData.getSizes(tab);
     }
@@ -2276,6 +2277,7 @@ class FontClampAdvanced {
   // Ensures consistency between UI and data model
   // Triggers necessary updates to reflect changes
   reorderSizes(draggedRow, targetRow) {
+    const activeTab = window.fontClampCore?.activeTab || "class";
     const sizes = this.getCurrentSizes();
     const draggedId = parseInt(draggedRow.dataset.id);
     const targetId = parseInt(targetRow.dataset.id);
@@ -2284,9 +2286,19 @@ class FontClampAdvanced {
     const targetIndex = sizes.findIndex((s) => s.id === targetId);
 
     if (draggedIndex !== -1 && targetIndex !== -1) {
-      // Remove dragged item and insert at target position
-      const [draggedItem] = sizes.splice(draggedIndex, 1);
-      sizes.splice(targetIndex, 0, draggedItem);
+      // Create new array with reordered items
+      const newSizes = [...sizes];
+      const [draggedItem] = newSizes.splice(draggedIndex, 1);
+      newSizes.splice(targetIndex, 0, draggedItem);
+
+      // Use unified system to update, fallback to direct manipulation
+      if (window.FontForgeData) {
+        window.FontForgeData.setSizes(activeTab, newSizes);
+      } else {
+        // Fallback: direct manipulation
+        const [originalDraggedItem] = sizes.splice(draggedIndex, 1);
+        sizes.splice(targetIndex, 0, originalDraggedItem);
+      }
 
       // Re-render and update
       this.renderSizes();
