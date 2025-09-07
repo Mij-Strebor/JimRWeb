@@ -5,7 +5,7 @@
  * real-time CSS clamp() generation, and responsive font previews.
  *
  * @package FluidFontForge
- * @version 4.0.0
+ * @version 4.0.2
  * @author Jim R (JimRWeb)
  * @link https://jimrweb.com
  * @since 1.0.0
@@ -208,7 +208,12 @@ const FontForgeUtils = {
   getCurrentSizes(activeTab = null, fontClampAdvanced = null) {
     const tab = activeTab || window.fontClampCore?.activeTab || "class";
 
-    // Get data from localized script
+    // Try unified system first, fallback to direct access
+    if (window.FontForgeData) {
+      return window.FontForgeData.getSizes(tab);
+    }
+
+    // Fallback: Get data from localized script
     const data = window.fontClampAjax?.data || {};
     let sizes = TabDataUtils.getDataForTab(tab, data);
 
@@ -249,8 +254,27 @@ const FontForgeUtils = {
   },
 };
 
-// Make FontForgeUtils available globally
-window.FontForgeUtils = FontForgeUtils;
+// Make FontForgeUtils available globallywindow.FontForgeUtils = FontForgeUtils;
+
+// Test unified system on load with timing check
+function checkUnifiedSystem() {
+  if (window.FontForgeData) {
+    console.log("✅ Unified system available:", window.FontForgeData);
+    return true;
+  } else {
+    console.warn("⚠️ Unified system not loaded yet, retrying...");
+    return false;
+  }
+}
+
+// Check immediately, then retry if needed
+if (!checkUnifiedSystem()) {
+  setTimeout(() => {
+    if (!checkUnifiedSystem()) {
+      console.error("❌ Unified system failed to load after delay");
+    }
+  }, 500);
+}
 
 // WordPress Admin Notice System
 // The WordPress Admin Notice System is a core feature that allows plugins, themes, and WordPress itself to display
@@ -851,11 +875,14 @@ class FontClampEnhancedCoreInterface {
         window.fontClampAdvanced
       );
     } else {
-      const allSizes = TabDataUtils.getDataForTab(tabName, {
-        classSizes: this.classSizes,
-        variableSizes: this.variableSizes,
-        tagSizes: this.tagSizes,
-      });
+      // Use unified system if available, fallback to TabDataUtils
+      const allSizes = window.FontForgeData
+        ? window.FontForgeData.getSizes(tabName, { useDefaults: false })
+        : TabDataUtils.getDataForTab(tabName, {
+            classSizes: this.classSizes,
+            variableSizes: this.variableSizes,
+            tagSizes: this.tagSizes,
+          });
 
       // Filter out custom entries for base dropdown
       currentSizes = allSizes.filter((size) => {
@@ -1642,9 +1669,13 @@ class FontClampAdvanced {
     }
 
     const sizes = this.getCurrentSizes();
-    const baseSize = sizes.find((size) => {
-      return size.id == baseValue; // Compare ID to ID (use == to handle string/number conversion)
-    });
+    // Use unified system for ID lookup if available
+    const baseSize = window.FontForgeData
+      ? window.FontForgeData.getSizeById(
+          baseValue,
+          window.fontClampCore?.activeTab
+        )
+      : sizes.find((size) => size.id == baseValue);
     if (!baseSize) {
       this.log("❌ Base size not found for:", baseValue);
       return;
@@ -3871,6 +3902,12 @@ class FontClampAdvanced {
   // Ensures consistent display of size names in the UI
   // Simplifies code by centralizing name retrieval logic
   getSizeDisplayName(size, activeTab) {
+    // Use unified system if available
+    if (window.FontForgeData) {
+      return window.FontForgeData.getSizeDisplayName(size, activeTab);
+    }
+
+    // Fallback to direct property access
     switch (activeTab) {
       case "class":
         return size.className || "";
