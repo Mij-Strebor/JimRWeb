@@ -18,7 +18,7 @@
 
 Transform your responsive design workflow with mathematically precise CSS scaling using modern `clamp()` functions.
 
-### 📐 [Fluid Font Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/projects/40-flluid-font-forge/)
+### 📐 [Fluid Font Forge](://github.com/Mij-Strebor/JimRWeb/blob/main/plugin-projects/40-fluid-font-forge/)
 Generate responsive typography systems with mathematical precision. Create fluid font scaling that works beautifully from mobile to desktop using proven typographic ratios.
 
 
@@ -31,7 +31,7 @@ Generate responsive typography systems with mathematical precision. Create fluid
 - Mathematical scaling with custom line heights
 - Drag-and-drop reordering with autosave
 
-### 📏 [Fluid Space Forge](https://github.com/Mij-Strebor/JimRWeb/tree/main/projects/41-fluid-space-forge/)
+### 📏 [Fluid Space Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/snippet-projects/41-fluid-space-forge/)
 Create consistent, scalable spacing systems for margins, padding, and gaps. The perfect companion to Fluid Font Forge and Fluid Button Forge for complete design system harmony.
 
 **Features:** 
@@ -40,7 +40,7 @@ Create consistent, scalable spacing systems for margins, padding, and gaps. The 
 - Mathematical scaling ratios
 - Dual unit support (px/rem)
 
-### 🎨 [Fluid Button Forge](https://github.com/Mij-Strebor/JimRWeb/tree/main/projects/42-fluid-button-forge/)
+### 🎨 [Fluid Button Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/snippet-projects/42-fluid-button-forge/)
 Design professional button hierarchies that scale perfectly across all devices. Generate responsive button systems for CTAs, forms, and UI components.
 
 **Features:**
@@ -82,7 +82,7 @@ Professional media library scanner and analyzer. Scan, analyze, and optimize you
 
 Specialized tools for Elementor developers focusing on design systems, color management, and accessibility compliance.
 
-### 🌈 [Elementor Color Inventory Forge](https://github.com/Mij-Strebor/JimRWeb/tree/main/projects/51-color-forge/)
+### 🌈 [Elementor Color Inventory Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/snippet-projects/51-color-forge/)
 Professional color management, analysis, and WCAG accessibility compliance tool. Complete inventory system for Elementor Global Colors with detailed analysis and usage tracking.
 
 **Features:**
