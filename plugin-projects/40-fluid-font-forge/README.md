@@ -8,9 +8,12 @@
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)](https://php.net/)
 
 A WordPress admin plugin for generating CSS clamp() functions for responsive typography. Provides a calculator interface for creating fluid font scaling between viewport sizes.
+
+ Transform your WordPress site's typography with precise, responsive font scaling using CSS clamp() functions.
+
+
 ![Fluid Font Forge interface](./docs/screenshots/fff.png)
 
-> Transform your WordPress site's typography with precise, responsive font scaling using CSS clamp() functions.
 
 ## Overview
 
