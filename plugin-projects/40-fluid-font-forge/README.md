@@ -1,6 +1,6 @@
 # Fluid Font Forge
 
-![Fluid Font Forge banner](.\docs\screenshots\banner.png)
+![Fluid Font Forge banner](./docs/screenshots/banner.png)
 
 [![Version](https://img.shields.io/badge/version-4.0.1-blue.svg)](https://github.com/jimrweb/fluid-font-forge)
 [![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-blue.svg)](https://wordpress.org/)
@@ -8,10 +8,9 @@
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)](https://php.net/)
 
 A WordPress admin plugin for generating CSS clamp() functions for responsive typography. Provides a calculator interface for creating fluid font scaling between viewport sizes.
+![Fluid Font Forge interface](./docs/screenshots/fff.png)
 
 > Transform your WordPress site's typography with precise, responsive font scaling using CSS clamp() functions.
-
-![Fluid Font Forge interface](.\docs\screenshots\fff.png)
 
 ## Overview
 
