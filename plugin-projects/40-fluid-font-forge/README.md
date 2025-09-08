@@ -16,7 +16,7 @@ A WordPress admin plugin for generating CSS clamp() functions for responsive typ
 ## Overview
 
 Fluid Font Forge generates CSS clamp() functions that allow font sizes to scale smoothly between minimum and maximum viewport widths. The plugin provides:
-
+Git
 - Mathematical scaling ratios for typography hierarchy
 - Four output formats: CSS classes, custom properties, HTML tags, and Tailwind config
 - Real-time preview at minimum and maximum viewport sizes
