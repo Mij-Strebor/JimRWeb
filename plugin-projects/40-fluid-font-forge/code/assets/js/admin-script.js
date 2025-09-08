@@ -1152,6 +1152,9 @@ class FontClampAdvanced {
 
       this.initialized = true;
 
+      // Force calculation now that initialization is complete
+      this.calculateSizes();
+
       window.dispatchEvent(
         new CustomEvent("fontforge:advanced:ready", {
           detail: {
@@ -1516,10 +1519,11 @@ class FontClampAdvanced {
    * Populate settings using constants instead of magic numbers
    */
   populateSettings() {
-    const data = window.fontClampAjax?.data;
+    // Use unified system for settings access with fallback
+    const data = window.FontForgeData?.dataSource || window.fontClampAjax?.data;
 
     if (!data) {
-      console.error("❌ No fluid font data available!");
+      console.error("⚠️ No fluid font data available!");
       return;
     }
 
@@ -1782,14 +1786,18 @@ class FontClampAdvanced {
 
   // Create preview context with all needed data
   createPreviewContext() {
+    const activeTab = window.fontClampCore?.activeTab || "class";
+
     return {
-      sizes: this.getCurrentSizes(),
+      sizes: window.FontForgeData
+        ? window.FontForgeData.getSizes(activeTab)
+        : this.getCurrentSizes(),
       previewMin: this.elements.previewMinContainer,
       previewMax: this.elements.previewMaxContainer,
       minRootSize: parseFloat(this.elements.minRootSizeInput?.value),
       maxRootSize: parseFloat(this.elements.maxRootSizeInput?.value),
       unitType: window.fontClampCore?.unitType || "rem",
-      activeTab: window.fontClampCore?.activeTab || "class",
+      activeTab: activeTab,
     };
   }
 
@@ -2034,9 +2042,13 @@ class FontClampAdvanced {
   // Simplifies function signatures by passing a single object
   // Facilitates easier debugging and state management
   createRenderContext() {
+    const activeTab = window.fontClampCore?.activeTab || "class";
+
     return {
-      sizes: this.getCurrentSizes(),
-      activeTab: window.fontClampCore?.activeTab || "class",
+      sizes: window.FontForgeData
+        ? window.FontForgeData.getSizes(activeTab)
+        : this.getCurrentSizes(),
+      activeTab: activeTab,
       unitType: window.fontClampCore?.unitType || "rem",
       tbody: null, // Will be set after table creation
     };
@@ -3564,29 +3576,17 @@ class FontClampAdvanced {
   // Simplifies validation and manipulation of the correct data array
   // Supports multiple tab types with appropriate data handling
   getTabDataForClear(activeTab) {
-    let currentData, dataArrayRef;
+    // Use unified system for data access
+    const currentData = window.FontForgeData
+      ? [...window.FontForgeData.getSizes(activeTab, { useDefaults: false })]
+      : [
+          ...(TabDataUtils.getDataForTab(
+            activeTab,
+            window.fontClampAjax?.data
+          ) || []),
+        ];
 
-    switch (activeTab) {
-      case "class":
-        currentData = [...(window.fontClampAjax?.data?.classSizes || [])];
-        dataArrayRef = "classSizes";
-        break;
-      case "vars":
-        currentData = [...(window.fontClampAjax?.data?.variableSizes || [])];
-        dataArrayRef = "variableSizes";
-        break;
-      case "tailwind":
-        currentData = [...(window.fontClampAjax?.data?.tailwindSizes || [])];
-        dataArrayRef = "tailwindSizes";
-        break;
-      case "tag":
-        currentData = [...(window.fontClampAjax?.data?.tagSizes || [])];
-        dataArrayRef = "tagSizes";
-        break;
-      default:
-        currentData = null;
-        dataArrayRef = null;
-    }
+    const dataArrayRef = TabDataMap[activeTab]?.dataKey || null;
 
     return { currentData, dataArrayRef };
   }
