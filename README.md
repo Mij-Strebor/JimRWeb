@@ -1,5 +1,5 @@
-# J Forge - WordPress Developer Toolkit
-<img src="resources\00-assets\design-assets\icons\svg\JimRWeb-logo-black.svg" alt="JimRWeb logo" style="height: 15px; width:100px;"/>
+# J Forge - WordPress Developer Tools
+<img src="resources\00-assets\design-assets\icons\svg\jimrweb_banner.png" alt="JimRWeb logo"/>
 
 **Professional WordPress development tools for modern developers**
 
@@ -9,6 +9,8 @@
 [![WCAG](https://img.shields.io/badge/WCAG-2.1%20AA%2FAAA-green.svg)](https://www.w3.org/WAI/WCAG21/quickref/)
 
 > A comprehensive collection of WordPress admin tools built as code snippets that solve real development challenges. From responsive design systems to performance optimization and accessibility compliance - everything you need for professional WordPress development.
+> 
+> The tool set exists currently as code snippets. They are being moved over to be full-scale, professional quality plugins. Look for the 🚀 mark for a superior WordPress plugin!
 
 ---
 
@@ -18,6 +20,9 @@ Transform your responsive design workflow with mathematically precise CSS scalin
 
 ### 📐 [Fluid Font Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/projects/40-flluid-font-forge/)
 Generate responsive typography systems with mathematical precision. Create fluid font scaling that works beautifully from mobile to desktop using proven typographic ratios.
+
+
+🚀 This is the first to be migrated to full WordPress plugin status.
 
 **Features:**
 - Typography scales (Minor Second, Major Third, Golden Ratio, etc.)

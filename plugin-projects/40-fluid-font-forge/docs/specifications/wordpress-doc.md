@@ -110,7 +110,7 @@ No. Fluid Font Forge runs only in the WordPress admin area and generates CSS for
 
 ### Does this work with page builders?
 
-Yes. The generated CSS works with any WordPress theme or page builder. You can use the CSS classes in Elementor, apply the custom properties in Gutenberg, or implement the tag styles globally.
+Yes. The generated CSS works with any WordPress theme or page builder. You can use the CSS classes in, for instance Elementor or Bricks, and apply the custom properties in Gutenberg, or implement the tag styles globally.
 
 ### What's the difference between px and rem units?
 
@@ -124,6 +124,7 @@ The plugin provides copy-to-clipboard functionality for all generated CSS. For T
 
 Copy the generated CSS and add it to your theme through:
 - **Theme Customizer**: Appearance > Customize > Additional CSS
+- **Code Snippets Manager**: Add to a CSS code snippet
 - **Child Theme**: Add to your style.css file
 - **CSS Plugins**: Use plugins like "Easy Custom CSS" or "SiteOrigin CSS"
 
@@ -133,7 +134,7 @@ Yes. While WordPress 6.1+ includes basic fluid typography support via theme.json
 
 ### Can I preview fonts with custom web fonts?
 
-Yes. The plugin includes a preview font feature where you can paste a WOFF2 font URL to see how your sizes look with custom fonts.
+Yes. The plugin includes a preview font feature where you can select a font URL to see how your sizes look with the custom fonts in your project.
 
 ### What if I need help or have feature requests?
 

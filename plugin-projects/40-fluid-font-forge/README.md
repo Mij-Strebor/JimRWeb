@@ -9,7 +9,7 @@
 
 A WordPress admin plugin for generating CSS clamp() functions for responsive typography. Provides a calculator interface for creating fluid font scaling between viewport sizes.
 
- Transform your WordPress site's typography with precise, responsive font scaling using CSS clamp() functions.
+Fluid Font Forge transforms how you implement responsive typography in WordPress. Instead of manually creating breakpoints for different screen sizes, this plugin generates mathematically precise CSS clamp() functions that scale typography fluidly across all viewport widths.
 
 
 ![Fluid Font Forge interface](./docs/screenshots/fff.png)
@@ -18,12 +18,37 @@ A WordPress admin plugin for generating CSS clamp() functions for responsive typ
 ## Overview
 
 Fluid Font Forge generates CSS clamp() functions that allow font sizes to scale smoothly between minimum and maximum viewport widths. The plugin provides:
-Git
 - Mathematical scaling ratios for typography hierarchy
 - Four output formats: CSS classes, custom properties, HTML tags, and Tailwind config
 - Real-time preview at minimum and maximum viewport sizes
 - Drag-and-drop reordering of font sizes
 - Configurable line heights and custom naming
+
+### Key Features
+
+**Advanced Typography Calculator**
+- Mathematical scaling using configurable ratios (Minor Second to Octave)
+- Precise viewport range control (minimum to maximum screen widths)
+- Real-time font size calculation with instant preview
+- Support for both px and rem units with accessibility considerations
+
+**Professional Interface**
+- Drag-and-drop size management for easy reordering
+- Real-time preview showing actual scaling behavior at min/max viewports
+- Modal editing system for detailed size customization
+- Copy-to-clipboard functionality for immediate implementation
+
+**Multiple Output Formats**
+- CSS Classes (.large, .medium, .small)
+- CSS Custom Properties (--fs-lg, --fs-md, --fs-sm)  
+- HTML Tag Styles (h1, h2, p, etc.)
+- Tailwind Configuration Objects (fontSize export)
+
+**WordPress Integration**
+- Works with any theme (block themes, classic themes, custom themes)
+- Compatible with page builders (Elementor, Gutenberg, Beaver Builder)
+- No external dependencies - fully self-contained
+- Performance optimized with local processing
 
 ## Installation
 
