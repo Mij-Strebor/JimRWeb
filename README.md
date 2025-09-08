@@ -18,7 +18,7 @@
 
 Transform your responsive design workflow with mathematically precise CSS scaling using modern `clamp()` functions.
 
-### 📐 [Fluid Font Forge](://github.com/Mij-Strebor/JimRWeb/blob/main/plugin-projects/40-fluid-font-forge/)
+### 📐 [Fluid Font Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/plugin-projects/40-fluid-font-forge/)
 Generate responsive typography systems with mathematical precision. Create fluid font scaling that works beautifully from mobile to desktop using proven typographic ratios.
 
 
@@ -40,8 +40,12 @@ Create consistent, scalable spacing systems for margins, padding, and gaps. The 
 - Mathematical scaling ratios
 - Dual unit support (px/rem)
 
+ 🛠️ (WORK IN PROGRESS) Exisits as a code snippet; professional WordPress plugin development underway.
+
 ### 🎨 [Fluid Button Forge](https://github.com/Mij-Strebor/JimRWeb/blob/main/snippet-projects/42-fluid-button-forge/)
 Design professional button hierarchies that scale perfectly across all devices. Generate responsive button systems for CTAs, forms, and UI components.
+
+ 🛠️ (WORK IN PROGRESS) Exisits as a code snippet; professional WordPress plugin development is planned.
 
 **Features:**
 - Professional button hierarchies (small, medium, large)
@@ -58,7 +62,7 @@ Professional utilities for WordPress administration, performance optimization, a
 ### 🧹 [Enhanced Cache Purge](./enhanced-cache-purge/)
 Professional one-click cache clearing for WordPress administrators. A comprehensive admin bar button that purges all caches with a single click.
 
- 🛠️ Not yet available.
+ 🛠️ (WORK IN PROGRESS) Not yet available.
 
 **Features:**
 - Universal cache support (WP Super Cache, W3 Total Cache, WP Rocket, LiteSpeed, etc.)
