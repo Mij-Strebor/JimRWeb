@@ -1,0 +1,5 @@
+mklink "C:\Users\Owner\Local Sites\site\app\public\wp-content\plugins\fluid-font-forge\assets\js\unified-size-access.js" "E:\OneDrive - Personal\OneDrive\WordPress Project Data\JimRWeb\JimRWeb Git\plugin-projects\40-fluid-font-forge\code\assets\js\unified-size-access.js"
+
+mklink "C:\Users\Owner\Local Sites\site\app\public\wp-content\plugins\fluid-font-forge\fluid-font-forge.php" "E:\OneDrive - Personal\OneDrive\WordPress Project Data\JimRWeb\JimRWeb Git\plugin-projects\40-fluid-font-forge\code\fluid-font-forge.php"
+
+mklink "C:\Users\Owner\Local Sites\site\app\public\wp-content\plugins\<<plugin name>>\<<path>>\<<file>>" "E:\OneDrive - Personal\OneDrive\WordPress Project Data\JimRWeb\JimRWeb Git\plugin-projects\<<project name>>\<<path>>\<<file>>"

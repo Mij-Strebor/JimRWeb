@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="j-forge---wordpress-developer-tools">J Forge - WordPress Developer Tools</h1>
+<img src="file:///e:/OneDrive - Personal/OneDrive/WordPress Project Data/JimRWeb/JimRWeb Git/resources/00-assets/design-assets/icons/svg/jimrweb_banner.png" alt="JimRWeb logo">
+<p><strong>Professional WordPress development tools for modern developers</strong></p>
+<p><a href="https://wordpress.org/"><img src="https://img.shields.io/badge/WordPress-5.0%2B-blue.svg" alt="WordPress"></a>
+<a href="https://php.net/"><img src="https://img.shields.io/badge/PHP-7.4%2B-purple.svg" alt="PHP"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
+<a href="https://www.w3.org/WAI/WCAG21/quickref/"><img src="https://img.shields.io/badge/WCAG-2.1%20AA%2FAAA-green.svg" alt="WCAG"></a></p>
+<blockquote>
+<p>A comprehensive collection of WordPress admin tools built as code snippets that solve real development challenges. From responsive design systems to performance optimization and accessibility compliance - everything you need for professional WordPress development.</p>
+<p>The tool set exists currently as code snippets. They are being moved over to be full-scale, professional quality plugins. Look for the 🚀 mark for a superior WordPress plugin!</p>
+</blockquote>
+<hr>
+<h2 id="%F0%9F%8E%A8-css-clamp-design-system-tools">🎨 CSS Clamp Design System Tools</h2>
+<p>Transform your responsive design workflow with mathematically precise CSS scaling using modern <code>clamp()</code> functions.</p>
+<h3 id="%F0%9F%93%90-fluid-font-forge">📐 <a href="https://github.com/Mij-Strebor/JimRWeb/blob/main/plugin-projects/40-fluid-font-forge/">Fluid Font Forge</a></h3>
+<p>Generate responsive typography systems with mathematical precision. Create fluid font scaling that works beautifully from mobile to desktop using proven typographic ratios.</p>
+<p>🚀 This is the first to be migrated to full WordPress plugin status.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Typography scales (Minor Second, Major Third, Golden Ratio, etc.)</li>
+<li>Four output modes: CSS Classes, Custom Properties, HTML Tags, Tailwind Config</li>
+<li>Live preview with custom font loading</li>
+<li>Mathematical scaling with custom line heights</li>
+<li>Drag-and-drop reordering with autosave</li>
+</ul>
+<h3 id="%F0%9F%93%8F-fluid-space-forge">📏 <a href="https://github.com/Mij-Strebor/JimRWeb/blob/main/snippet-projects/41-fluid-space-forge/">Fluid Space Forge</a></h3>
+<p>Create consistent, scalable spacing systems for margins, padding, and gaps. The perfect companion to Fluid Font Forge and Fluid Button Forge for complete design system harmony.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Responsive spacing with CSS <code>clamp()</code> functions</li>
+<li>Classes, Variables, and Utility class outputs</li>
+<li>Mathematical scaling ratios</li>
+<li>Dual unit support (px/rem)</li>
+</ul>
+<p>🛠️ (WORK IN PROGRESS) Exisits as a code snippet; professional WordPress plugin development underway.</p>
+<h3 id="%F0%9F%8E%A8-fluid-button-forge">🎨 <a href="https://github.com/Mij-Strebor/JimRWeb/blob/main/snippet-projects/42-fluid-button-forge/">Fluid Button Forge</a></h3>
+<p>Design professional button hierarchies that scale perfectly across all devices. Generate responsive button systems for CTAs, forms, and UI components.</p>
+<p>🛠️ (WORK IN PROGRESS) Exisits as a code snippet; professional WordPress plugin development is planned.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Professional button hierarchies (small, medium, large)</li>
+<li>Framework-ready CSS for Elementor, Bricks, and custom themes</li>
+<li>CSS Classes and Custom Properties output</li>
+<li>Perfect touch targets across all devices</li>
+</ul>
+<hr>
+<h2 id="%F0%9F%94%A7-wordpress-management--optimization-tools">🔧 WordPress Management &amp; Optimization Tools</h2>
+<p>Professional utilities for WordPress administration, performance optimization, and site management.</p>
+<h3 id="%F0%9F%A7%B9-enhanced-cache-purge">🧹 <a href="./enhanced-cache-purge/">Enhanced Cache Purge</a></h3>
+<p>Professional one-click cache clearing for WordPress administrators. A comprehensive admin bar button that purges all caches with a single click.</p>
+<p>🛠️ (WORK IN PROGRESS) Not yet available.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Universal cache support (WP Super Cache, W3 Total Cache, WP Rocket, LiteSpeed, etc.)</li>
+<li>Enterprise-grade security with CSRF protection</li>
+<li>Real-time feedback with success/error notifications</li>
+<li>AJAX-powered with no page refreshes required</li>
+<li>Comprehensive error handling and logging</li>
+</ul>
+<h3 id="%F0%9F%93%8A-media-inventory-forge">📊 <a href="https://github.com/Mij-Strebor/JimRWeb/blob/main/snippet-projects/52-media-inventory/">Media Inventory Forge</a></h3>
+<p>Professional media library scanner and analyzer. Scan, analyze, and optimize your WordPress media library with detailed insights and storage breakdowns.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Comprehensive file categorization (Images, SVG, Fonts, Videos, Audio, Documents)</li>
+<li>Storage breakdown by category with visual analytics</li>
+<li>Progressive scanning with batch processing</li>
+<li>Live thumbnails with hover effects</li>
+<li>CSV export for detailed reporting</li>
+<li>Performance optimization recommendations</li>
+</ul>
+<hr>
+<h2 id="%F0%9F%8E%A8-elementor-integration-tools">🎨 Elementor Integration Tools</h2>
+<p>Specialized tools for Elementor developers focusing on design systems, color management, and accessibility compliance.</p>
+<h3 id="%F0%9F%8C%88-elementor-color-inventory-forge">🌈 <a href="https://github.com/Mij-Strebor/JimRWeb/blob/main/snippet-projects/51-color-forge/">Elementor Color Inventory Forge</a></h3>
+<p>Professional color management, analysis, and WCAG accessibility compliance tool. Complete inventory system for Elementor Global Colors with detailed analysis and usage tracking.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li><strong>Complete Color Analysis</strong>: System &amp; Custom Colors with multi-format conversion (HEX, RGB, HSL)</li>
+<li><strong>WCAG Contrast Analysis</strong>: Real-time accessibility compliance checker with AA/AAA standards</li>
+<li><strong>Smart Color Suggestions</strong>: Intelligent recommendations while preserving brand identity</li>
+<li><strong>Usage Tracking</strong>: Site-wide color usage detection and analytics</li>
+<li><strong>CSS Generation</strong>: Four output modes (Variables, Classes, SCSS, Fallbacks)</li>
+<li><strong>Elementor CSS Capture</strong>: Provides Delementor's unique CSS Variables naming of your Custom Colors</li>
+<li><strong>Educational Content</strong>: Built-in WCAG guidelines and accessibility explanations</li>
+</ul>
+<h4 id="%E2%99%BF-accessibility-compliance-features">♿ Accessibility Compliance Features</h4>
+<pre class="hljs"><code><div>WCAG Compliance Levels Supported:
+✅ WCAG AA Normal Text (4.5:1 contrast ratio)
+✅ WCAG AA Large Text (3:1 contrast ratio)  
+✅ WCAG AAA Normal Text (7:1 contrast ratio)
+✅ WCAG AAA Large Text (4.5:1 contrast ratio)
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%9A%80-why-these-tools">🚀 Why These Tools?</h2>
+<p>As WordPress developers, we face common challenges: responsive design complexity, cache management across multiple plugins, media library optimization, color consistency, and accessibility compliance. These tools eliminate guesswork and deliver professional solutions using modern techniques.</p>
+<p><strong>Perfect for:</strong></p>
+<ul>
+<li><strong>WordPress Theme Developers</strong> building custom themes and design systems</li>
+<li><strong>Agency Developers</strong> managing multiple client sites efficiently</li>
+<li><strong>Elementor Specialists</strong> needing advanced color management and accessibility tools</li>
+<li><strong>Performance Optimizers</strong> requiring comprehensive site analysis capabilities</li>
+<li><strong>Government/Enterprise Sites</strong> needing WCAG accessibility compliance</li>
+<li><strong>Freelancers</strong> wanting professional workflows and time-saving utilities</li>
+<li><strong>Anyone</strong> tired of manual processes and inconsistent results</li>
+</ul>
+<hr>
+<h2 id="%F0%9F%8F%97%EF%B8%8F-technical-architecture">🏗️ Technical Architecture</h2>
+<h3 id="professional-wordpress-standards">Professional WordPress Standards</h3>
+<ul>
+<li><strong>Security</strong>: Proper nonces, capability checks, input sanitization</li>
+<li><strong>Performance</strong>: Optimized queries, minimal resource usage, efficient caching</li>
+<li><strong>Accessibility</strong>: WCAG 2.1 AA/AAA compliance throughout</li>
+<li><strong>Internationalization</strong>: Translation-ready with proper text domains</li>
+<li><strong>Integration</strong>: Clean admin menu system under J Forge parent</li>
+</ul>
+<h3 id="modern-development-practices">Modern Development Practices</h3>
+<ul>
+<li><strong>Object-Oriented PHP</strong>: Clean class structures with separation of concerns</li>
+<li><strong>ES6+ JavaScript</strong>: Modern JavaScript with graceful degradation</li>
+<li><strong>AJAX Architecture</strong>: Asynchronous processing for better user experience</li>
+<li><strong>Error Handling</strong>: Comprehensive try/catch blocks with user-friendly messages</li>
+<li><strong>Responsive Design</strong>: Mobile-first approach with desktop enhancements</li>
+</ul>
+<h3 id="code-quality-standards">Code Quality Standards</h3>
+<ul>
+<li><strong>WordPress Coding Standards</strong>: Follows official guidelines</li>
+<li><strong>PSR Standards</strong>: PHP standards compliance where applicable</li>
+<li><strong>Documentation</strong>: Comprehensive inline documentation</li>
+<li><strong>Version Control</strong>: Git-friendly structure with clear commit practices</li>
+</ul>
+<hr>
+<h2 id="%F0%9F%93%9E-support--community">📞 Support &amp; Community</h2>
+<ul>
+<li><strong>Issues</strong>: <a href="https://github.com/your-username/j-forge-toolkit/issues">GitHub Issues</a></li>
+<li><strong>Discussions</strong>: <a href="https://github.com/your-username/j-forge-toolkit/discussions">GitHub Discussions</a></li>
+<li><strong>Website</strong>: <a href="https://jimrweb.com">JimRWeb.com</a></li>
+<li><strong>Documentation</strong>: <a href="https://jimrweb.com/j-forge-toolkit">Complete Documentation</a></li>
+</ul>
+<hr>
+<div align="center">
+</div><p><strong>Made with ❤️ for the WordPress developer community</strong></p>
+<p><a href="https://github.com/your-username/j-forge-toolkit">⭐ Star this repo</a> if it helps your projects!</p>
+<p><strong>J Forge - Professional WordPress Development Toolkit</strong></p>
+<p><em>Building better WordPress sites, one tool at a time</em> 🛠️♿🎨</p>
+
+
+</body>
+</html>
