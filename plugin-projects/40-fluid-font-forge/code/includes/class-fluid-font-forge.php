@@ -883,10 +883,16 @@ class FluidFontForge
                 wp_send_json_success([
                     'message' => 'All data saved to database successfully',
                     'saved_settings' => $result1,
-                    'saved_sizes' => $result2 && $result3 && $result4
+                    'saved_sizes' => $result2 && $result3 && $result4,
+                    'timestamp' => current_time('timestamp')
                 ]);
             } catch (Exception $e) {
-                wp_send_json_error(['message' => 'Save failed: ' . $e->getMessage()]);
+                error_log('Fluid Font Forge save_settings error: ' . $e->getMessage());
+                wp_send_json_error([
+                    'message' => 'Save failed: ' . $e->getMessage(),
+                    'error_code' => 'SAVE_SETTINGS_FAILED',
+                    'timestamp' => current_time('timestamp')
+                ]);
             }
         }
     }
