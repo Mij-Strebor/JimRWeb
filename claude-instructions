@@ -117,7 +117,7 @@
 - Backup using git
 - Archive in GitHub
 - WordPress testing is in Local
-- VS Code <-> WordPress file linking via mklink (Remind Jim with the following template for the link: mklink "C:\Users\Owner\Local Sites\site\app\public\wp-content\plugins\plugin-name\path\file-name" "E:\OneDrive - Personal\OneDrive\WordPress Project Data\JimRWeb\JimRWeb Git\plugin-projects\project-name\path\file-name")
+- VS Code <-> WordPress file linking via mklink (**Remind Jim with the following template for the link**: mklink "C:\Users\Owner\Local Sites\site\app\public\wp-content\plugins\plugin-name\path\file-name" "E:\OneDrive - Personal\OneDrive\WordPress Project Data\JimRWeb\JimRWeb Git\plugin-projects\project-name\path\file-name")
 
 ---
 

@@ -5,7 +5,7 @@
  * real-time CSS clamp() generation, and responsive font previews.
  *
  * @package FluidFontForge
- * @version 4.0.2
+ * @version 4.0.3
  * @author Jim R (JimRWeb)
  * @link https://jimrweb.com
  * @since 1.0.0
@@ -1685,80 +1685,85 @@ class FontClampAdvanced {
   // Uses mathematical scaling principles for responsive typography
   // Updates UI and preview to reflect new calculations
   calculateSizes() {
-    const baseValue = this.elements.baseValueSelect?.value;
-    if (!baseValue) {
-      return;
+    try {
+      const baseValue = this.elements.baseValueSelect?.value;
+      if (!baseValue) {
+        return;
+      }
+
+      const sizes = this.getCurrentSizes();
+      // Use unified system for ID lookup if available
+      const baseSize = window.FontForgeData
+        ? window.FontForgeData.getSizeById(
+            baseValue,
+            window.fontClampCore?.activeTab
+          )
+        : sizes.find((size) => size.id == baseValue);
+      if (!baseSize) {
+        this.log("⚠ Base size not found for:", baseValue);
+        return;
+      }
+      const baseIndex = sizes.indexOf(baseSize);
+      const minScale = parseFloat(this.elements.minScaleSelect?.value);
+      const maxScale = parseFloat(this.elements.maxScaleSelect?.value);
+      const minRootSize = parseFloat(this.elements.minRootSizeInput?.value);
+      const maxRootSize = parseFloat(this.elements.maxRootSizeInput?.value);
+      const unitType = window.fontClampCore?.unitType || "rem";
+
+      if (
+        isNaN(minScale) ||
+        isNaN(maxScale) ||
+        isNaN(minRootSize) ||
+        isNaN(maxRootSize)
+      ) {
+        this.log("⚠ Invalid form values");
+        return;
+      }
+
+      let minBaseSize, maxBaseSize;
+      if (unitType === "rem") {
+        // Why divide by defalut font size: Convert px to rem units
+        // (1rem = 16px by browser default, user may have changed this)
+        // Mathematical relationship: rem = pixels ÷ browser_default_font_size
+        minBaseSize = minRootSize / this.constants.BROWSER_DEFAULT_FONT_SIZE;
+        maxBaseSize = maxRootSize / this.constants.BROWSER_DEFAULT_FONT_SIZE;
+      } else {
+        // Why direct assignment: px units don't need conversion (already absolute)
+        minBaseSize = minRootSize;
+        maxBaseSize = maxRootSize;
+      }
+
+      if (sizes.length === 1) {
+        sizes[0].min = parseFloat(minBaseSize.toFixed(3));
+        sizes[0].max = parseFloat(maxBaseSize.toFixed(3));
+      } else {
+        sizes.forEach((size, index) => {
+          // Why steps calculation: Distance from base determines scaling power
+          // Negative steps = larger sizes (headings), positive = smaller (captions)
+          const steps = baseIndex - index;
+
+          // Why Math.pow: Typography scales exponentially, not linearly
+          // Each step up/down multiplies by the scale ratio (musical harmony theory)
+          const minMultiplier = Math.pow(minScale, steps);
+          const maxMultiplier = Math.pow(maxScale, steps);
+
+          // Why separate min/max: Different scales for mobile vs desktop creates better hierarchy
+          const calculatedMin = minBaseSize * minMultiplier;
+          const calculatedMax = maxBaseSize * maxMultiplier;
+
+          size.min = parseFloat(calculatedMin.toFixed(3));
+          size.max = parseFloat(calculatedMax.toFixed(3));
+        });
+      }
+
+      this.dataChanged = true;
+      this.renderSizes();
+      this.updatePreview();
+      this.updateCSS();
+    } catch (error) {
+      console.error("Error in calculateSizes:", error);
+      this.showError("Failed to calculate sizes: " + error.message);
     }
-
-    const sizes = this.getCurrentSizes();
-    // Use unified system for ID lookup if available
-    const baseSize = window.FontForgeData
-      ? window.FontForgeData.getSizeById(
-          baseValue,
-          window.fontClampCore?.activeTab
-        )
-      : sizes.find((size) => size.id == baseValue);
-    if (!baseSize) {
-      this.log("❌ Base size not found for:", baseValue);
-      return;
-    }
-    const baseIndex = sizes.indexOf(baseSize);
-    const minScale = parseFloat(this.elements.minScaleSelect?.value);
-    const maxScale = parseFloat(this.elements.maxScaleSelect?.value);
-    const minRootSize = parseFloat(this.elements.minRootSizeInput?.value);
-    const maxRootSize = parseFloat(this.elements.maxRootSizeInput?.value);
-    const unitType = window.fontClampCore?.unitType || "rem";
-
-    if (
-      isNaN(minScale) ||
-      isNaN(maxScale) ||
-      isNaN(minRootSize) ||
-      isNaN(maxRootSize)
-    ) {
-      this.log("❌ Invalid form values");
-      return;
-    }
-
-    let minBaseSize, maxBaseSize;
-    if (unitType === "rem") {
-      // Why divide by defalut font size: Convert px to rem units
-      // (1rem = 16px by browser default, user may have changed this)
-      // Mathematical relationship: rem = pixels ÷ browser_default_font_size
-      minBaseSize = minRootSize / this.constants.BROWSER_DEFAULT_FONT_SIZE;
-      maxBaseSize = maxRootSize / this.constants.BROWSER_DEFAULT_FONT_SIZE;
-    } else {
-      // Why direct assignment: px units don't need conversion (already absolute)
-      minBaseSize = minRootSize;
-      maxBaseSize = maxRootSize;
-    }
-
-    if (sizes.length === 1) {
-      sizes[0].min = parseFloat(minBaseSize.toFixed(3));
-      sizes[0].max = parseFloat(maxBaseSize.toFixed(3));
-    } else {
-      sizes.forEach((size, index) => {
-        // Why steps calculation: Distance from base determines scaling power
-        // Negative steps = larger sizes (headings), positive = smaller (captions)
-        const steps = baseIndex - index;
-
-        // Why Math.pow: Typography scales exponentially, not linearly
-        // Each step up/down multiplies by the scale ratio (musical harmony theory)
-        const minMultiplier = Math.pow(minScale, steps);
-        const maxMultiplier = Math.pow(maxScale, steps);
-
-        // Why separate min/max: Different scales for mobile vs desktop creates better hierarchy
-        const calculatedMin = minBaseSize * minMultiplier;
-        const calculatedMax = maxBaseSize * maxMultiplier;
-
-        size.min = parseFloat(calculatedMin.toFixed(3));
-        size.max = parseFloat(calculatedMax.toFixed(3));
-      });
-    }
-
-    this.dataChanged = true;
-    this.renderSizes();
-    this.updatePreview();
-    this.updateCSS();
   }
 
   // ========================================================================
@@ -3860,13 +3865,16 @@ class FontClampAdvanced {
     };
     document.addEventListener("keydown", handleUndoKeydown);
 
-    // Auto-dismiss after 10 seconds
-    setTimeout(() => {
+    // Auto-dismiss after 10 seconds with proper cleanup
+    const timeoutId = setTimeout(() => {
       if (document.body.contains(notification)) {
         this.removeNotification(notification);
         document.removeEventListener("keydown", handleUndoKeydown);
       }
     }, 10000);
+
+    // Store timeout ID for potential cleanup
+    notification.dataset.timeoutId = timeoutId;
   }
 
   // Remove notification with animation

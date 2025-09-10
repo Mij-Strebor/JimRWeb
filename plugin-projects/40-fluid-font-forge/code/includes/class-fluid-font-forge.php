@@ -206,8 +206,11 @@ class FluidFontForge
             true
         );
 
-        error_log('Plugin URL: ' . FLUID_FONT_FORGE_URL);
-        error_log('Full script URL: ' . FLUID_FONT_FORGE_URL . 'assets/js/unified-size-access.js');
+        // Remove debug logging from production
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Plugin URL: ' . FLUID_FONT_FORGE_URL);
+            error_log('Full script URL: ' . FLUID_FONT_FORGE_URL . 'assets/js/unified-size-access.js');
+        }
 
         // Enqueue our admin script (tab utilities now embedded directly)
         wp_enqueue_script(
@@ -745,8 +748,13 @@ class FluidFontForge
          */
         public function save_sizes()
         {
-            // Verify nonce for security
-            if (!wp_verify_nonce($_POST['nonce'], self::NONCE_ACTION)) {
+            // Verify request method and nonce
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                wp_send_json_error(['message' => 'Invalid request method']);
+                return;
+            }
+
+            if (!wp_verify_nonce($_POST['nonce'] ?? '', self::NONCE_ACTION)) {
                 wp_send_json_error(['message' => 'Security check failed']);
                 return;
             }
@@ -758,10 +766,20 @@ class FluidFontForge
             }
 
             try {
-                // Get the active tab to determine which sizes to save
+                // Validate and sanitize input data
                 $active_tab = sanitize_text_field($_POST['activeTab'] ?? 'class');
+                if (!in_array($active_tab, ['class', 'vars', 'tag', 'tailwind'])) {
+                    wp_send_json_error(['message' => 'Invalid tab type']);
+                    return;
+                }
+
                 $sizes_json = stripslashes($_POST['sizes'] ?? '');
-                $sizes = json_decode($sizes_json, true);
+                if (empty($sizes_json)) {
+                    wp_send_json_error(['message' => 'No sizes data provided']);
+                    return;
+                }
+
+                $sizes = json_decode($sizes_json, true);;
 
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     wp_send_json_error(['message' => 'Invalid sizes data']);
@@ -793,11 +811,14 @@ class FluidFontForge
                         return;
                 }
 
-                // Clear cached data
+                // Clear cached data and transients
                 wp_cache_delete(self::OPTION_CLASS_SIZES, 'options');
                 wp_cache_delete(self::OPTION_VARIABLE_SIZES, 'options');
                 wp_cache_delete(self::OPTION_TAG_SIZES, 'options');
                 wp_cache_delete(FLUID_FONT_FORGE_OPTION_TAILWIND_SIZES, 'options');
+
+                // Clear related transients
+                delete_transient('fluid_font_forge_defaults_' . FLUID_FONT_FORGE_VERSION);
 
                 wp_send_json_success([
                     'message' => 'Sizes saved successfully',
