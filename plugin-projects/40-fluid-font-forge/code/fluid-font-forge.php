@@ -153,13 +153,6 @@ add_action('plugins_loaded', 'fluid_font_forge_check_version');
 // Load the data factory
 require_once FLUID_FONT_FORGE_PATH . 'includes/class-default-data-factory.php';
 
-// Debug: Check if class exists
-if (class_exists('FluidFontForgeDefaultData')) {
-    error_log('✅ FluidFontForgeDefaultData class loaded successfully');
-} else {
-    error_log('❌ FluidFontForgeDefaultData class NOT found');
-}
-
 // Load the main class
 require_once FLUID_FONT_FORGE_PATH . 'includes/class-fluid-font-forge.php';
 

@@ -3,7 +3,11 @@ Contributors: mijstrebor
 Donate link: https://jimrweb.com
 Tags: typography, fonts, responsive, clamp, fluid, css, font-size, mobile-first, accessibility
 Requires at least: 5.0
+<<<<<<< HEAD
 Tested up to: 6.8
+=======
+Tested up to: 6.4
+>>>>>>> refactor
 Requires PHP: 7.4
 Stable tag: 4.0.3
 License: GPLv2 or later
