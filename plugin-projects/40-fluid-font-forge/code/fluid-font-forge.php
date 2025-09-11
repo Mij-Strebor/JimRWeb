@@ -11,7 +11,7 @@
  * Text Domain: fluid-font-forge
  * Requires at least: 5.0
  * Tested up to: 6.4
- * Requires PHP: 7.4/**
+ * Requires PHP: 7.4
  * 
  * Fluid Font Forge Bootstrap File
  * 
