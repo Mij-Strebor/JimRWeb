@@ -2,7 +2,6 @@
 
 /**
  * Plugin Name: Fluid Font Forge
- * Plugin URI: https://jimrweb.com
  * Description: Advanced fluid typography calculator with CSS clamp() generation for responsive font scaling.
  * Version: 4.0.3
  * Author: Jim R (JimRWeb)
