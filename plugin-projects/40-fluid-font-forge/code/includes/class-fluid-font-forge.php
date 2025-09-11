@@ -206,12 +206,6 @@ class FluidFontForge
             true
         );
 
-        // Remove debug logging from production
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('Plugin URL: ' . FLUID_FONT_FORGE_URL);
-            error_log('Full script URL: ' . FLUID_FONT_FORGE_URL . 'assets/js/unified-size-access.js');
-        }
-
         // Enqueue our admin script (tab utilities now embedded directly)
         wp_enqueue_script(
             'fluid-font-forge-admin',
