@@ -229,7 +229,8 @@ class FluidFontForge
                 'settings' => $this->get_font_clamp_settings(),
                 'classSizes' => $this->get_font_clamp_class_sizes(),
                 'variableSizes' => $this->get_font_clamp_variable_sizes(),
-                'tagSizes' => $this->get_font_clamp_tag_sizes()
+                'tagSizes' => $this->get_font_clamp_tag_sizes(),
+                'tailwindSizes' => $this->get_font_clamp_tailwind_sizes()
             ],
             'constants' => $this->get_all_constants(),
             'version' => FLUID_FONT_FORGE_VERSION,

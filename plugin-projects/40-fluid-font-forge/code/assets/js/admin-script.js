@@ -28,7 +28,7 @@
  */
 
 /**
- * Tab Data Utilities - Embedded temporarily to fix 404 issue
+ * Tab Data Utilities - Embedded for reliable initialization timing
  */
 const TabDataMap = {
   class: {
@@ -206,52 +206,8 @@ class SimpleTooltips {
 // Returns array of sizes for the active tab
 const FontForgeUtils = {
   getCurrentSizes(activeTab = null, fontClampAdvanced = null) {
-    const tab = activeTab || window.fontClampCore?.activeTab || "class";
-
-    // Try unified system first, fallback to direct access
-    // Try unified system first, fallback to direct access
-    if (window.FontForgeData) {
-      return window.FontForgeData.getSizes(tab);
-    }
-
-    // Fallback: Get data from localized script
-    const data = window.fontClampAjax?.data || {};
-    let sizes = TabDataUtils.getDataForTab(tab, data);
-
-    // Handle defaults if needed and fontClampAdvanced instance is available
-    // But don't restore if this tab was explicitly cleared by user
-    const isExplicitlyCleared =
-      window.fontClampAjax?.data?.explicitlyClearedTabs?.[tab];
-    if (sizes.length === 0 && fontClampAdvanced && !isExplicitlyCleared) {
-      switch (tab) {
-        case "class":
-          sizes = fontClampAdvanced.getDefaultClassSizes();
-          if (window.fontClampAjax?.data) {
-            window.fontClampAjax.data.classSizes = sizes;
-          }
-          break;
-        case "vars":
-          sizes = fontClampAdvanced.getDefaultVariableSizes();
-          if (window.fontClampAjax?.data) {
-            window.fontClampAjax.data.variableSizes = sizes;
-          }
-          break;
-        case "tailwind":
-          sizes = fontClampAdvanced.getDefaultTailwindSizes();
-          if (window.fontClampAjax?.data) {
-            window.fontClampAjax.data.tailwindSizes = sizes;
-          }
-          break;
-        case "tag":
-          sizes = fontClampAdvanced.getDefaultTagSizes();
-          if (window.fontClampAjax?.data) {
-            window.fontClampAjax.data.tagSizes = sizes;
-          }
-          break;
-      }
-    }
-
-    return sizes;
+    // Use unified system - it handles all fallback logic internally
+    return window.FontForgeData?.getSizes(activeTab) || [];
   },
 };
 
@@ -804,7 +760,7 @@ class FontClampEnhancedCoreInterface {
   // Trigger calculation in advanced features segment
   // Dispatches custom event to notify advanced features of settings change
   triggerCalculation() {
-    window.dispatchEvent(new CustomEvent("fontClamp_settingsChanged"));
+    window.dispatchEvent(new CustomEvent(FONTFORGE_EVENTS.SETTINGS_CHANGED));
     if (window.fontClampAdvanced && window.fontClampAdvanced.calculateSizes) {
       window.fontClampAdvanced.calculateSizes();
     }
@@ -1004,132 +960,51 @@ class FontClampEnhancedCoreInterface {
 // Ensures initialization only occurs when all dependencies are ready
 class FontClampAdvanced {
   constructor() {
-    this.version = "4.0.0";
-    this.DEBUG_MODE = true;
     this.initialized = false;
     this.dragState = this.initDragState();
     this.editingId = null;
     this.lastFontStyle = null;
     this.dataChanged = false;
     this.selectedRowId = null;
-    this.autosaveTimer = null; // Add this for autosave functionality
+    this.autosaveTimer = null;
 
     // Initialize constants from backend
     this.constants = this.initializeConstants();
-
-    // Why complex initialization: WordPress admin loads assets asynchronously
-    // DOM, AJAX data, and other components may load in any order - we need all three
-    this.initState = {
-      domReady: false, // Why: Can't bind events until DOM elements exist
-      dataReady: false, // Why: Can't calculate sizes without fluid font data
-      segmentBReady: false, // Why: Can't function without core interface ready
-    };
+    this.version = window.fontClampAjax?.version || "4.0.5";
 
     this.updatePreview = this.debounce(this.updatePreview.bind(this), 150);
     this.calculateSizes = this.debounce(this.calculateSizes.bind(this), 300);
 
-    this.initializeWhenReady();
+    // Simplified initialization - DOM readiness only
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => this.init());
+    } else {
+      this.init();
+    }
   }
 
   /**
    * Initialize constants from backend
    */
   initializeConstants() {
-    // Priority 1: Use constants from Segment A
-    if (window.fontClampAjax && window.fontClampAjax.constants) {
-      return window.fontClampAjax.constants;
-    }
-
-    // Priority 2: Use defaults
-    if (window.fontClampAjax && window.fontClampAjax.defaults) {
-      return {
-        DEFAULT_MIN_ROOT_SIZE: window.fontClampAjax.defaults.minRootSize || 16,
-        DEFAULT_MAX_ROOT_SIZE: window.fontClampAjax.defaults.maxRootSize || 20,
-        DEFAULT_MIN_VIEWPORT: window.fontClampAjax.defaults.minViewport || 375,
-        DEFAULT_MAX_VIEWPORT: window.fontClampAjax.defaults.maxViewport || 1620,
+    // Use constants from backend with simple fallback
+    return (
+      window.fontClampAjax?.constants || {
+        DEFAULT_MIN_ROOT_SIZE: 16,
+        DEFAULT_MAX_ROOT_SIZE: 20,
+        DEFAULT_MIN_VIEWPORT: 375,
+        DEFAULT_MAX_VIEWPORT: 1620,
         DEFAULT_BODY_LINE_HEIGHT: 1.4,
         DEFAULT_HEADING_LINE_HEIGHT: 1.2,
         BROWSER_DEFAULT_FONT_SIZE: 16,
         CSS_UNIT_CONVERSION_BASE: 16,
-      };
-    }
-
-    // Ultimate fallback (should never be reached)
-    return {
-      DEFAULT_MIN_ROOT_SIZE: 16,
-      DEFAULT_MAX_ROOT_SIZE: 20,
-      DEFAULT_MIN_VIEWPORT: 375,
-      DEFAULT_MAX_VIEWPORT: 1620,
-      DEFAULT_BODY_LINE_HEIGHT: 1.4,
-      DEFAULT_HEADING_LINE_HEIGHT: 1.2,
-      BROWSER_DEFAULT_FONT_SIZE: 16,
-      CSS_UNIT_CONVERSION_BASE: 16,
-    };
-  }
-
-  initializeWhenReady() {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () => {
-        this.initState.domReady = true;
-        this.checkReadinessAndInit();
-      });
-    } else {
-      this.initState.domReady = true;
-    }
-
-    if (window.fontClampAjax && window.fontClampAjax.data) {
-      this.initState.dataReady = true;
-    } else {
-      window.addEventListener("fontClampDataReady", () => {
-        this.initState.dataReady = true;
-        this.checkReadinessAndInit();
-      });
-    }
-
-    if (window.fontClampCore) {
-      this.initState.segmentBReady = true;
-    } else {
-      window.addEventListener("fontClampCoreReady", () => {
-        this.initState.segmentBReady = true;
-        this.checkReadinessAndInit();
-      });
-    }
-
-    this.checkReadinessAndInit();
-
-    // Why timeout fallback: WordPress admin can have loading delays/failures
-    // If something doesn't load properly, we still need a working interface
-    setTimeout(() => {
-      if (!this.initialized) {
-        // Why force init: Better to have partial functionality than broken interface
-        this.forceInit();
       }
-    }, 2000); // Why 2 seconds: Long enough for normal loading, short enough for user patience
+    );
   }
 
-  checkReadinessAndInit() {
-    const { domReady, dataReady, segmentBReady } = this.initState;
-
-    // Why all three required: Missing any piece causes runtime errors
-    // DOM needed for element binding, data for calculations, core for coordination
-    if (domReady && dataReady && segmentBReady && !this.initialized) {
-      // Why setTimeout: Ensures final DOM render before binding events
-      setTimeout(() => this.init(), 50);
-    }
-  }
-
-  forceInit() {
-    if (!this.initialized) {
-      this.init();
-    }
-  }
-
-  // Simple debug utility
-  log(message, ...args) {
-    if (this.DEBUG_MODE) {
-      console.log(`[FluidFontForge] ${message}`, ...args);
-    }
-  }
+  // ========================================================================
+  // INITIALIZATION & SETUP METHODS
+  // ========================================================================
 
   // Initialize drag state
   initDragState() {
@@ -1519,15 +1394,10 @@ class FontClampAdvanced {
    * Populate settings using constants instead of magic numbers
    */
   populateSettings() {
-    // Use unified system for settings access with fallback
-    const data = window.FontForgeData?.dataSource || window.fontClampAjax?.data;
+    const data = window.fontClampAjax?.data;
+    if (!data) return;
 
-    if (!data) {
-      console.error("⚠️ No fluid font data available!");
-      return;
-    }
-
-    // Use constants instead of magic numbers for validation
+    // Direct access - unified system ensures data consistency
     const minRootSize =
       data.settings?.minRootSize || this.constants.DEFAULT_MIN_ROOT_SIZE;
     const maxRootSize =
@@ -1556,9 +1426,10 @@ class FontClampAdvanced {
     }
   }
 
+  // Handle tab changes from core interface
+  // Updates table headers, base value options, recalculates sizes, and refreshes preview
+  // Uses a slight delay to ensure DOM updates are complete before recalculation
   handleTabChange(detail) {
-    this.log("Tab changed to:", detail.activeTab);
-
     this.updateTableHeaders();
     this.updateBaseValueOptions();
 
@@ -1569,6 +1440,10 @@ class FontClampAdvanced {
     }, 50);
   }
 
+  // Update table headers based on active tab
+  // Why update: Ensures headers accurately reflect current context
+  // Improves usability by providing clear labels for users
+  // Adapts dynamically to user selections for a responsive interface
   updateTableHeaders() {
     const headerRow = this.elements.tableHeader;
     if (!headerRow) return;
@@ -1700,7 +1575,6 @@ class FontClampAdvanced {
           )
         : sizes.find((size) => size.id == baseValue);
       if (!baseSize) {
-        this.log("⚠ Base size not found for:", baseValue);
         return;
       }
       const baseIndex = sizes.indexOf(baseSize);
@@ -1716,7 +1590,6 @@ class FontClampAdvanced {
         isNaN(minRootSize) ||
         isNaN(maxRootSize)
       ) {
-        this.log("⚠ Invalid form values");
         return;
       }
 
@@ -2459,7 +2332,6 @@ class FontClampAdvanced {
       context;
 
     if (isNaN(minRootSize) || isNaN(maxRootSize)) {
-      this.log("⚠ Invalid root size value from Settings inputs");
       return "clamp(1rem, 1rem, 1rem)";
     }
 
@@ -2577,65 +2449,6 @@ class FontClampAdvanced {
     });
 
     return generator.wrapper(content);
-  }
-  // Generate CSS for class-based output
-  // Why modular generation: Encapsulates class-specific CSS structure
-  // Ensures consistent formatting across all class definitions
-  generateClassCSS(sizes, context) {
-    let css = "";
-    sizes.forEach((size) => {
-      if (size.min && size.max) {
-        const clampValue = this.generateClampCSS(size.min, size.max, context);
-        css += `.${size.className} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
-      }
-    });
-    return css;
-  }
-
-  // Generate CSS for variable-based output
-  // Why modular generation: Encapsulates variable-specific CSS structure
-  // Ensures consistent formatting across all variable definitions
-  generateVariableCSS(sizes, context) {
-    let css = ":root {\n";
-    sizes.forEach((size) => {
-      if (size.min && size.max) {
-        const clampValue = this.generateClampCSS(size.min, size.max, context);
-        css += `  ${size.variableName}: ${clampValue};\n`;
-      }
-    });
-    css += "}";
-    return css;
-  }
-
-  // Generate Tailwind config for fontSize object
-  // Why modular generation: Encapsulates Tailwind-specific config structure
-  // Ensures consistent formatting across all Tailwind size definitions
-  generateTailwindCSS(sizes, context) {
-    let css =
-      "module.exports = {\n  theme: {\n    extend: {\n      fontSize: {\n";
-    sizes.forEach((size, index) => {
-      if (size.min && size.max) {
-        const clampValue = this.generateClampCSS(size.min, size.max, context);
-        const comma = index < sizes.length - 1 ? "," : "";
-        css += `        '${size.tailwindName}': '${clampValue}'${comma}\n`;
-      }
-    });
-    css += "      }\n    }\n  }\n}";
-    return css;
-  }
-
-  // Generate CSS for tag-based output
-  // Why modular generation: Encapsulates tag-specific CSS structure
-  // Ensures consistent formatting across all tag definitions
-  generateTagCSS(sizes, context) {
-    let css = "";
-    sizes.forEach((size) => {
-      if (size.min && size.max) {
-        const clampValue = this.generateClampCSS(size.min, size.max, context);
-        css += `${size.tagName} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
-      }
-    });
-    return css;
   }
 
   // Update CSS display elements and create copy buttons
@@ -3408,18 +3221,19 @@ class FontClampAdvanced {
           switch (activeTab) {
             case "class":
               window.fontClampAjax.data.classSizes =
-                this.getDefaultClassSizes();
+                window.FontForgeData.getDefaultSizes("class");
               break;
             case "vars":
               window.fontClampAjax.data.variableSizes =
-                this.getDefaultVariableSizes();
+                window.FontForgeData.getDefaultVariableSizes("class");
               break;
             case "tailwind":
               window.fontClampAjax.data.tailwindSizes =
-                this.getDefaultTailwindSizes();
+                window.FontForgeData.getDefaultTailwindSizes("class");
               break;
             case "tag":
-              window.fontClampAjax.data.tagSizes = this.getDefaultTagSizes();
+              window.fontClampAjax.data.tagSizes =
+                window.FontForgeData.getDefaultTagSizes("class");
               break;
           }
 
@@ -4027,263 +3841,6 @@ class FontClampAdvanced {
   // Can be expanded to include user-facing notifications if needed
   showError(message) {
     console.error(message);
-  }
-
-  // ========================================================================
-  // DEFAULT DATA FACTORIES
-  // ========================================================================
-
-  // Default sizes for classes, variables, and tags
-  // Why default data: Provides a baseline for users to start with
-  // Ensures consistent initial state across installations
-  // Simplifies reset functionality by having predefined defaults
-  getDefaultClassSizes() {
-    return [
-      {
-        id: 1,
-        className: "xxxlarge",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 2,
-        className: "xxlarge",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 3,
-        className: "xlarge",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 4,
-        className: "large",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 5,
-        className: "medium",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 6,
-        className: "small",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 7,
-        className: "xsmall",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 8,
-        className: "xxsmall",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-    ];
-  }
-
-  // Default variable sizes
-  // Why variable defaults: Provides a standard set of CSS variables for users
-  // Ensures consistency with class sizes for easier adoption
-  // Simplifies reset functionality by having predefined defaults
-  getDefaultVariableSizes() {
-    return [
-      {
-        id: 1,
-        variableName: "--fs-xxxl",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 2,
-        variableName: "--fs-xxl",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 3,
-        variableName: "--fs-xl",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 4,
-        variableName: "--fs-lg",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 5,
-        variableName: "--fs-md",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 6,
-        variableName: "--fs-sm",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 7,
-        variableName: "--fs-xs",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 8,
-        variableName: "--fs-xxs",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-    ];
-  }
-
-  // Default tag sizes
-  // Why tag defaults: Provides a standard set of HTML tags for users
-  // Ensures consistency with class and variable sizes for easier adoption
-  // Simplifies reset functionality by having predefined defaults
-  getDefaultTagSizes() {
-    return [
-      {
-        id: 1,
-        tagName: "h1",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 2,
-        tagName: "h2",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 3,
-        tagName: "h3",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 4,
-        tagName: "h4",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 5,
-        tagName: "h5",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 6,
-        tagName: "h6",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 7,
-        tagName: "p",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-    ];
-  }
-
-  // Tailwind sizes are read-only defaults
-  // Why tailwind defaults: Provides a reference set of Tailwind CSS sizes
-  // Ensures users have a familiar baseline for Tailwind integration
-  // Simplifies reset functionality by having predefined defaults
-  getDefaultTailwindSizes() {
-    return [
-      {
-        id: 1,
-        tailwindName: "4xl",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 2,
-        tailwindName: "3xl",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 3,
-        tailwindName: "2xl",
-        lineHeight: this.constants.DEFAULT_HEADING_LINE_HEIGHT,
-      },
-      {
-        id: 4,
-        tailwindName: "xl",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 5,
-        tailwindName: "base",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 6,
-        tailwindName: "lg",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 7,
-        tailwindName: "sm",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-      {
-        id: 8,
-        tailwindName: "xs",
-        lineHeight: this.constants.DEFAULT_BODY_LINE_HEIGHT,
-      },
-    ];
-  }
-
-  // Generate CSS for class-based output
-  // Why class CSS generation: Provides ready-to-use CSS for font size classes
-  // Ensures consistent application of responsive font sizing
-  // Simplifies user implementation with clear class definitions
-  generateClassCSS(sizes, context) {
-    let css = "";
-    sizes.forEach((size) => {
-      if (size.min && size.max) {
-        const clampValue = this.generateClampCSS(size.min, size.max, context);
-        css += `.${size.className} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
-      }
-    });
-    return css;
-  }
-
-  // Generate CSS for variable-based output
-  // Why variable CSS generation: Provides ready-to-use CSS for font size variables
-  // Ensures consistent application of responsive font sizing
-  // Simplifies user implementation with clear variable definitions
-  generateVariableCSS(sizes, context) {
-    let css = ":root {\n";
-    sizes.forEach((size) => {
-      if (size.min && size.max) {
-        const clampValue = this.generateClampCSS(size.min, size.max, context);
-        css += `  ${size.variableName}: ${clampValue};\n`;
-      }
-    });
-    css += "}";
-    return css;
-  }
-
-  // Generate Tailwind config for fontSize object
-  // Why Tailwind config generation: Provides a ready-to-use Tailwind CSS configuration
-  // Ensures seamless integration with Tailwind projects
-  // Simplifies user implementation with clear configuration structure
-  generateTailwindCSS(sizes, context) {
-    let css =
-      "module.exports = {\n  theme: {\n    extend: {\n      fontSize: {\n";
-    sizes.forEach((size, index) => {
-      if (size.min && size.max) {
-        const clampValue = this.generateClampCSS(size.min, size.max, context);
-        const comma = index < sizes.length - 1 ? "," : "";
-        css += `        '${size.tailwindName}': '${clampValue}'${comma}\n`;
-      }
-    });
-    css += "      }\n    }\n  }\n}";
-    return css;
-  }
-
-  // Generate CSS for tag-based output
-  // Why tag CSS generation: Provides ready-to-use CSS for HTML tags
-  generateTagCSS(sizes, context) {
-    let css = "";
-    sizes.forEach((size) => {
-      if (size.min && size.max) {
-        const clampValue = this.generateClampCSS(size.min, size.max, context);
-        css += `${size.tagName} {\n  font-size: ${clampValue};\n  line-height: ${size.lineHeight};\n}\n\n`;
-      }
-    });
-    return css;
   }
 }
 
