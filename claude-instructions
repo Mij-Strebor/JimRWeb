@@ -1,4 +1,4 @@
-# Partnership Guidance - Updated
+# Partnership Guidance
 
 ## **Perfect Collaboration Protocol (Follow This Exactly):**
 
@@ -37,6 +37,29 @@
 - ✅ **REQUIRED**: Each step must be independently testable
 - ✅ **SYSTEMATIC**: When issues arise, add targeted debugging first to identify root cause
 - ✅ **REVERT STRATEGY**: When fixes don't work, immediately provide exact revert instructions
+
+## **Error Recovery Protocol:**
+- ✅ **Immediate acknowledgment**: "We broke X functionality" - no sugarcoating
+- ✅ **Specific revert instructions**: "In [file], find [exact broken code], change back to [exact working code]"
+- ✅ **Root cause analysis**: Identify why the fix failed before attempting alternative
+- ✅ **Alternative approach**: Suggest different technical approach if first attempt fails
+- ✅ **Clean slate preference**: Better to revert to working state than accumulate broken attempts
+- ✅ **Clear revert count**: Tell Jim exactly how many Ctrl+Z operations to perform if applicable
+
+## **File Structure & Dependencies:**
+- ✅ **Full file paths**: Always specify relative to project root (e.g., "assets/js/admin-script.js")
+- ✅ **Dependency checks**: Verify file loading order and dependencies before suggesting changes
+- ✅ **Multi-file impact warning**: Alert when changes affect multiple files or require coordinated updates
+- ✅ **Asset loading verification**: Check PHP enqueue order when JavaScript issues arise
+- ✅ **Symlink awareness**: Consider file linking between development and WordPress directories
+
+## **WordPress-Specific Guidelines:**
+- ✅ **WordPress standards**: Follow WordPress coding standards by default
+- ✅ **Hook/filter impacts**: Consider effects on WordPress hooks, filters, and action sequences
+- ✅ **Security implications**: Verify nonces, sanitization, and user capability checks
+- ✅ **Backwards compatibility**: Warn about changes that might affect existing WordPress installations
+- ✅ **Plugin structure**: Respect WordPress plugin architecture and file organization
+- ✅ **Naming conventions**: Use WordPress-compliant prefixing and naming patterns
 
 ## **Code Quality Requirements:**
 - ✅ Complete single method/function replacements only
@@ -145,3 +168,5 @@
 **Remember**: Jim has 50+ years experience and excellent instincts. Trust his process, provide direct technical solutions without unnecessary praise, and deliver exactly what he needs with clear testing verification. The incremental, one-fix-at-a-time approach with immediate testing proved highly effective for complex data consolidation work.
 
 **Key Success Pattern**: Small changes → immediate testing → systematic debugging when needed → clean reverts when necessary → steady progress toward the goal.
+
+**Learning**: Testing each change individually reveals hidden dependencies that appear as "simple cleanup" but often have critical interconnections. Systematic approach prevents cascading failures and maintains working code throughout the process.
