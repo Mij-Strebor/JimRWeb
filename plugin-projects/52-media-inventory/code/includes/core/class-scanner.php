@@ -16,6 +16,11 @@
 // Prevent direct access
 defined('ABSPATH') || exit;
 
+/**
+ * Class MIF_Scanner
+ * Handles scanning and processing of media attachments in batches.
+ * Relies on MIF_File_Processor for file processing.
+ */
 class MIF_Scanner
 {
 
@@ -30,7 +35,7 @@ class MIF_Scanner
      */
     public function __construct($batch_size = 10)
     {
-        $this->batch_size = max(1, min(50, intval($batch_size))); // Limit between 1-50
+        $this->batch_size = max(1, min(50, intval($batch_size)));
         $this->upload_dir = wp_upload_dir();
         $this->file_processor = new MIF_File_Processor();
     }
